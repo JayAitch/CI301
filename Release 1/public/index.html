@@ -18,8 +18,10 @@
 	-->	
 	<script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.js"></script>	
 	<script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.mobile-1.4.5.min.js"></script>	
+	<script defer src="/scripts/libs/jquery/notify.min.js"></script>
 	<link rel="stylesheet" href="/scripts/libs/jquery/jquerymobile/css/themes/default/jquery.mobile-1.4.5.min.css">
 	
+
 	<script defer src="/scripts/customelements/notification-page.js"></script>	
     <script defer src="/scripts/firebaseMain.js"></script>	
 
@@ -35,7 +37,7 @@
 					<li><a href="#teams-page" data-transition="pop">teams</a></li>
 					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
 					<li><a href="#user-page" data-transition="pop">user</a></li>
-					<li><a href="#notifications-page" data-transition="pop">notifications</a></li>
+					<li><a class="notification-btn" href="#notifications-page" data-transition="pop">notifications</a></li>
 				</ul>
 			</div>		
 		</div>
@@ -51,7 +53,7 @@
 					<li><a href="#teams-page" data-transition="pop">teams</a></li>
 					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
 					<li><a href="#user-page" data-transition="pop">user</a></li>
-					<li><a href="#notifications-page" data-transition="pop">notifications</a></li>
+					<li><a class="notification-btn" href="#notifications-page" data-transition="pop">notifications</a></li>
 				</ul>
 			</div>		
 		</div>
@@ -68,7 +70,7 @@
 					<li><a href="#teams-page" data-transition="pop">teams</a></li>
 					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
 					<li><a href="#user-page" data-transition="pop">user</a></li>
-					<li><a href="#notifications-page" data-transition="pop">notifications</a></li>
+					<li><a class="notification-btn" href="#notifications-page" data-transition="pop">notifications</a></li>
 				</ul>
 			</div>			
 		</div>
@@ -83,7 +85,7 @@
 					<li><a href="#teams-page" data-transition="pop">teams</a></li>
 					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
 					<li><a href="#user-page" data-transition="pop">user</a></li>
-					<li><a href="#notifications-page" data-transition="pop">notifications</a></li>
+					<li><a class="notification-btn" href="#notifications-page" data-transition="pop">notifications</a></li>
 				</ul>
 			</div>			
 		</div>
@@ -91,7 +93,20 @@
 			<div id="notification-wrapper">
 			</div>
 		</div>
+		
+		
+		
+		
 		<div data-role="footer"><button id="logout-btn" onclick="logOut()">logout</button></div>
 	</div>
+	
+
   </body>
+  
+  <style>
+  notification-card{display:block;}
+	.read-notification{
+		background-color: grey;
+	}
+  </style>
 </html>

@@ -32,8 +32,10 @@ class NotificationCard extends HTMLElement{
 
 	// set the display for these values onto the txt of the displays
 	attributeChangedCallback(name, oldValue, newValue) {
-		this.isRead.innerHTML = this.getAttribute("is-read");
+		let isRead = this.getAttribute("is-read");
+		this.isRead.innerHTML = isRead;
 		this.message.innerHTML = this.getAttribute("message");
+		if(isRead) this.classList.add("read-notification")
 		// do something when an attribute has changed
 		console.log(this);
 	}
@@ -87,7 +89,6 @@ class InviteNotificationCard extends HTMLElement{
 	// set the display for these values onto the txt of the displays
 	attributeChangedCallback(name, oldValue, newValue) {
 		this.message.innerHTML = "you have been invited to:  " + this.getAttribute("team-name");
-
 	}
 	
 	// the user has accepeted the invite so lets add the team to their collection
@@ -200,7 +201,7 @@ class NotificationPage extends HTMLElement{
 	let queryString = "notifications/" + doc.id
 	newNotificationCard.setAttribute("doc-location", queryString);
 
-	//if(!docData["is-read"]) // new unread notification, let the user know somehow
+	if(!docData["is-read"]) $(".notification-btn").notify("unread messages");
 
 	// add new element to local notifications
 	this.notifications.push(newNotificationCard);
