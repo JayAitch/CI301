@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>workaholic</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.2.3/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.2.3/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.2.3/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.2.3/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.2.3/firebase-storage.js"></script>	
+	<!--
+	<script defer src="/scripts/libs/jquery/jquery-3.4.1.min.js"></script>
+	-->	
+	<script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.js"></script>	
+	<script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.mobile-1.4.5.min.js"></script>	
+	<link rel="stylesheet" href="/scripts/libs/jquery/jquerymobile/css/themes/default/jquery.mobile-1.4.5.min.css">
+
+    <script defer src="/scripts/firebaseMain.js"></script>	
+
+  </head>
+  <body>
+  
+	
+	<div data-role="page" id="teams-page" class="page" data-theme="a">
+		<div data-role="header" data-position="fixed">
+			<h1>Teams</h1>
+			<div data-role="navbar">
+				<ul>
+					<li><a href="#teams-page" data-transition="pop">teams</a></li>
+					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
+					<li><a href="#user-page" data-transition="pop">user</a></li>
+				</ul>
+			</div>		
+		</div>
+		<div role="main" class="ui-content">...</div>
+		<div data-role="footer"><button id="logout-btn" onclick="logOut()">logout</button></div>
+	</div>
+	<div data-role="page" id="tasks-page" class="page" data-theme="a">
+	
+		<div data-role="header" data-position="fixed">
+			<h1>Tasks</h1>
+			<div data-role="navbar">
+				<ul>
+					<li><a href="#teams-page" data-transition="pop">teams</a></li>
+					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
+					<li><a href="#user-page" data-transition="pop">user</a></li>
+				</ul>
+			</div>		
+		</div>
+		
+		
+		<div role="main" class="ui-content">...</div>
+		<div data-role="footer"><button id="logout-btn" onclick="logOut()">logout</button></div>
+	</div>
+	<div data-role="page" id="user-page" class="page" data-theme="a">
+		<div data-role="header" data-position="fixed">
+			<h1>Account</h1>
+			<div data-role="navbar">
+				<ul>
+					<li><a href="#teams-page" data-transition="pop">teams</a></li>
+					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
+					<li><a href="#user-page" data-transition="pop">user</a></li>
+				</ul>
+			</div>		
+		</div>
+		<div role="main" class="ui-content">...</div>
+		<div data-role="footer"><button id="logout-btn" onclick="logOut()">logout</button></div>
+	</div>
+  </body>
+</html>
