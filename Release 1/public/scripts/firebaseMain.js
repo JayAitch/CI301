@@ -20,21 +20,28 @@ document.addEventListener("DOMContentLoaded", event =>{
 	firebase.auth().onAuthStateChanged(function(user) {
 		if (user) {
 			// User is signed in.
-			console.log(user)
+			//console.log(user)//
 			//loadHomePage();
+			document.getElementById("notification-wrapper").appendChild(document.createElement("notification-page"));
 		} else {
 			const authenticator = new firebase.auth.GoogleAuthProvider();
 			firebase.auth().signInWithRedirect(authenticator)
 			//console.log("nouser")	// No user is signed in.;
+
 		}
 	});
 });
 
-	function logOut(){
-		firebase.auth().signOut().then(function() {
+function logOut(){
+	firebase.auth().signOut().then(function() {
 			// Sign-out successful.
 			
-		}, function(error) {
+	}, function(error) {
 			// An error happened.
-		});
-	}
+	});
+}
+
+function notifyUnreadNotification(){
+	
+	alert("new notification");
+}
