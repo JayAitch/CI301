@@ -23,6 +23,7 @@
 	
 
 	<script defer src="/scripts/customelements/notification-page.js"></script>	
+	<script defer src="/scripts/customelements/user-page.js"></script>	
     <script defer src="/scripts/firebaseMain.js"></script>	
 
   </head>
@@ -74,7 +75,10 @@
 				</ul>
 			</div>			
 		</div>
-		<div role="main" class="ui-content">...</div>
+		<div role="main" class="ui-content">
+			<div id="account-wrapper">
+			</div>
+		</div>
 		<div data-role="footer"><button id="logout-btn" onclick="logOut()">logout</button></div>
 	</div>
 	<div data-role="page" id="notifications-page" class="page" data-theme="a">

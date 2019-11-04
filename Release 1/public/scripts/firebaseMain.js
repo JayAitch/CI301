@@ -22,7 +22,9 @@ document.addEventListener("DOMContentLoaded", event =>{
 			// User is signed in.
 			//console.log(user)//
 			//loadHomePage();
+				var userAccount = firebase.firestore().collection('accounts').doc(user.uid);
 			document.getElementById("notification-wrapper").appendChild(document.createElement("notification-page"));
+			document.getElementById("account-wrapper").appendChild(document.createElement("user-page"));
 		} else {
 			const authenticator = new firebase.auth.GoogleAuthProvider();
 			firebase.auth().signInWithRedirect(authenticator)
