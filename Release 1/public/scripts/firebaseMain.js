@@ -40,8 +40,10 @@ function logOut(){
 			// An error happened.
 	});
 }
-
-function notifyUnreadNotification(){
+function getCurrentUserDocRef(){
+	const workaholicCurrentUserID = firebase.auth().currentUser.uid;
+	// promote this variable u
+	let currentUserDocRef = firebase.firestore().doc("accounts/" + workaholicCurrentUserID)
 	
-	alert("new notification");
+	return currentUserDocRef;
 }

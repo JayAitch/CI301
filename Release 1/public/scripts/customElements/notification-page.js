@@ -1,14 +1,15 @@
 class NotificationCard extends HTMLElement{
 	constructor() {  
 		super();
-		// bind this to the click handler for this component
+		
+		// bind 'this' to the click handler for this component
 		this._clickHandler = this._clickHandler.bind(this);
 	}
 	
+	
+	// setup elmenet when connected
 	connectedCallback() {
-				const userAccountTemplate = `
-											<style>:host { ... }</style>
-												<div class="task-wrapper">
+				const userAccountTemplate = `<div class="notification-wrapper">
 													<div class="name-header">
 														<h3 class="message"></h3>
 													</div>
@@ -18,16 +19,13 @@ class NotificationCard extends HTMLElement{
 				
 				// dont do it like this maybe? potential dom lag
 				this.innerHTML = userAccountTemplate;
-				
-				// assign local values for the team displays
-				this.isRead = this.querySelector('.is-read');
-				console.log(this.isRead);
-				this.message = this.querySelector('.message');
-				this.docLoaction = this.getAttribute("doc-location");
-				this.querySelector(".task-wrapper").addEventListener("click", this._clickHandler);
+				this.isRead = this.querySelector(".is-read");
+				this.message = this.querySelector(".message");
+				// find the top wrapper and add the click listener to it
+				this.querySelector(".notification-wrapper").addEventListener("click", this._clickHandler);
 	}
 	
-	// observe the attribute changes so we can show the user tasks have been completed
+	// observe the attribute changes so we can modify dispalyed data
 	static get observedAttributes() {
 		return ['is-read', 'message'];
 	}
@@ -44,49 +42,123 @@ class NotificationCard extends HTMLElement{
 		console.log("clicked");
 		const docLocation = this.getAttribute("doc-location")
 		let notification = firebase.firestore().doc(docLocation);
-		var setWithMerge =	notification.set({
-							"is-read": true,
-						}, { merge: true });
+		notification.set({
+				"is-read": true,
+			}, { merge: true });
 	}
 }
 
-// list for all the teams a person is part of
-class NotificationPage extends HTMLElement{
-  constructor() { 
-    super();
-	this.notifications = [];
-  }
-  
-  connectedCallback() {
-	  console.log("connected");
-	  const teamListTemplate = `
-											<style>:host { ... }</style>
-												<h2 class="name-header">
-													Notifications
-												</h2>
-												<div id="team-wrapper">
-													<ul id="teams-list">
-													</ul>
-													<slot></slot>
+
+class InviteNotificationCard extends HTMLElement{
+	constructor() {  
+		super();
+		
+		// bind 'this' to the click handlers for this component
+		this._clickDecline = this._clickDecline.bind(this);
+		this._clickAccept = this._clickAccept.bind(this);
+	}
+	
+	
+	// setup elmenet when connected
+	connectedCallback() {
+				const userAccountTemplate = `<div class="notification-wrapper">
+													<div class="name-header">
+														<h3 class="message"></h3>
+													</div>
+													<span class="is-read"></span><span class="message"></span>
+													<button class="accept-btn">accept</button><button class="decline-btn">decline</button>
 												</div>
 											`;
 				
-	let template = document.createElement('template');
+				// dont do it like this maybe? potential dom lag
+				this.innerHTML = userAccountTemplate;
+				
+				this.message = this.querySelector(".message");
+				// find the top wrapper and add the click listener to it
+				this.querySelector(".accept-btn").addEventListener("click", this._clickAccept);
+				this.querySelector(".decline-btn").addEventListener("click", this._clickDecline);
+	}
+	
+	// observe the attribute changes so we can modify dispalyed data
+	static get observedAttributes() {
+		return ['is-read', 'team-name'];
+	}
+
+	// set the display for these values onto the txt of the displays
+	attributeChangedCallback(name, oldValue, newValue) {
+		this.message.innerHTML = "you have been invited to:  " + this.getAttribute("team-name");
+
+	}
+	
+	// the user has accepeted the invite so lets add the team to their collection
+	_clickAccept(ev){
+		// get the document location from the dom object
+		let teamDocLocation = this.getAttribute("team-doc-location");
+		
+		// add a new team under the users account
+		// we should be able to secure this by adding the users id to a collection under the team on inviting
+		let currentUsersTeams = getCurrentUserDocRef().collection("users-teams").add({
+		"team-reference": firebase.firestore().doc(teamDocLocation),
+		name: "name"
+		}).then(function(docRef) {
+				alert("added to team");
+		}).catch(function(error) {
+				console.error("Error adding document: ", error);
+		});
+	}
+	
+	// delete the notification???
+	_clickDecline(ev){
+		
+		alert('declined');
+	}
+}
+
+
+
+
+
+
+
+
+
+// list of all notifications
+class NotificationPage extends HTMLElement{
+  constructor() { 
+    super();
+	
+	// local variable of dom elements order is difined when documents are added as part of the query
+	this.notifications = [];
+  }
+  
+  // set up the element on connection
+  connectedCallback() {
+	  console.log("connected");
+	  const teamListTemplate = `				<h2 class="name-header">
+													Notifications
+												</h2>
+												<div id="team-wrapper">
+													<ul id="notification-list">
+													</ul>
+												</div>
+											`;
+				
+
 	
 	
 	// dont do it like this maybe? potential dom lag
 	this.innerHTML = teamListTemplate;
 	
-	template.innerHTML = teamListTemplate;
-	//	var clone = document.importNode(template, true);
-	
 	// find the user from the auth configuration
 	const workaholicCurrentUserID = firebase.auth().currentUser.uid;
-	this.teamsList = document.getElementById("teams-list");
-	console.log(workaholicCurrentUserID);
-	// get all the teams an account has reference too
+	
+	// find the UL containing the nofications
+	this.teamsList = document.getElementById("notification-list");
+
+	// find all notifications refering to the current user
 	const noficationsRef = firebase.firestore().collection("notifications").where("for","==", workaholicCurrentUserID)
 		
+	// attach listeners to the reference to apply com updates
 	noficationsRef.onSnapshot((snapshot) => {
 		snapshot.docChanges().forEach((change) =>{
 			if (change.type === "added") {
@@ -103,52 +175,88 @@ class NotificationPage extends HTMLElement{
   }
 
 	
-  // create new list elements and assign listeners to the attributes that other people can modify
+  // create new list elements and assign attributes to let cards modify there displayed data
   createNewNotificationCard(doc){
-
-	// create element and set any values specific to the user
-    let newNotificationCard = document.createElement("notification-card");			
+	var newNotificationCard;
 	let docData = doc.data();
+	// is the notification a team invite
+	if(docData.type === "team-invite"){
+		// yes - create the team notification card from the custom element registry
+		newNotificationCard = document.createElement("invite-notification-card");	
+	}
+	else{
+		// no - create the normal notification card from the custom element registry
+		newNotificationCard = document.createElement("notification-card");	
+	}
+
+     
+
+	// get the data from the document and apply to card attributes
+
 	this.appendChild(newNotificationCard);	
 	this.setAttributesFromDoc(newNotificationCard, docData);
 	
+	// setup a document reference on the card for debuging
 	let queryString = "notifications/" + doc.id
 	newNotificationCard.setAttribute("doc-location", queryString);
 
 	//if(!docData["is-read"]) // new unread notification, let the user know somehow
 
-
+	// add new element to local notifications
 	this.notifications.push(newNotificationCard);
-	console.log(this.notifications);
 	
   }
   
+  // this scenario should only rarely happen, remove deleted document from the DOM
   removeNotificationCard(change){
+	
+	// find it via the query index
 	let docIndex = change.oldIndex
-
 	let notificationCard = this.notifications[docIndex];
 
+	// remove from the parent node
 	notificationCard.parentNode.removeChild(notificationCard);
   }
   
+  // set/update any relevant attributes on the card
   setAttributesFromDoc(elem, docData){
 	let isRead = docData["is-read"];
-	let message = docData["message"]
+	let message = docData["message"];
 	elem.setAttribute("is-read", isRead);
 	elem.setAttribute("message", message);
+	
+	if(docData["team"]){
+		this.setTeamData(elem, docData["team"]);
+	}
+	
+	
+	
+  }
+  
+  // set team data of team invite cards
+  setTeamData(elem, teamRef){
+	teamRef.get().then( (team) =>{
+		let teamName = team.data().name;
+		elem.setAttribute("team-name", teamName);
+		elem.setAttribute("team-doc-location", teamRef.path);
+	});
   }
   
   
+  // update an existing dom element with modified data
   changeDocAttributes(change){
 	let docIndex = change.newIndex
 	let doc = change.doc;
+	
+	// find the notification card from the query index
 	let notificationCard = this.notifications[docIndex];
-		console.log(this.notifications);
-	console.log(notificationCard);
+
+	// update the data to allow display
 	this.setAttributesFromDoc(notificationCard, doc.data());
 
   }
 	
+	// currently un-used consider implementing adding/removing listeners
   attributeChangedCallback(attrName, oldVal, newVal) {
     console.log("userpage attr change" + attrName + oldVal + newVal);
   }
@@ -157,6 +265,7 @@ class NotificationPage extends HTMLElement{
   
 }
 
-
+// add elements to the custom element registry
 window.customElements.define('notification-page', NotificationPage);
 window.customElements.define('notification-card', NotificationCard);
+window.customElements.define('invite-notification-card', InviteNotificationCard);
