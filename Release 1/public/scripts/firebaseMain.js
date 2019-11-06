@@ -24,7 +24,9 @@ document.addEventListener("DOMContentLoaded", event =>{
 			//loadHomePage();
 
 			document.getElementById("notification-wrapper").appendChild(document.createElement("notification-page"));
-			document.getElementById("account-wrapper").appendChild(document.createElement("user-page"));
+			document.getElementById("account-wrapper").appendChild(document.createElement("user-page"));	
+			document.getElementById("team-wrapper").appendChild(document.createElement("team-list"));		
+			
 		} else {
 			const authenticator = new firebase.auth.GoogleAuthProvider();
 			firebase.auth().signInWithRedirect(authenticator)

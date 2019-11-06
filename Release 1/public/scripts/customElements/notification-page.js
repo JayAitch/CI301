@@ -37,11 +37,11 @@ class NotificationCard extends HTMLElement{
 		this.message.innerHTML = this.getAttribute("message");
 		if(isRead) this.classList.add("read-notification")
 		// do something when an attribute has changed
-		console.log(this);
+//		console.log(this);
 	}
 	
   	_clickHandler(ev){
-		console.log("clicked");
+//		console.log("clicked");
 		const docLocation = this.getAttribute("doc-location")
 		let notification = firebase.firestore().doc(docLocation);
 		notification.set({
@@ -116,81 +116,6 @@ class InviteNotificationCard extends HTMLElement{
 }
 
 
-
-
-
-
-
-
-
-// Base query listener, acts on query data retured by getQueryReferenece()
-// override snapshot listners called to modify the DOM
-// override getQueryRefernece to change the data set
-class QueryListElement extends HTMLElement{
-  constructor() { 
-    super();
-	
-	// get the current user from the authentication object
-	this.currentUserID = firebase.auth().currentUser.uid; 
-	
-	// create a query reference of dataset
-	const queryRef = this.getQueryReferenece();
-	
-	// attach listeners to the reference to apply com updates
-	this.snapshotListener = queryRef.onSnapshot((snapshot) => {
-		snapshot.docChanges().forEach((change) =>{
-			if (change.type === "added") {
-				this._onDocumentAdded(change);
-			}
-			else if(change.type === "modified"){
-				this._onDocumentChanged(change);
-			}
-			else if(change.type ==="removed"){
-				this._onDocumentRemoved(change);
-			}
-		});
-	});
-
-	// local variable of dom elements order is difined when documents are added as part of the query
-	this.activeCards = [];
-  }
-  
-  // set up the element on connection
-  connectedCallback() {	
-  
-
-  }
-  
-  // called by snapshotListener
-  // override these to modify the DOM
-  _onDocumentAdded(change){
-  }  
-  
-  _onDocumentChanged(change){
-  }
-  
-  _onDocumentRemoved(change){
-  } 
-  
-  // remove all listeners on this list
-  removeListeners(){
-	  this.snapshotListener();
-  }
-  
-  // override this to give a list of queries
-  getQueryReferenece(){
-  }
-}
-
-
-
-
-
-
-
-
-
-
 // list of all notifications
 class NotificationList extends QueryListElement{
   constructor() { 
@@ -200,14 +125,14 @@ class NotificationList extends QueryListElement{
   // set up the element on connection
   connectedCallback() {
 	  //super();
-	  console.log("connected");
+//	  console.log("connected");
 	  const teamListTemplate = `				<h2 class="name-header">
 													Notifications
 												</h2>
-												<div id="team-wrapper">
+												
 													<ul id="notification-list">
 													</ul>
-												</div>
+												
 											`;
 				
 
@@ -216,7 +141,7 @@ class NotificationList extends QueryListElement{
 	// dont do it like this maybe? potential dom lag
 	this.innerHTML = teamListTemplate;
 	// find the UL containing the nofications
-	this.teamsList = document.getElementById("notification-list");
+	this.notificationList = document.getElementById("notification-list");
 
   }
   
@@ -227,17 +152,15 @@ class NotificationList extends QueryListElement{
   
   
   _onDocumentAdded(change){
-	//console.log(change);
+
 	this.createNewNotificationCard(change.doc);
   }
     
   _onDocumentChanged(change){
-//	console.log(change);
 	this.changeDocAttributes(change);
   }
      
   _onDocumentRemoved(change){
-	//console.log(change);
 	this.removeNotificationCard(change);
   } 
   
@@ -247,6 +170,7 @@ class NotificationList extends QueryListElement{
   createNewNotificationCard(doc){
 	var newNotificationCard;
 	let docData = doc.data();
+//	console.log(docData);
 	// is the notification a team invite
 	if(docData.type === "team-invite"){
 		// yes - create the team notification card from the custom element registry
@@ -260,7 +184,7 @@ class NotificationList extends QueryListElement{
      
 
 	// get the data from the document and apply to card attributes
-	this.appendChild(newNotificationCard);	
+	this.notificationList.appendChild(newNotificationCard);	
 	this.setAttributesFromDoc(newNotificationCard, docData);
 	
 	// setup a document reference on the card for debuging
@@ -274,6 +198,19 @@ class NotificationList extends QueryListElement{
 	
   }
   
+  // update an existing dom element with modified data
+  changeDocAttributes(change){
+	let docIndex = change.newIndex
+	let doc = change.doc;
+	
+	// find the notification card from the query index
+	let notificationCard = this.activeCards[docIndex];
+
+	// update the data to allow display
+	this.setAttributesFromDoc(notificationCard, doc.data());
+
+  }
+  
   // this scenario should only rarely happen, remove deleted document from the DOM
   removeNotificationCard(change){
 	
@@ -285,6 +222,22 @@ class NotificationList extends QueryListElement{
 	notificationCard.parentNode.removeChild(notificationCard);
   }
   
+  
+  
+    // update an existing dom element with modified data
+  changeDocAttributes(change){
+	let docIndex = change.newIndex
+	let doc = change.doc;
+	
+	// find the notification card from the query index
+	let notificationCard = this.activeCards[docIndex];
+
+	// update the data to allow display
+	this.setAttributesFromDoc(notificationCard, doc.data());
+
+  }
+  
+
   // set/update any relevant attributes on the card
   setAttributesFromDoc(elem, docData){
 	let isRead = docData["is-read"];
@@ -310,18 +263,7 @@ class NotificationList extends QueryListElement{
   }
   
   
-  // update an existing dom element with modified data
-  changeDocAttributes(change){
-	let docIndex = change.newIndex
-	let doc = change.doc;
-	
-	// find the notification card from the query index
-	let notificationCard = this.activeCards[docIndex];
 
-	// update the data to allow display
-	this.setAttributesFromDoc(notificationCard, doc.data());
-
-  }
 	
 
 
