@@ -123,17 +123,83 @@ class InviteNotificationCard extends HTMLElement{
 
 
 
-// list of all notifications
-class NotificationPage extends HTMLElement{
+// Base query listener, acts on query data retured by getQueryReferenece()
+// override snapshot listners called to modify the DOM
+// override getQueryRefernece to change the data set
+class QueryListElement extends HTMLElement{
   constructor() { 
     super();
 	
+	// get the current user from the authentication object
+	this.currentUserID = firebase.auth().currentUser.uid; 
+	
+	// create a query reference of dataset
+	const queryRef = this.getQueryReferenece();
+	
+	// attach listeners to the reference to apply com updates
+	this.snapshotListener = queryRef.onSnapshot((snapshot) => {
+		snapshot.docChanges().forEach((change) =>{
+			if (change.type === "added") {
+				this._onDocumentAdded(change);
+			}
+			else if(change.type === "modified"){
+				this._onDocumentChanged(change);
+			}
+			else if(change.type ==="removed"){
+				this._onDocumentRemoved(change);
+			}
+		});
+	});
+
 	// local variable of dom elements order is difined when documents are added as part of the query
-	this.notifications = [];
+	this.activeCards = [];
+  }
+  
+  // set up the element on connection
+  connectedCallback() {	
+  
+
+  }
+  
+  // called by snapshotListener
+  // override these to modify the DOM
+  _onDocumentAdded(change){
+  }  
+  
+  _onDocumentChanged(change){
+  }
+  
+  _onDocumentRemoved(change){
+  } 
+  
+  // remove all listeners on this list
+  removeListeners(){
+	  this.snapshotListener();
+  }
+  
+  // override this to give a list of queries
+  getQueryReferenece(){
+  }
+}
+
+
+
+
+
+
+
+
+
+
+// list of all notifications
+class NotificationList extends QueryListElement{
+  constructor() { 
+    super();
   }
   
   // set up the element on connection
   connectedCallback() {
+	  //super();
 	  console.log("connected");
 	  const teamListTemplate = `				<h2 class="name-header">
 													Notifications
@@ -149,33 +215,34 @@ class NotificationPage extends HTMLElement{
 	
 	// dont do it like this maybe? potential dom lag
 	this.innerHTML = teamListTemplate;
-	
-	// find the user from the auth configuration
-	const workaholicCurrentUserID = firebase.auth().currentUser.uid;
-	
 	// find the UL containing the nofications
 	this.teamsList = document.getElementById("notification-list");
 
-	// find all notifications refering to the current user
-	const noficationsRef = firebase.firestore().collection("notifications").where("for","==", workaholicCurrentUserID)
-		
-	// attach listeners to the reference to apply com updates
-	noficationsRef.onSnapshot((snapshot) => {
-		snapshot.docChanges().forEach((change) =>{
-			if (change.type === "added") {
-				this.createNewNotificationCard(change.doc);
-			}
-			else if(change.type === "modified"){
-				this.changeDocAttributes(change);
-			}
-			else if(change.type ==="removed"){
-				this.removeNotificationCard(change);
-			}
-		});
-	});
   }
-
-	
+  
+  getQueryReferenece(){
+	// find all notifications refering to the current user
+	return firebase.firestore().collection("notifications").where("for","==", this.currentUserID)	
+  }
+  
+  
+  _onDocumentAdded(change){
+	//console.log(change);
+	this.createNewNotificationCard(change.doc);
+  }
+    
+  _onDocumentChanged(change){
+//	console.log(change);
+	this.changeDocAttributes(change);
+  }
+     
+  _onDocumentRemoved(change){
+	//console.log(change);
+	this.removeNotificationCard(change);
+  } 
+  
+  
+  
   // create new list elements and assign attributes to let cards modify there displayed data
   createNewNotificationCard(doc){
 	var newNotificationCard;
@@ -193,7 +260,6 @@ class NotificationPage extends HTMLElement{
      
 
 	// get the data from the document and apply to card attributes
-
 	this.appendChild(newNotificationCard);	
 	this.setAttributesFromDoc(newNotificationCard, docData);
 	
@@ -203,8 +269,8 @@ class NotificationPage extends HTMLElement{
 
 	if(!docData["is-read"]) $(".notification-btn").notify("unread messages");
 
-	// add new element to local notifications
-	this.notifications.push(newNotificationCard);
+	// add new element to local active cards
+	this.activeCards.push(newNotificationCard);
 	
   }
   
@@ -213,7 +279,7 @@ class NotificationPage extends HTMLElement{
 	
 	// find it via the query index
 	let docIndex = change.oldIndex
-	let notificationCard = this.notifications[docIndex];
+	let notificationCard = this.activeCards[docIndex];
 
 	// remove from the parent node
 	notificationCard.parentNode.removeChild(notificationCard);
@@ -250,23 +316,48 @@ class NotificationPage extends HTMLElement{
 	let doc = change.doc;
 	
 	// find the notification card from the query index
-	let notificationCard = this.notifications[docIndex];
+	let notificationCard = this.activeCards[docIndex];
 
 	// update the data to allow display
 	this.setAttributesFromDoc(notificationCard, doc.data());
 
   }
 	
-	// currently un-used consider implementing adding/removing listeners
-  attributeChangedCallback(attrName, oldVal, newVal) {
-    console.log("userpage attr change" + attrName + oldVal + newVal);
-  }
-  
+
 
   
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // add elements to the custom element registry
-window.customElements.define('notification-page', NotificationPage);
+window.customElements.define('notification-page', NotificationList);
 window.customElements.define('notification-card', NotificationCard);
 window.customElements.define('invite-notification-card', InviteNotificationCard);
