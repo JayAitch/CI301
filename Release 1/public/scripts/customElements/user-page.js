@@ -13,8 +13,8 @@ class UserPage extends HTMLElement{
 	  
 		// we want the currently logged in users reference in our accounts collection
 		// this document will be used to populate the users account page
-		const workaholicCurrentUser = firebase.auth().currentUser;
-		this.userAccount = firebase.firestore().collection('accounts').doc(workaholicCurrentUser.uid);
+		const workaholicCurrentUser = getUserId();
+		this.userAccount = firebase.firestore().collection('accounts').doc(workaholicCurrentUser);
 		var testText = ""
 		this.userAccount.set({
 			"logged-on": true

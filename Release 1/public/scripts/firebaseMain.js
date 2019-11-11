@@ -44,6 +44,9 @@ function logOut(){
 			// An error happened.
 	});
 }
+function getUserId(){
+	 return firebase.auth().currentUser.uid;
+}
 function getCurrentUserDocRef(){
 	const workaholicCurrentUserID = firebase.auth().currentUser.uid;
 	// promote this variable u

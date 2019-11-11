@@ -1,3 +1,6 @@
+
+
+
 class TeamCard extends HTMLElement{
 	constructor() {  
 		super();
@@ -17,7 +20,7 @@ class TeamCard extends HTMLElement{
 													</div>
 													<form class="invite-form">
 														<input name="code" type="text"></input>
-														<input value="invite" type="submit"></input>														
+														<input value="invite" type="submit" required  maxlength="28" minlength="28"></input>														
 													</form>
 												</div>
 											`;
@@ -34,7 +37,7 @@ class TeamCard extends HTMLElement{
 	
 	// observe the attribute changes so we can modify dispalyed data
 	static get observedAttributes() {
-		return ['is-read', 'name'];
+		return ['name'];
 	}
 
 	// set the display for these values onto the txt of the displays
@@ -48,19 +51,13 @@ class TeamCard extends HTMLElement{
 	}
 	
   	_clickHandler(ev){
-		console.log("clicked");
-	//	const docLocation = this.getAttribute("doc-location")
-	//	let notification = firebase.firestore().doc(docLocation);
-	//	notification.set({
-	//			"is-read": true,
-	//		}, { merge: true });
 	}
 	
 	
 	_sendInvite(ev){
 		ev.preventDefault();
-		console.log(this.inviteForm.code.value);
 		let code = this.inviteForm.code.value
+		if(code.length != 28) return;
 		let teamDocLocation = this.getAttribute("doc-location");
 		
 			// test invite
@@ -77,7 +74,7 @@ class TeamCard extends HTMLElement{
 		.catch(function(error) {
 			console.error("Error adding document: ", error);
 		});
-		
+
 		
 	}
 }
@@ -89,7 +86,8 @@ class TeamCard extends HTMLElement{
 class TeamList extends QueryListElement{
   constructor() { 
     super();
-	this._onNewTeamBtnClick = this._onNewTeamBtnClick.bind(this);
+	//this._onNewTeamBtnClick = this._onNewTeamBtnClick.bind(this);
+	this._showInviteCode = this._showInviteCode.bind(this);
   }
   
   // set up the element on connection
@@ -99,10 +97,12 @@ class TeamList extends QueryListElement{
 	  const teamListTemplate = `				<h2 class="name-header">
 													Teams
 												</h2>
-												<button id="new-team-btn">new team</button>
+												<!--button id="new-team-btn">new team</button-->												
 												<div id="team-wrapper">
 													<ul id="team-list">
 													</ul>
+												<button id="invite-code-btn">invite code</button>
+												<div hidden id="qr-code"></div>
 												</div>
 											`;
 				
@@ -113,8 +113,24 @@ class TeamList extends QueryListElement{
 	this.innerHTML = teamListTemplate;
 	// find the UL containing the nofications
 	this.teamsList = document.getElementById("team-list");
-	this.newTeamBtn = document.getElementById("new-team-btn").addEventListener("click", this._onNewTeamBtnClick);
+//	this.newTeamBtn = document.getElementById("new-team-btn").addEventListener("click", this._onNewTeamBtnClick);
+	
+
+	this.inviteCodeBtn = document.getElementById("invite-code-btn").addEventListener("click", this._showInviteCode);
+	this.QRcode = document.getElementById("qr-code");  
+	
+	
+	let QRCodeData = {"text": this.currentUserID};
+	new QRCode(this.QRcode, QRCodeData);
+	
+	
+	
+	// not like this
+	let newMaker = this.appendChild(document.createElement("document-form"));
+	newMaker.setAttribute("obj-type", "team");
+	
   }
+  
   
   getQueryReferenece(){
 	// find all notifications refering to the current user
@@ -133,8 +149,14 @@ class TeamList extends QueryListElement{
   _onDocumentRemoved(change){
 	this.removeTeamCard(change);
   } 
+  
+  _showInviteCode(){
+	  let isHidden = this.QRcode.hidden
+	  this.QRcode.hidden = !isHidden
+  }
+  /**
   _onNewTeamBtnClick(){
-	console.log("newteams");
+//	console.log("newteams");
 	  
 	// create test team
 	firebase.firestore().collection("teams").add({
@@ -153,7 +175,7 @@ class TeamList extends QueryListElement{
 	});
 	  
 	  
-  }
+  }**/
   
   
   // create new list elements and assign attributes to let cards modify there displayed data
@@ -169,7 +191,7 @@ class TeamList extends QueryListElement{
 	this.setAttributesFromDoc(newTeamCard, docData);
 	
 	// setup a document reference on the card for debuging
-	console.log(doc);
+	//console.log(doc);
 	let queryString = docData["team-reference"].path;
 	newTeamCard.setAttribute("doc-location", queryString);
 
@@ -222,10 +244,10 @@ class TeamList extends QueryListElement{
   // set/update any relevant attributes on the card
   setAttributesFromDoc(elem, docData){
 
-	let name = docData["nickname"];
+	let name = docData["name"];
 
 	elem.setAttribute("name", name);
-	console.log(name);
+
 	
   }
   

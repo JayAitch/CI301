@@ -196,8 +196,9 @@ class NotificationList extends QueryListElement{
 	// add new element to local active cards
 	this.activeCards.push(newNotificationCard);
 	
+	
   }
-  
+  // promote to upper class
   // update an existing dom element with modified data
   changeDocAttributes(change){
 	let docIndex = change.newIndex
@@ -210,7 +211,7 @@ class NotificationList extends QueryListElement{
 	this.setAttributesFromDoc(notificationCard, doc.data());
 
   }
-  
+  // promote to upper class
   // this scenario should only rarely happen, remove deleted document from the DOM
   removeNotificationCard(change){
 	
@@ -224,19 +225,6 @@ class NotificationList extends QueryListElement{
   
   
   
-    // update an existing dom element with modified data
-  changeDocAttributes(change){
-	let docIndex = change.newIndex
-	let doc = change.doc;
-	
-	// find the notification card from the query index
-	let notificationCard = this.activeCards[docIndex];
-
-	// update the data to allow display
-	this.setAttributesFromDoc(notificationCard, doc.data());
-
-  }
-  
 
   // set/update any relevant attributes on the card
   setAttributesFromDoc(elem, docData){
@@ -248,9 +236,6 @@ class NotificationList extends QueryListElement{
 	if(docData["team"]){
 		this.setTeamData(elem, docData["team"]);
 	}
-	
-	
-	
   }
   
   // set team data of team invite cards
