@@ -19,14 +19,15 @@
 	<script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.js"></script>	
 	<script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.mobile-1.4.5.min.js"></script>	
 	<script defer src="/scripts/libs/jquery/notify.min.js"></script>
-	<script defer src="/scripts/libs/davidshimjs-qrcodejs-04f46c6/qrcode.min.js"></script>
+	<script defer src="/scripts/libs/qrcode.min.js"></script>
 	<link rel="stylesheet" href="/scripts/libs/jquery/jquerymobile/css/themes/default/jquery.mobile-1.4.5.min.css">
-	
-	
+
+	  <script defer src="/scripts/customelements/modal-popups.js"></script>
 	<script defer src="/scripts/customelements/document-form.js"></script>	
 	<script defer src="/scripts/customelements/query-list-element.js"></script>	
-	<script defer src="/scripts/customelements/teams-page.js"></script>	
-	<script defer src="/scripts/customelements/notification-page.js"></script>	
+	<script defer src="/scripts/customelements/teams-page.js"></script>
+
+	  <script defer src="/scripts/customelements/notification-page.js"></script>
 	<script defer src="/scripts/customelements/user-page.js"></script>	
     <script defer src="/scripts/firebaseMain.js"></script>	
 
@@ -102,6 +103,7 @@
 		</div>
 		<div role="main" class="ui-content">
 			<div id="notification-wrapper">
+
 			</div>
 		</div>
 		
@@ -110,14 +112,44 @@
 		
 		<div data-role="footer"><button id="logout-btn" onclick="logOut()">logout</button></div>
 	</div>
-	
-
+	<!--modal div to create new documents with, modifying the obj-type attibute will trigger form regeneration-->
+	<document-form id="new-document-form"></document-form>
+	<change-document-form id="change-document-form"></change-document-form>
   </body>
   
   <style>
+	  team-card{
+		  padding: 10px;
+	  }
   notification-card{display:block;}
 	.read-notification{
 		background-color: grey;
 	}
+  .fullscreen-popup{
+	  display: block;
+	  position:fixed;
+	  height:100vh;
+	  width:100vw;
+	  top:0;
+	  left:0;
+	  background-color: black;
+	  background-color: rgba(0,0,0,0.5)
+  }
+  .fullscreen-popup .modal{
+	  opacity: 1;
+	  width:50%;
+	  height:50%;
+	  min-width: 300px;
+	  margin: auto;
+	  margin-top: 200px;
+	  background-color: white;
+	  zzz-index: 5123101;
+  }
+	  .fullscreen-popup .modal .content{
+		  width:80%;
+		  margin: auto;
+		  padding: 25px;
+	  }
+	  .hidden{display: none;}
   </style>
 </html>

@@ -142,7 +142,6 @@ class NotificationList extends QueryListElement{
 	this.innerHTML = teamListTemplate;
 	// find the UL containing the nofications
 	this.notificationList = document.getElementById("notification-list");
-
   }
   
   getQueryReferenece(){
@@ -241,6 +240,7 @@ class NotificationList extends QueryListElement{
   // set team data of team invite cards
   setTeamData(elem, teamRef){
 	teamRef.get().then( (team) =>{
+		// todo: check if the doc has errored
 		let teamName = team.data().name;
 		elem.setAttribute("team-name", teamName);
 		elem.setAttribute("team-doc-location", teamRef.path);

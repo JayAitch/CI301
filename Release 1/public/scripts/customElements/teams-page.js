@@ -1,6 +1,9 @@
 
 
-
+//TODO: this is  very big issue
+//       we  need to watch for value changes on documents inside our teams collection
+//       this requires modification of query-list-element as there are 2 seperate things here
+//       queries need a way of manualy applying listeners to doucments as well as notifications not caring about the chanages
 class TeamCard extends HTMLElement{
 	constructor() {  
 		super();
@@ -8,6 +11,7 @@ class TeamCard extends HTMLElement{
 		// bind 'this' to the click handler for this component
 		this._clickHandler = this._clickHandler.bind(this);
 		this._sendInvite = this._sendInvite.bind(this);
+		this._editTeam = this._editTeam.bind(this);
 	}
 	
 	
@@ -18,6 +22,7 @@ class TeamCard extends HTMLElement{
 														<h3 class="name"></h3>
 														
 													</div>
+													<button class="team-edit-button">edit</button>
 													<form class="invite-form">
 														<input name="code" type="text"></input>
 														<input value="invite" type="submit" required  maxlength="28" minlength="28"></input>														
@@ -33,6 +38,10 @@ class TeamCard extends HTMLElement{
 				this.querySelector(".notification-wrapper").addEventListener("click", this._clickHandler);
 				this.inviteForm = this.querySelector(".invite-form")
 				this.inviteForm.addEventListener("submit", this._sendInvite);
+		this.querySelector(".team-edit-button").addEventListener("click", this._editTeam);
+
+
+
 	}
 	
 	// observe the attribute changes so we can modify dispalyed data
@@ -77,6 +86,16 @@ class TeamCard extends HTMLElement{
 
 		
 	}
+
+
+	// todo move this functionality into a seperate element so we can just put edit buttons everywhere
+	_editTeam(ev) {
+		let docLocation = this.getAttribute("doc-location");
+		const changeDocForm = document.getElementById("change-document-form");
+		changeDocForm.setAttribute("type", "team");
+		changeDocForm.setAttribute("document-target", docLocation);
+		changeDocForm.hidden = false;
+	}
 }
 
 
@@ -102,6 +121,7 @@ class TeamList extends QueryListElement{
 													<ul id="team-list">
 													</ul>
 												<button id="invite-code-btn">invite code</button>
+												<button id="new-team-btn">new team</button>
 												<div hidden id="qr-code"></div>
 												</div>
 											`;
@@ -113,7 +133,7 @@ class TeamList extends QueryListElement{
 	this.innerHTML = teamListTemplate;
 	// find the UL containing the nofications
 	this.teamsList = document.getElementById("team-list");
-//	this.newTeamBtn = document.getElementById("new-team-btn").addEventListener("click", this._onNewTeamBtnClick);
+	this.newTeamBtn = document.getElementById("new-team-btn").addEventListener("click", this._onNewTeamBtnClick);
 	
 
 	this.inviteCodeBtn = document.getElementById("invite-code-btn").addEventListener("click", this._showInviteCode);
@@ -122,13 +142,13 @@ class TeamList extends QueryListElement{
 	
 	let QRCodeData = {"text": this.currentUserID};
 	new QRCode(this.QRcode, QRCodeData);
-	
-	
-	
-	// not like this
-	let newMaker = this.appendChild(document.createElement("document-form"));
-	newMaker.setAttribute("obj-type", "team");
-	
+
+
+
+	  // not like this
+	  let newChanger = this.appendChild(document.createElement("change-document-form"));
+	  newChanger.setAttribute("obj-type", "team");
+	  newChanger.setAttribute("document-target", "teams/7hiyhpIckzGElOsG3ggF");
   }
   
   
@@ -154,28 +174,12 @@ class TeamList extends QueryListElement{
 	  let isHidden = this.QRcode.hidden
 	  this.QRcode.hidden = !isHidden
   }
-  /**
+
   _onNewTeamBtnClick(){
-//	console.log("newteams");
-	  
-	// create test team
-	firebase.firestore().collection("teams").add({
-		name: "RuntimeTeam",
-		owner: this.currentUserID
-	})	
-	.then((docRef)=> {
-		// also create a reference to the team under the player
-		firebase.firestore().collection("accounts/" + this.currentUserID + "/users-teams").add({
-		nickname: "Personal team runtime",
-		"team-reference": docRef
-		})
-	})
-	.catch(function(error) {
-		console.error("Error adding document: ", error);
-	});
-	  
-	  
-  }**/
+  	const newDocumentForm = document.getElementById("new-document-form");
+  	newDocumentForm.setAttribute("obj-type", "team");
+	  newDocumentForm.hidden = false;
+  }
   
   
   // create new list elements and assign attributes to let cards modify there displayed data
@@ -243,12 +247,11 @@ class TeamList extends QueryListElement{
 
   // set/update any relevant attributes on the card
   setAttributesFromDoc(elem, docData){
-
-	let name = docData["name"];
-
-	elem.setAttribute("name", name);
-
-	
+	let docRef = docData["team-reference"];
+	docRef.get().then((doc) =>{
+		let name = doc.data().name
+		elem.setAttribute("name", name)
+	})
   }
   
 

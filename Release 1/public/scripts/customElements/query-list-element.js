@@ -11,7 +11,7 @@ class QueryListElement extends HTMLElement{
 	
 	// create a query reference of dataset
 	const queryRef = this.getQueryReferenece();
-			console.log(queryRef);
+	// this maybe a bit ott with notifcations concider switching to https://firebase.google.com/docs/database/admin/retrieve-data
 	// attach listeners to the reference to apply com updates
 	this.snapshotListener = queryRef.onSnapshot((snapshot) => {
 		snapshot.docChanges().forEach((change) =>{
