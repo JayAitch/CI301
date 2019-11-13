@@ -102,11 +102,12 @@ class TeamCard extends HTMLElement{
 
 
 // list of all notifications
-class TeamList extends QueryListElement{
+class TeamList extends ActiveQueryListElement{
   constructor() { 
     super();
 	//this._onNewTeamBtnClick = this._onNewTeamBtnClick.bind(this);
 	this._showInviteCode = this._showInviteCode.bind(this);
+	this.collectionRef = "teams/"
   }
   
   // set up the element on connection
@@ -148,13 +149,16 @@ class TeamList extends QueryListElement{
 	  // not like this
 	  let newChanger = this.appendChild(document.createElement("change-document-form"));
 	  newChanger.setAttribute("obj-type", "team");
-	  newChanger.setAttribute("document-target", "teams/7hiyhpIckzGElOsG3ggF");
+	  newChanger.setAttribute("document-target", this.collectionRef + "7hiyhpIckzGElOsG3ggF");
   }
   
   
   getQueryReferenece(){
 	// find all notifications refering to the current user
-	return firebase.firestore().collection("accounts/" + this.currentUserID + "/users-teams");	
+	//return firebase.firestore().collection("accounts/" + this.currentUserID + "/users-teams");
+	  const queryRef = firebase.firestore().collection("teams").where('members', 'array-contains', getUserId());
+	  console.log(queryRef)
+	  return queryRef;
   }
   
   
@@ -196,7 +200,8 @@ class TeamList extends QueryListElement{
 	
 	// setup a document reference on the card for debuging
 	//console.log(doc);
-	let queryString = docData["team-reference"].path;
+	let queryString = this.collectionRef + doc.id;
+	console.log(doc.id);
 	newTeamCard.setAttribute("doc-location", queryString);
 
 
@@ -209,7 +214,7 @@ class TeamList extends QueryListElement{
   changeDocAttributes(change){
 	let docIndex = change.newIndex
 	let doc = change.doc;
-	
+	console.log("doc changes");
 	// find the card card from the query index
 	let teamCard = this.activeCards[docIndex];
 
@@ -247,11 +252,11 @@ class TeamList extends QueryListElement{
 
   // set/update any relevant attributes on the card
   setAttributesFromDoc(elem, docData){
-	let docRef = docData["team-reference"];
-	docRef.get().then((doc) =>{
-		let name = doc.data().name
+	//let docRef = docData["team-reference"];
+
+		let name = docData.name
 		elem.setAttribute("name", name)
-	})
+
   }
   
 

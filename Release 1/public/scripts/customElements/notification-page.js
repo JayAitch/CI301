@@ -117,7 +117,7 @@ class InviteNotificationCard extends HTMLElement{
 
 
 // list of all notifications
-class NotificationList extends QueryListElement{
+class NotificationList extends ActiveQueryListElement{
   constructor() { 
     super();
   }
@@ -151,7 +151,6 @@ class NotificationList extends QueryListElement{
   
   
   _onDocumentAdded(change){
-
 	this.createNewNotificationCard(change.doc);
   }
     
