@@ -144,26 +144,25 @@ class NotificationList extends ActiveQueryListElement{
 	this.notificationList = document.getElementById("notification-list");
   }
   
-  getQueryReferenece(){
+  getQueryReference(){
 	// find all notifications refering to the current user
 	return firebase.firestore().collection("notifications").where("for","==", this.currentUserID)	
   }
   
-  
-  _onDocumentAdded(change){
-	this.createNewNotificationCard(change.doc);
+
+  createCardDOMElement(docData){
+	  if(docData.type === "team-invite"){
+		  // yes - create the team notification card from the custom element registry
+		  let newNotificationCard = document.createElement("invite-notification-card");
+		  return newNotificationCard;
+	  }
+	  else{
+		  // no - create the normal notification card from the custom element registry
+		  let newNotificationCard = document.createElement("notification-card");
+		  return newNotificationCard;
+	  }
+
   }
-    
-  _onDocumentChanged(change){
-	this.changeDocAttributes(change);
-  }
-     
-  _onDocumentRemoved(change){
-	this.removeNotificationCard(change);
-  } 
-  
-  
-  
   // create new list elements and assign attributes to let cards modify there displayed data
   createNewNotificationCard(doc){
 	var newNotificationCard;
@@ -192,36 +191,11 @@ class NotificationList extends ActiveQueryListElement{
 	if(!docData["is-read"]) $(".notification-btn").notify("unread messages");
 
 	// add new element to local active cards
-	this.activeCards.push(newNotificationCard);
+	this.cardElemsArray.push(newNotificationCard);
 	
 	
   }
-  // promote to upper class
-  // update an existing dom element with modified data
-  changeDocAttributes(change){
-	let docIndex = change.newIndex
-	let doc = change.doc;
-	
-	// find the notification card from the query index
-	let notificationCard = this.activeCards[docIndex];
 
-	// update the data to allow display
-	this.setAttributesFromDoc(notificationCard, doc.data());
-
-  }
-  // promote to upper class
-  // this scenario should only rarely happen, remove deleted document from the DOM
-  removeNotificationCard(change){
-	
-	// find it via the query index
-	let docIndex = change.oldIndex
-	let notificationCard = this.activeCards[docIndex];
-
-	// remove from the parent node
-	notificationCard.parentNode.removeChild(notificationCard);
-  }
-  
-  
   
 
   // set/update any relevant attributes on the card
@@ -245,12 +219,6 @@ class NotificationList extends ActiveQueryListElement{
 		elem.setAttribute("team-doc-location", teamRef.path);
 	});
   }
-  
-  
-
-	
-
-
   
 }
 

@@ -270,14 +270,8 @@ class newDocumentForm extends documentForm{
 			"owner": userId,
 			"name": this.currentDocument.name,
 			"description": this.currentDocument.description,
-			"team-type": this.currentDocument["team-type"]
-		}).then((docRef)=> {
-				console.log(docRef);
-			//	also create a reference to the team under the player
-				firebase.firestore().collection("accounts/" + userId + "/users-teams").add({
-				//name: this.currentDocument.name,
-				"team-reference": docRef
-			})
+			"team-type": this.currentDocument["team-type"],
+			"members": [userId]
 		})
 		.catch(function(error) {
 			console.error("Error adding document: ", error);
