@@ -117,7 +117,7 @@ class NotificationList extends ActiveQueryListElement{
     super();
   }
 
-  
+
   getQueryReference(){
 	// find all notifications refering to the current user
 	return firebase.firestore().collection("notifications").where("for","==", this.currentUserID)	
