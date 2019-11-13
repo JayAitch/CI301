@@ -83,12 +83,12 @@ class InviteNotificationCard extends HTMLElement{
 	
 	// observe the attribute changes so we can modify dispalyed data
 	static get observedAttributes() {
-		return ['is-read', 'team-name'];
+		return ['is-read', 'message'];
 	}
 
 	// set the display for these values onto the txt of the displays
 	attributeChangedCallback(name, oldValue, newValue) {
-		this.message.innerHTML = "you have been invited to:  " + this.getAttribute("team-name");
+		this.message.innerHTML = this.getAttribute("message");
 	}
 	
 	// the user has accepeted the invite so lets add the team to their collection
@@ -98,14 +98,9 @@ class InviteNotificationCard extends HTMLElement{
 		
 		// add a new team under the users account
 		// we should be able to secure this by adding the users id to a collection under the team on inviting
-		let currentUsersTeams = getCurrentUserDocRef().collection("users-teams").add({
-		"team-reference": firebase.firestore().doc(teamDocLocation),
-		name: "name"
-		}).then(function(docRef) {
-				alert("added to team");
-		}).catch(function(error) {
-				console.error("Error adding document: ", error);
-		});
+		let addToPendingInvites = firebase.firestore().doc(teamDocLocation).set({
+			"members": firebase.firestore.FieldValue.arrayUnion(getUserId())
+		}, { merge: true })
 	}
 	
 	// delete the notification???
@@ -121,28 +116,7 @@ class NotificationList extends ActiveQueryListElement{
   constructor() { 
     super();
   }
-  
-  // set up the element on connection
-  connectedCallback() {
-	  //super();
-//	  console.log("connected");
-	  const teamListTemplate = `				<h2 class="name-header">
-													Notifications
-												</h2>
-												
-													<ul id="notification-list">
-													</ul>
-												
-											`;
-				
 
-	
-	
-	// dont do it like this maybe? potential dom lag
-	this.innerHTML = teamListTemplate;
-	// find the UL containing the nofications
-	this.notificationList = document.getElementById("notification-list");
-  }
   
   getQueryReference(){
 	// find all notifications refering to the current user
@@ -151,7 +125,9 @@ class NotificationList extends ActiveQueryListElement{
   
 
   createCardDOMElement(docData){
+	  if(!docData["is-read"]) $(".notification-btn").notify("unread messages");
 	  if(docData.type === "team-invite"){
+	  	console.log("making teaminvites");
 		  // yes - create the team notification card from the custom element registry
 		  let newNotificationCard = document.createElement("invite-notification-card");
 		  return newNotificationCard;
@@ -163,40 +139,7 @@ class NotificationList extends ActiveQueryListElement{
 	  }
 
   }
-  // create new list elements and assign attributes to let cards modify there displayed data
-  createNewNotificationCard(doc){
-	var newNotificationCard;
-	let docData = doc.data();
-//	console.log(docData);
-	// is the notification a team invite
-	if(docData.type === "team-invite"){
-		// yes - create the team notification card from the custom element registry
-		newNotificationCard = document.createElement("invite-notification-card");	
-	}
-	else{
-		// no - create the normal notification card from the custom element registry
-		newNotificationCard = document.createElement("notification-card");	
-	}
 
-     
-
-	// get the data from the document and apply to card attributes
-	this.notificationList.appendChild(newNotificationCard);	
-	this.setAttributesFromDoc(newNotificationCard, docData);
-	
-	// setup a document reference on the card for debuging
-	let queryString = "notifications/" + doc.id
-	newNotificationCard.setAttribute("doc-location", queryString);
-
-	if(!docData["is-read"]) $(".notification-btn").notify("unread messages");
-
-	// add new element to local active cards
-	this.cardElemsArray.push(newNotificationCard);
-	
-	
-  }
-
-  
 
   // set/update any relevant attributes on the card
   setAttributesFromDoc(elem, docData){
@@ -204,25 +147,33 @@ class NotificationList extends ActiveQueryListElement{
 	let message = docData["message"];
 	elem.setAttribute("is-read", isRead);
 	elem.setAttribute("message", message);
-	
-	if(docData["team"]){
-		this.setTeamData(elem, docData["team"]);
-	}
+	elem.setAttribute("team-doc-location", docData.team);
   }
   
-  // set team data of team invite cards
-  setTeamData(elem, teamRef){
-	teamRef.get().then( (team) =>{
-		// todo: check if the doc has errored
-		let teamName = team.data().name;
-		elem.setAttribute("team-name", teamName);
-		elem.setAttribute("team-doc-location", teamRef.path);
-	});
-  }
+
+
   
 }
 
+// list of all notifications
+class NotificationPage extends HTMLElement {
+	constructor() {
+		super();
+	}
 
+	// set up the element on connection
+	connectedCallback() {
+		const teamListTemplate = `				<h2 class="name-header">
+													Notifications
+												</h2>
+												<notification-list></notification-list>
+											`;
+
+		// dont do it like this maybe? potential dom lag
+		this.innerHTML = teamListTemplate;
+
+	}
+}
 
 
 
@@ -252,6 +203,7 @@ class NotificationList extends ActiveQueryListElement{
 
 
 // add elements to the custom element registry
-window.customElements.define('notification-page', NotificationList);
+window.customElements.define('notification-page', NotificationPage);
+window.customElements.define('notification-list', NotificationList);
 window.customElements.define('notification-card', NotificationCard);
 window.customElements.define('invite-notification-card', InviteNotificationCard);

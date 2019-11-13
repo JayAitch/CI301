@@ -119,7 +119,7 @@ class ActiveQueryListElement extends StaticQueryListElement{
 
 		// splice into the array to maintain postional accuracy
 		this.cardElemsArray.splice(changeIndex, 0, newCard);
-
+		//return newCard;
 	}
 
 	applyChangesToCard(change){
@@ -151,6 +151,7 @@ class ActiveQueryListElement extends StaticQueryListElement{
 		// this maybe a bit ott with notifcations concider switching to https://firebase.google.com/docs/database/admin/retrieve-data
 		// attach listeners to the reference to apply com updates
 		this.snapshotListener = queryRef.onSnapshot((snapshot) => {
+			console.log(snapshot);
 			snapshot.docChanges().forEach((change) =>{
 				if (change.type === "added") {
 					this._onDocumentAdded(change);

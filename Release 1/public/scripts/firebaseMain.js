@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", event =>{
 
 			document.getElementById("notification-wrapper").appendChild(document.createElement("notification-page"));
 			document.getElementById("account-wrapper").appendChild(document.createElement("user-page"));	
-			document.getElementById("team-wrapper").appendChild(document.createElement("team-list"));		
+			document.getElementById("team-wrapper").appendChild(document.createElement("team-page"));
 			
 		} else {
 			const authenticator = new firebase.auth.GoogleAuthProvider();
