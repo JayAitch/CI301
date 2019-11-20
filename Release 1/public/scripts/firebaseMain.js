@@ -9,7 +9,8 @@ const firebaseConfig = {
   measurementId: "G-D6D9ZR077L"
 };
 
-
+var currentViewedTeams;
+var taskPage;
 // Initialize Firebase
 
 document.addEventListener("DOMContentLoaded", event =>{
@@ -26,12 +27,12 @@ document.addEventListener("DOMContentLoaded", event =>{
 			document.getElementById("notification-wrapper").appendChild(document.createElement("notification-page"));
 			document.getElementById("account-wrapper").appendChild(document.createElement("user-page"));	
 			document.getElementById("team-wrapper").appendChild(document.createElement("team-page"));
-			
+			taskPage = document.createElement("tasks-page");
+			document.getElementById("tasks-wrapper").appendChild(taskPage);
+			getLastViewedTeam();
 		} else {
 			const authenticator = new firebase.auth.GoogleAuthProvider();
 			firebase.auth().signInWithRedirect(authenticator)
-			//console.log("nouser")	// No user is signed in.;
-
 		}
 	});
 });
@@ -44,6 +45,7 @@ function logOut(){
 			// An error happened.
 	});
 }
+
 function getUserId(){
 	 return firebase.auth().currentUser.uid;
 }
@@ -54,3 +56,31 @@ function getCurrentUserDocRef(){
 	
 	return currentUserDocRef;
 }
+
+
+
+
+
+
+
+// POC cookie based task loading, allows refreshes, this will break when a  user hasnt clicked on a team
+/* section */
+function setCurrentViewedTeam(pViewedTeams){
+	currentViewedTeams = pViewedTeams;
+	taskPage.setAttribute("teams-watched", currentViewedTeams);
+	createCurrentViewedTeamCookie(pViewedTeams);
+}
+
+function getLastViewedTeam(){
+	let cookieName = "lastviewedTeam=";
+	let cookies = document.cookie;
+	let lastViewedTeam = cookies.substr(cookieName.length, cookies.length)
+	setCurrentViewedTeam(lastViewedTeam);
+}
+
+function createCurrentViewedTeamCookie(pViewedTeams){
+	let date = new Date()
+	date.setTime(date.getTime() + (1000 * 24 * 60 * 60 * 1000))
+	document.cookie = "lastviewedTeam=" + pViewedTeams + ";" + "expires=" + date.toUTCString();
+}
+/* section */

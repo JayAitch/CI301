@@ -1,7 +1,7 @@
 
 
 
-// list of all notifications
+// list of all teams
 class TeamsPage extends HTMLElement{
   constructor() { 
     super();
@@ -20,6 +20,7 @@ class TeamsPage extends HTMLElement{
 												<div id="team-wrapper">
 													<button id="invite-code-btn">invite code</button>
 													<button id="new-team-btn">new team</button>
+													<!--move qr code out of here when creating the show hide top level modls-->
 													<div hidden id="qr-code"></div>
 												</div>
 												<team-list></team-list>
@@ -31,14 +32,14 @@ class TeamsPage extends HTMLElement{
 	// dont do it like this maybe? potential dom lag
 	this.innerHTML = teamListTemplate;
 	// find the UL containing the nofications
-	this.teamsList = document.getElementById("team-list");
 	this.newTeamBtn = document.getElementById("new-team-btn").addEventListener("click", this._onNewTeamBtnClick);
 	
 
 	this.inviteCodeBtn = document.getElementById("invite-code-btn").addEventListener("click", this._showInviteCode);
-	this.QRcode = document.getElementById("qr-code");  
-	
 
+
+
+	this.QRcode = document.getElementById("qr-code");
 	let QRCodeData = {"text": getUserId()};
 	console.log(this.QRcode);
 	new QRCode(this.QRcode, QRCodeData);
@@ -53,15 +54,13 @@ class TeamsPage extends HTMLElement{
 	  this.QRcode.hidden = !isHidden
   }
 
+  // promote this to a seperate elemnt
   _onNewTeamBtnClick(){
   	const newDocumentForm = document.getElementById("new-document-form");
+  	newDocumentForm.setAttribute("collection-target", "teams/");
   	newDocumentForm.setAttribute("obj-type", "team");
 	  newDocumentForm.hidden = false;
   }
-
-
-
-
   
 }
 
@@ -98,24 +97,25 @@ class TeamCard extends HTMLElement{
 		super();
 
 		// bind 'this' to the click handler for this component
-		this._clickHandler = this._clickHandler.bind(this);
-		this._sendInvite = this._sendInvite.bind(this);
 		this._editTeam = this._editTeam.bind(this);
+		this._viewTeam = this._viewTeam.bind(this);
+		this._showInviteForm = this._showInviteForm.bind(this);
 	}
 
 
 	// setup elmenet when connected
 	connectedCallback() {
-		const userAccountTemplate = `<div class="notification-wrapper">
+		const userAccountTemplate = `<div class="team-wrapper">
 													<div class="name-header">
 														<h3 class="name"></h3>
 														
 													</div>
-													<button class="team-edit-button">edit</button>
-													<form class="invite-form">
-														<input name="code" type="text"></input>
-														<input value="invite" type="submit" required  maxlength="28" minlength="28"></input>														
-													</form>
+													<div class="control-group">
+														<button class="team-view-button control">view</button>
+														<button class="team-edit-button control">edit</button>
+														<button class="team-invite-button control">invite</button>								
+													</div>
+													<!--this elemnent should have its on custom element-->
 												</div>
 											`;
 
@@ -124,14 +124,12 @@ class TeamCard extends HTMLElement{
 
 		this.name = this.querySelector(".name");
 		// find the top wrapper and add the click listener to it
-		this.querySelector(".notification-wrapper").addEventListener("click", this._clickHandler);
-		this.inviteForm = this.querySelector(".invite-form")
-		this.inviteForm.addEventListener("submit", this._sendInvite);
+
 		this.querySelector(".team-edit-button").addEventListener("click", this._editTeam);
-
-
-
+		this.querySelector(".team-view-button").addEventListener("click", this._viewTeam);
+		this.querySelector(".team-invite-button").addEventListener("click", this._showInviteForm);
 	}
+
 
 	// observe the attribute changes so we can modify dispalyed data
 	static get observedAttributes() {
@@ -147,43 +145,14 @@ class TeamCard extends HTMLElement{
 		// do something when an attribute has changed
 	}
 
-	_clickHandler(ev){
-	}
-
-
-	_sendInvite(ev){
-		ev.preventDefault();
-		let code = this.inviteForm.code.value
-		if(code.length != 28)
-		{
-			console.log("error, incorrect code entered");
-		//	return;
-		}
-
-		let teamDocLocation = this.getAttribute("doc-location");
-
-		//https://firebase.google.com/docs/reference/node/firebase.firestore.FieldValue
-		let addToPendingInvites = firebase.firestore().doc(teamDocLocation).set({
-			"pending-invites": firebase.firestore.FieldValue.arrayUnion(code)
-		}, { merge: true })
-
-
-
-
-		// test invite
-		firebase.firestore().collection("notifications").add({
-			"for": code,
-			"type": "team-invite",
-			"is-read":false,
-			"team": teamDocLocation,
-			"message": "you have been invited to: " + this.getAttribute("name")
-
-		}).catch(function(error) {
-				console.error("Error adding document: ", error);
-			});
-
+	_viewTeam(ev){
+			let teamDocLocation = this.getAttribute("doc-location");
+		setCurrentViewedTeam(teamDocLocation);
+		document.location = '#tasks-page';
 
 	}
+
+
 
 
 	// todo move this functionality into a seperate element so we can just put edit buttons everywhere
@@ -193,6 +162,15 @@ class TeamCard extends HTMLElement{
 		changeDocForm.setAttribute("type", "team");
 		changeDocForm.setAttribute("document-target", docLocation);
 		changeDocForm.hidden = false;
+	}
+
+	_showInviteForm(ev){
+		const inviteForm = document.getElementById("invite-form");
+		let teamName = this.getAttribute("name");
+		let teamLocation = this.getAttribute("doc-location");
+		inviteForm.setAttribute('team-name', teamName);
+		inviteForm.setAttribute('team-invited',teamLocation);
+		inviteForm.hidden =! inviteForm.hidden;
 	}
 }
 

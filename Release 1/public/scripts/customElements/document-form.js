@@ -9,6 +9,12 @@ const teamType = {
 	"HORIZONTAL":0,
 	"VERTICAL":1
 }
+const experienceType = {
+	"Strength":0,
+	"Intelligence":1,
+	"Endurance":2,
+	"Agility":3,
+}
 
 
 // base team used on creating a new team to create the form
@@ -33,30 +39,26 @@ const newObjectLookup = {"team":team, "task":task}
 const selectLookup = {"team-type":teamType}
 
 
-// base document for knows how to create an ok button and how to generate data from form fields
-class documentForm extends HTMLElement{
-  constructor() {
-    super();
-	this._submitHandler = this._submitHandler.bind(this);
-	  this._cancelHandler = this._cancelHandler.bind(this);
-	this.currentDocument;
-	this.isEditMode;
-  }
-	// every form will most likely have an ok button
-	initBaseForm(){
-		const formTemplate = `				
-				<div class="fullscreen-popup">
-					<div class="modal">
-										<div class="content">
-						<h3 class="form-header">
-													Unamed Document
-												</h3>
-												<form class="document-form"><fieldset class="form-data"></fieldset><input type="submit" value="OK"><input type="button" class="cancel-form" value="Cancel"></form>
-												</div>
-					</div>
-				</div>
-											`;
+// basic form to create handlers and form data wrapper
+class basicForm extends HTMLElement{
+	constructor() {
+		super();
+		this._submitHandler = this._submitHandler.bind(this);
+		this._cancelHandler = this._cancelHandler.bind(this);
+		this.currentDocument;
+		this.isEditMode;
+	}
 
+	// create any elements required by the form
+	connectedCallback() {
+		this.initBaseForm();
+	}
+
+
+	// create template from extended classes and assign dom elements that will be modified by attribute changes
+	initBaseForm(){
+		const formTemplate = this.getFormTemplateHTML();
+		// modal so dont show to begin with
 		this.hidden = true;
 		// dont do it like this maybe? potential dom lag
 		this.innerHTML = formTemplate;
@@ -68,36 +70,190 @@ class documentForm extends HTMLElement{
 		this.querySelector(".cancel-form").addEventListener("click", this._cancelHandler);
 	}
 
-  // not overriden base functionality of the form submit
-	// document validations should be performed on a per type basis
-  _submitHandler(ev){
-	 ev.preventDefault();
-	 if(this.isValid()){
-		 this.submitChanges();
-	 }
+	// the most basic form layout, the contents of form data will be populated when document targets are modified, this prevents the popup being re created and destroyed when its modified.
+	getFormTemplateHTML(){
+		return `				
+				<div class="fullscreen-popup">
+					<div class="modal">
+						<div class="content">
+							<h3 class="form-header">Unamed</h3>
+							<form class="document-form"><fieldset class="form-data"></fieldset>
+							<div class="form-controls-row">							
+								<input type="submit" value="OK">
+								<input type="button" class="cancel-form" value="Cancel"></form>
+							</div>
+						</div>
+					</div>
+				</div>
+											`;
+	}
 
-  }
+
+	// not overriden base functionality of the form submit
+	// document validations should be performed on a per type basis
+	_submitHandler(ev){
+		ev.preventDefault();
+		if(this.isValid()){
+			this.submitForm();
+		}
+
+	}
+	// not overriden
 	_cancelHandler(){
 		this.closeForm();
 	}
-  // virtual method for overriding to check clientside whether the data is valid
+
+	// virtual method for overriding to check clientside whether the data is valid
 	// could also contain any base validations common to all objects
-  isValid(){ return true };
-  
+	isValid(){ return true };
+
+	// to be overriden does form submit action will be different for creating/modifying documents
+	submitForm(){
+	}
+
+	// hide the form again
+	closeForm(){
+		this.hidden = true;
+	}
+
+}
+
+
+
+// implementation of basic form, used to create invites through reading qr codes
+class inviteForm extends basicForm {
+	connectedCallback() {
+		// use supers version to create the basic form layout and fetch relivant dom elements
+		super.connectedCallback();
+
+		// from jarods sessions creates a listener chain to load qr data into the form
+		$("#qr-input").change( (event) => {
+			let files = event.target.files, file;
+			if (files && files.length > 0) {
+				file = files[0];
+			}
+
+			let image = new MegaPixImage(file);
+			let reader = new FileReader();
+			reader.onloadend =  () => {
+				let exif = EXIF.readFromBinaryFile(new BinaryFile(reader.result));
+				let scanDisplayElem = this.querySelector(".qr-scan-display")
+				image.onrender = (target) =>{
+					console.log(target);
+					qrcode.callback = (data) => {
+						console.log(data);
+						this.querySelector(".invite-code-input").value = data;
+					};
+					qrcode.decode(target.src);
+				};
+
+				image.render(scanDisplayElem, {
+					height: 200,
+					orientation: exif.Orientation
+				});
+			};
+			reader.readAsBinaryString(file);
+		});
+		this.inviteCodeInput = this.querySelector(".invite-code-input");
+	}
+
+	submitForm(){
+		this._sendInvite();
+	}
+
+	// use the invite and team attribute changes to modify title display and team target of the form
+	static get observedAttributes() {
+		return ['team-invited', 'team-name'];
+	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		if(name ==='team-invited'){
+			this.teamTarget = newValue;
+		} else if('team-name'){
+			this.teamName = newValue;
+			this.formHeader.innerHTML = "invite to: " + this.teamName
+		} else{
+			return;
+		}
+	}
+
+	// own version of template html
+	// this form will no change based on the document type so it can be static html
+	getFormTemplateHTML(){
+		return `<div class="fullscreen-popup">
+					<div class="modal">
+						<div class="content">
+							<h3 class="form-header">Invite</h3>
+							<form class="document-form">
+								<fieldset class="form-data">
+								<img class="qr-scan-display" class="media" src="">
+									<label for="qr-input"><img src="something here instead of the browse"/></label><input hidden id="qr-input" type="file" accept="image/*" capture="camera">
+									<input hidden class="invite-code-input" name="code" type="text"  required  maxlength="28" minlength="28">
+								</fieldset>
+								<div class="form-controls-row">
+								<input type="submit" value="Invite">
+								<input type="button" class="cancel-form" value="Cancel"></form>
+								</div>
+						</div>
+					</div>
+				</div>`;
+	}
+
+
+
+	// create an invite notification for the target user
+	// allows the user to accept the team invite as being part of pending invites will afford permissions
+	_sendInvite(){
+
+		let code = this.inviteCodeInput.value
+		if(code.length != 28)
+		{
+			console.log("error, incorrect code entered");
+			return;
+		}
+
+		let teamDocLocation = this.teamTarget;
+
+		//https://firebase.google.com/docs/reference/node/firebase.firestore.FieldValue
+		let addToPendingInvites = firebase.firestore().doc(teamDocLocation).set({
+			"pending-invites": firebase.firestore.FieldValue.arrayUnion(code)
+		}, { merge: true })
+
+
+
+
+		// test invite
+		firebase.firestore().collection("notifications").add({
+			"for": code,
+			"type": "team-invite",
+			"is-read":false,
+			"team": teamDocLocation,
+			"message": "you have been invited to: " + this.teamName
+
+		}).catch(function(error) {
+			console.error("Error adding document: ", error);
+		});
+
+
+	}
+
+}
+
+
+
+
+// base document for knows how to create an ok button and how to generate data from form fields
+class documentForm extends basicForm{
+
+
   // to be overriden does form submit action
-  submitChanges(){
+  submitForm(){
 	this.populateObjectFromForm();
   }
-  
-  closeForm(){
-  	this.hidden = true;
-  }
-
 
   // breaks down form data into our new object
   // we submit that object to firebase
   populateObjectFromForm(){
-
 
 	 let formChildren = this.formDataElem.elements;
 	 let formChildrenCount = this.formDataElem.childElementCount;
@@ -142,14 +298,15 @@ class documentForm extends HTMLElement{
 	}
 
 	clearFormDataFields(){
-		let formChildren = this.formDataElem.elements;
+		let formChildren = this.formDataElem.childNodes;
 		let formChildrenCount = this.formDataElem.childElementCount;
-
+		console.log(formChildren);
 		// going through these manually to have control over elements that need ignoring
-		for(let i = 0; i < formChildrenCount; i++){
-			let currentFormElement = formChildren[i]
-			console.log(currentFormElement);
-			this.formDataElem.parentElement.removeChild(currentFormElement)
+
+		let lastFormDataChild = this.formDataElem.lastElementChild;
+		while(lastFormDataChild){
+			this.formDataElem.removeChild(lastFormDataChild);
+			lastFormDataChild = this.formDataElem.lastElementChild
 		}
 	}
 
@@ -218,32 +375,41 @@ class documentForm extends HTMLElement{
 
 
 
+
+
+
+
+
 class newDocumentForm extends documentForm{
 	  constructor() {
 		super();
 	  }
-	
-	connectedCallback() {
-		this.initBaseForm();
-	}
+
 	
 	// observe the attribute changes so we can modify dispalyed data
 	static get observedAttributes() {
-		return ['obj-type'];
+		return ['obj-type','collection-target'];
 	}
 
 	// set the display for these values onto the txt of the displays
 	attributeChangedCallback(name, oldValue, newValue) {
-		let type = this.getAttribute("obj-type");
-		this.formHeader.innerHTML = "create new" + type;
-		this.createNewForm(type);
+
+		if(name === "obj-type"){
+
+			let type = this.getAttribute("obj-type");
+			this.formHeader.innerHTML = "create new " + type;
+			this.createNewForm(type);
+		}else{
+			this.collectionTarget = this.getAttribute('collection-target');
+		}
+
 	}
 	
 
 
 	
 	// override of the submit changes, different actions for creating differnt objects
-	submitChanges(){
+	submitForm(){
 		this.populateObjectFromForm();
 
 		switch(this.documentType){
@@ -251,6 +417,7 @@ class newDocumentForm extends documentForm{
 				this.createNewTeam();
 				break;
 			case "task":
+				this.createNewTask();
 				break;
 			default:
 
@@ -277,8 +444,22 @@ class newDocumentForm extends documentForm{
 			console.error("Error adding document: ", error);
 		});
 
-	}
 
+	}
+	createNewTask(){
+
+		let userId = getUserId();
+		let collectionLocation = this.collectionTarget
+		firebase.firestore().collection(collectionLocation).add({
+			"owner": userId,
+			"name": this.currentDocument.name,
+			"description": this.currentDocument.description,
+			"status": taskStatus.UNAPPROVED,
+		})
+			.catch(function(error) {
+				console.error("Error adding document: ", error);
+			});
+	}
 }
 
 
@@ -287,10 +468,6 @@ class newDocumentForm extends documentForm{
 class changeDocumentForm extends documentForm{
 	constructor() {
 		super();
-	}
-
-	connectedCallback() {
-		this.initBaseForm();
 	}
 
 	// observe the attribute changes so we can modify dispalyed data
@@ -322,7 +499,7 @@ class changeDocumentForm extends documentForm{
 		return super.isValid();
 	}
 
-	submitChanges(){
+	submitForm(){
 		console.log(this.currentDocument)
 		this.populateObjectFromForm();
 		let change = this.documentReference.set(
@@ -335,6 +512,6 @@ class changeDocumentForm extends documentForm{
 
 }
 
-
+window.customElements.define('invite-form', inviteForm);
 window.customElements.define('document-form', newDocumentForm);
 window.customElements.define('change-document-form', changeDocumentForm);

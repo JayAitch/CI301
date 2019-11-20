@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>workaholic</title>
-
+      <link defer rel="stylesheet" href="/scripts/libs/jquery/jquerymobile/css/themes/default/jquery.mobile-1.4.5.min.css">
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.2.3/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -16,11 +16,18 @@
 	<!--
 	<script defer src="/scripts/libs/jquery/jquery-3.4.1.min.js"></script>
 	-->	
-	<script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.js"></script>	
-	<script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.mobile-1.4.5.min.js"></script>	
+	<script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.js"></script>
+	<script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.mobile-1.4.5.min.js"></script>
+
 	<script defer src="/scripts/libs/jquery/notify.min.js"></script>
+
 	<script defer src="/scripts/libs/qrcode.min.js"></script>
-	<link rel="stylesheet" href="/scripts/libs/jquery/jquerymobile/css/themes/default/jquery.mobile-1.4.5.min.css">
+
+
+		<!--these need minifiying-->
+	  <script defer src="/scripts/libs/exif.js"></script>
+	  <script defer src="/scripts/libs/jsqrcode.js"></script>
+	  <script defer src="/scripts/libs/megapix-image.js"></script>
 
 	  <script defer src="/scripts/customelements/modal-popups.js"></script>
 	<script defer src="/scripts/customelements/document-form.js"></script>	
@@ -28,8 +35,11 @@
 	<script defer src="/scripts/customelements/teams-page.js"></script>
 
 	  <script defer src="/scripts/customelements/notification-page.js"></script>
-	<script defer src="/scripts/customelements/user-page.js"></script>	
-    <script defer src="/scripts/firebaseMain.js"></script>	
+	<script defer src="/scripts/customelements/user-page.js"></script>
+	  <script defer src="/scripts/customelements/tasks-page.js"></script>
+    <script defer src="/scripts/firebaseMain.js"></script>
+
+
 
   </head>
   <body>
@@ -40,10 +50,10 @@
 			<h1>Teams</h1>
 			<div data-role="navbar">
 				<ul>
-					<li><a href="#teams-page" data-transition="pop">teams</a></li>
-					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
-					<li><a href="#user-page" data-transition="pop">user</a></li>
-					<li><a class="notification-btn" href="#notifications-page" data-transition="pop">notifications</a></li>
+                    <li><a href="#teams-page" >teams</a></li>
+                    <li><a href="#tasks-page">tasks</a></li>
+                    <li><a href="#user-page">user</a></li>
+                    <li><a class="notification-btn">notifications</a></li>
 				</ul>
 			</div>		
 		</div>
@@ -59,16 +69,19 @@
 			<h1>Tasks</h1>
 			<div data-role="navbar">
 				<ul>
-					<li><a href="#teams-page" data-transition="pop">teams</a></li>
-					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
-					<li><a href="#user-page" data-transition="pop">user</a></li>
-					<li><a class="notification-btn" href="#notifications-page" data-transition="pop">notifications</a></li>
+					<li><a href="#teams-page" >teams</a></li>
+					<li><a href="#tasks-page">tasks</a></li>
+					<li><a href="#user-page">user</a></li>
+					<li><a class="notification-btn">notifications</a></li>
 				</ul>
 			</div>		
 		</div>
 		
 		
-		<div role="main" class="ui-content">...</div>
+		<div role="main" class="ui-content">
+			<div id="tasks-wrapper">
+			</div>
+		</div>
 		<div data-role="footer"><button id="logout-btn" onclick="logOut()">logout</button></div>
 	</div>
 	<div data-role="page" id="user-page" class="page" data-theme="a">
@@ -76,10 +89,10 @@
 			<h1>Account</h1>
 			<div data-role="navbar">
 				<ul>
-					<li><a href="#teams-page" data-transition="pop">teams</a></li>
-					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
-					<li><a href="#user-page" data-transition="pop">user</a></li>
-					<li><a class="notification-btn" href="#notifications-page" data-transition="pop">notifications</a></li>
+                    <li><a href="#teams-page" >teams</a></li>
+                    <li><a href="#tasks-page">tasks</a></li>
+                    <li><a href="#user-page">user</a></li>
+                    <li><a class="notification-btn">notifications</a></li>
 				</ul>
 			</div>			
 		</div>
@@ -94,10 +107,10 @@
 			<h1>Account</h1>
 			<div data-role="navbar">
 				<ul>
-					<li><a href="#teams-page" data-transition="pop">teams</a></li>
-					<li><a href="#tasks-page" data-transition="pop">tasks</a></li>
-					<li><a href="#user-page" data-transition="pop">user</a></li>
-					<li><a class="notification-btn" href="#notifications-page" data-transition="pop">notifications</a></li>
+                    <li><a href="#teams-page" >teams</a></li>
+                    <li><a href="#tasks-page">tasks</a></li>
+                    <li><a href="#user-page">user</a></li>
+                    <li><a class="notification-btn">notifications</a></li>
 				</ul>
 			</div>			
 		</div>
@@ -115,6 +128,7 @@
 	<!--modal div to create new documents with, modifying the obj-type attibute will trigger form regeneration-->
 	<document-form id="new-document-form"></document-form>
 	<change-document-form id="change-document-form"></change-document-form>
+	<invite-form id="invite-form"></invite-form>
   </body>
   
   <style>
@@ -125,31 +139,85 @@
 	.read-notification{
 		background-color: grey;
 	}
+
   .fullscreen-popup{
-	  display: block;
 	  position:fixed;
 	  height:100vh;
 	  width:100vw;
 	  top:0;
 	  left:0;
 	  background-color: black;
-	  background-color: rgba(0,0,0,0.5)
+	  background-color: rgba(0,0,0,0.5);
+      z-index: 5123100;
   }
   .fullscreen-popup .modal{
 	  opacity: 1;
 	  width:50%;
-	  height:50%;
+	  //height:80vh;
 	  min-width: 300px;
 	  margin: auto;
-	  margin-top: 200px;
+      margin-top: 10%;
 	  background-color: white;
-	  zzz-index: 5123101;
+	  z-index: 5123101;
   }
-	  .fullscreen-popup .modal .content{
+   .fullscreen-popup .modal .content{
 		  width:80%;
+          height:80%;
 		  margin: auto;
 		  padding: 25px;
+
+          min-height:550px;
+
+	}
+      .fullscreen-popup .modal form
+      {
+          display:flex;
+          position: relative;
+          justify-content: space-between;
+          flex-direction: column;
+          align-self: stretch;
+          /*potential issue*/
+          height:500px;
+      }
+      .fullscreen-popup .modal fieldset
+      {
+          align-self: stretch;
+          flex-basis: border-box;
+
+      }
+
+      .form-controls-row{
+          display:flex;
+          justify-content: flex-end;
+      }
+
+      .form-controls-row input{
+          width:50%;
+          padding:10px;
+      }
+
+
+
+
+
+      #qr-code img {
+          padding:30px;
+          margin:auto
+      }
+
+
+
+
+	  .control-group{
+		  width:80%;
+		  margin:0 auto;
+
 	  }
-	  .hidden{display: none;}
+	  .control-group .control{
+		  margin:0 auto;
+		  padding: 10px;
+		  width:30%;
+	  }
+
   </style>
 </html>

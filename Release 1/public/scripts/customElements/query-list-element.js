@@ -5,16 +5,19 @@
 class StaticQueryListElement extends HTMLElement {
 	constructor() {
 		super();
+		this.initQueryelement();
 
+
+	}
+
+	initQueryelement(){
 		// get the current user from the authentication object
 		this.currentUserID = getUserId();
 		this.setupSnapshot();
 
 		// local variable of dom elements order is defined when documents are added as part of the query
 		this.cardElemsArray = [];
-
 	}
-
 
 	setupSnapshot() {
 		// create a query reference of dataset
@@ -76,7 +79,9 @@ class StaticQueryListElement extends HTMLElement {
 // override snapshot listners called to modify the DOM
 // override getQueryRefernece to change the data set
 class ActiveQueryListElement extends StaticQueryListElement{
-
+	disconnectedCallback(){
+		this.removeListeners();
+	}
   // remove all listeners on this list
   removeListeners(){
 	  this.snapshotListener();
@@ -139,9 +144,9 @@ class ActiveQueryListElement extends StaticQueryListElement{
 	removeCard(change){
 		// use the change position to find which dom element should be removed
 		let docIndex = change.oldIndex
-		let teamCard = this.cardElemsArray[docIndex];
+		let card = this.cardElemsArray[docIndex];
 
-		this.removeChild(teamCard);
+		this.removeChild(card);
 	}
 
 
@@ -171,3 +176,40 @@ class ActiveQueryListElement extends StaticQueryListElement{
   }
 }
 
+// class to reform list when collection target property is changed.
+// Should be a simple way of having a list that reloads.
+class ChangeableActiveQueryList extends ActiveQueryListElement{
+
+	initQueryelement(){
+		// local variable of dom elements order is defined when documents are added as part of the query
+		this.cardElemsArray = [];
+	}
+
+
+	static get observedAttributes(){
+		return['collection-target']
+	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		if(name == 'collection-target' && oldValue != newValue){
+
+			// remove the cards and re setup snapshot
+			this.removeAllCards();
+			// make sure the snapshot is not listening away in memory somewhere
+			if(this.snapshotListener) this.removeListeners();
+			this.setupSnapshot();
+		}
+	}
+
+
+	// bin this list contents
+	removeAllCards(){
+		let activeCards = this.cardElemsArray
+		for(var i=0; i < activeCards.length; i++){
+			this.removeChild(activeCards[i]);
+		}
+
+		// remove any potential ghost elements
+		this.cardElemsArray = [];
+	}
+}
