@@ -213,3 +213,27 @@ class ChangeableActiveQueryList extends ActiveQueryListElement{
 		this.cardElemsArray = [];
 	}
 }
+
+class EditButton extends HTMLButtonElement{
+	constructor(){
+		super();
+		this._onClick = this._onClick.bind(this);
+		this.addEventListener("click", this._onClick);
+	}
+
+
+
+	_onClick(){
+		let docLocation = this.parentElement.parentElement.getAttribute("doc-location");
+
+		let docType = this.getAttribute("obj-type");
+
+		const changeDocForm = document.getElementById("change-document-form");
+		changeDocForm.setAttribute("obj-type", docType);
+		changeDocForm.setAttribute("document-target", docLocation);
+		changeDocForm.hidden = false;
+	}
+
+}
+
+window.customElements.define('edit-button', EditButton, {extends: 'button'});

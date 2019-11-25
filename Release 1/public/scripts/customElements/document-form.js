@@ -10,10 +10,10 @@ const teamType = {
 	"VERTICAL":1
 }
 const experienceType = {
-	"Strength":0,
-	"Intelligence":1,
-	"Endurance":2,
-	"Agility":3,
+	"Strength":"Strength",
+	"Intelligence":"Intelligence",
+	"Endurance":"Endurance",
+	"Agility":"Agility",
 }
 
 
@@ -24,11 +24,19 @@ const team = {
 	"team-type": teamType.HORIZONTAL,
 	"name": "",
 	"description": "",
+
 }
 
 const task = {
-	"name": "",
-	"description": "",
+//	"name": "",
+//	"description": "",
+//	"urgency":1,
+//	"importance":1,
+//	"impact":1,
+//	"rewards": {},
+//	"deadline":	new Date(),
+	"requirements": {},
+		"requirements2": {}
 }
 
 
@@ -36,7 +44,7 @@ const task = {
 const newObjectLookup = {"team":team, "task":task}
 
 // all lookups to link data options with field name
-const selectLookup = {"team-type":teamType}
+const selectLookup = {"team-type":teamType, "requirements":experienceType, "rewards":experienceType}
 
 
 // basic form to create handlers and form data wrapper
@@ -243,6 +251,7 @@ class inviteForm extends basicForm {
 
 
 // base document for knows how to create an ok button and how to generate data from form fields
+//todo: create checking
 class documentForm extends basicForm{
 
 
@@ -256,35 +265,73 @@ class documentForm extends basicForm{
   populateObjectFromForm(){
 
 	 let formChildren = this.formDataElem.elements;
-	 let formChildrenCount = this.formDataElem.childElementCount;
-
+	 let formChildrenCount = formChildren.length;
+	  console.log(formChildrenCount);
+	  console.log(formChildren);
 	  // going through these manually to have control over elements that need ignoring
 	 for(let i = 0; i < formChildrenCount; i++){
 
 		let currentFormRow = formChildren[i];
-
+		console.log(currentFormRow);
 		 let fieldName = currentFormRow.name;
 		 let fieldValue = currentFormRow.value;
 		 // we want to have control over the data passed into our object via forms
 		 // should contain any different form type object and how i parse them
+			console.log(currentFormRow.type);
 		 switch(currentFormRow.type){
 			 case "text":
 				 this.currentDocument[fieldName] =  fieldValue;
 			 	break;
 			 case "select-one":
 				 this.currentDocument[fieldName] =  parseInt(fieldValue);
+				 break;
+			 case "select-multiple":
+				 //this.currentDocument[fieldName] =  parseInt(fieldValue);
+				 let formatedSelection = this.mapDataFromMultiSelect(currentFormRow);
+				 this.currentDocument[fieldName] = formatedSelection;
+				 break;
+			 case "range":
+				 this.currentDocument[fieldName] =  parseFloat(fieldValue);
+				 break;
+			 case "date":
+				 this.currentDocument[fieldName] =  new Date(fieldValue);
+				 break;
 			 default:
 		 }
 	 }
-
+	  console.log(this.currentDocument);
   }
+
+  mapDataFromMultiSelect(formRow){
+	  let selectedOptions = formRow.selectedOptions;
+	  let formatedSelection = {};
+	  for(let selectionCount = 0; selectedOptions.length > selectionCount; selectionCount++){
+	  	let selectedOption = selectedOptions[selectionCount];
+	  	let fieldName = selectedOption.value;
+	  	// hardcoded for now this will need to be a new custom element look into this post
+		  //todo:  this, is wrong needs some different kind of custom element to add lookup values against a number
+	  	formatedSelection[fieldName] = 10;
+	  }
+	  return formatedSelection;
+  }
+
+
+
+
 	// assign the object from the types list and trigger the relivant generation
 	createNewForm(type){
 		this.clearFormDataFields();
 		let object = newObjectLookup[type];
 		this.documentType = type;
 		// this will be more than just the team form, we may be able to do this with the same function
-		this.createNewTeamForm(object);
+		switch(type) {
+			case "team":
+				this.createNewTeamForm(object);
+				break;
+			case"task":
+				this.createNewTaskForm(object);
+				break;
+		}
 		this.currentDocument = object;
 	}
 
@@ -293,7 +340,15 @@ class documentForm extends basicForm{
 		this.documentType = type;
 		// this will be more than just the team form, we may be able to do this with the same function
 		// in this case we are passing in a populated object
-		this.createNewTeamForm(object);
+		switch(type) {
+			case "team":
+				this.createNewTeamForm(object);
+				break;
+			case"task":
+				this.createNewTaskForm(object);
+				break;
+		}
+
 		this.currentDocument = object;
 	}
 
@@ -309,6 +364,7 @@ class documentForm extends basicForm{
 			lastFormDataChild = this.formDataElem.lastElementChild
 		}
 	}
+
 
 	// create fields on the form to allow the user change specific values on the object
 	createNewTeamForm(object){
@@ -329,8 +385,82 @@ class documentForm extends basicForm{
 			}
 		}
 	}
+	createNewTaskForm(object){
+		for(var fieldName in object){
+			console.log(fieldName);
 
+			switch(fieldName){
+				case "name":
+					this.createInputLabel(fieldName);
+					this.createTextInputField(fieldName, object[fieldName]);
+					break;
+				case "description":
+					this.createInputLabel(fieldName);
+					this.createTextInputField(fieldName, object[fieldName]);
+					break;
+				case"requirements":
+					// this will not be a multiselect but will instead be some kind of custom element so the number canmatch the level type
+					this.createInputLabel(fieldName);
+					this.createMultiSelect(fieldName, object[fieldName]);
+					break;
+				case"requirements2":
+					// this will not be a multiselect but will instead be some kind of custom element so the number canmatch the level type
+					this.createInputLabel(fieldName);
+					this.createMapInputField(fieldName, object[fieldName]);
+					break;
+				case"rewards":
+					this.createInputLabel(fieldName);
+					this.createMultiSelect(fieldName, object[fieldName]);
+					break;
+				case "urgency":
+					this.createInputLabel(fieldName);
+					this.createSliderInput(fieldName, object[fieldName]);
+					break;
+				case "importance":
+					this.createInputLabel(fieldName);
+					this.createSliderInput(fieldName, object[fieldName]);
+					break;
+				case "impact":
+					this.createInputLabel(fieldName);
+					this.createSliderInput(fieldName, object[fieldName]);
+					break;
+				case "deadline":
+					this.createInputLabel(fieldName);
+					this.createDateInputField(fieldName, object[fieldName]);
+					break;
+				default:
+			}
+		}
+	}
 
+	createInputLabel(key){
+		let newLabelField = document.createElement("label");
+		newLabelField.setAttribute("for", key);
+		newLabelField.innerText = key;
+		this.formDataElem.appendChild(newLabelField);
+	}
+
+	createSliderInput(key, value){
+		let newSliderField = document.createElement("input");
+		newSliderField.name = key;
+		newSliderField.type = "range";
+		newSliderField.value = value;
+		newSliderField.step = "0.01";
+		newSliderField.min = "0";
+		newSliderField.max = "2";
+		newSliderField.placeholder = key;
+		this.formDataElem.appendChild(newSliderField);
+	}
+
+	createNumberInput(key, value){
+			// create the field and propulate with any data from the object
+			let newNumberField = document.createElement("input");
+			newNumberField.name = key;
+			newNumberField.type = "number";
+			newNumberField.value = value;
+			newNumberField.placeholder = key;
+			this.formDataElem.appendChild(newNumberField);
+	}
 
  	 // create text field for the user to input data
 	createTextInputField(key, value){
@@ -341,6 +471,41 @@ class documentForm extends basicForm{
 		newTextField.value = value;
 		newTextField.placeholder = key;
 		this.formDataElem.appendChild(newTextField);
+	}
+
+	createDateInputField(key, value){
+		let newDateField = document.createElement("input");
+		let date = value;
+		if(value.toDate) date = value.toDate();
+		newDateField.name = key;
+		newDateField.type = "date";
+		newDateField.value =  convertToHTMLDate(date);
+		newDateField.required = true;
+		this.formDataElem.appendChild(newDateField);
+	}
+
+
+
+	createMultiSelect(key, value){
+		// set-up the select parent element
+		let newSelectField = document.createElement("select");
+		newSelectField.name = key;
+		newSelectField.value = value;
+		newSelectField.multiple = true;
+		// get the lookup values from our list of lookups
+		let selectOptionsJson = selectLookup[key];
+
+		// make an option field for each
+		for(let option in selectOptionsJson){
+			let optionElem = this.createOption(option, selectOptionsJson[option])
+			newSelectField.appendChild(optionElem);
+
+			if(value.hasOwnProperty(option)){
+				optionElem.selected = true;
+			}
+		}
+
+		this.formDataElem.appendChild(newSelectField);
 	}
 
 	// create select for the user to input data
@@ -362,14 +527,14 @@ class documentForm extends basicForm{
 
 		this.formDataElem.appendChild(newSelectField);
 	}
-	
-	
+
+
 	createOption(key, value){
   		let newOption = document.createElement("option");
 		newOption.value = value;
 		newOption.innerHTML = key;
   		return newOption;
-	};
+	}
 
 }
 
@@ -433,29 +598,31 @@ class newDocumentForm extends documentForm{
 	createNewTeam(){
 
 		let userId = getUserId();
-		firebase.firestore().collection("teams").add({
-			"owner": userId,
-			"name": this.currentDocument.name,
-			"description": this.currentDocument.description,
-			"team-type": this.currentDocument["team-type"],
-			"members": [userId]
-		})
+		let newTeam = this.currentDocument
+		newTeam.owner = userId;
+		newTeam.memebers = [userId];
+
+
+		firebase.firestore().collection("teams").add(newTeam)
 		.catch(function(error) {
 			console.error("Error adding document: ", error);
 		});
 
 
 	}
+
+
 	createNewTask(){
 
 		let userId = getUserId();
 		let collectionLocation = this.collectionTarget
-		firebase.firestore().collection(collectionLocation).add({
-			"owner": userId,
-			"name": this.currentDocument.name,
-			"description": this.currentDocument.description,
-			"status": taskStatus.UNAPPROVED,
-		})
+		console.log(this.currentDocument);
+		let newTask = this.currentDocument
+		newTask.owner = userId;
+		//newTask["experience-reward"] = createExperienceReward();
+
+
+		firebase.firestore().collection(collectionLocation).add(newTask)
 			.catch(function(error) {
 				console.error("Error adding document: ", error);
 			});
@@ -511,6 +678,26 @@ class changeDocumentForm extends documentForm{
 
 
 }
+
+
+class SelectAndValue extends HTMLElement(){
+	constructor(){
+		super();
+	}
+
+	static get observedAttributes() {
+		return ['select-lookup','selected-value', 'value-type'];
+	}
+
+	// intiate document grab when we change the location reference
+	attributeChangedCallback(name, oldValue, newValue) {
+		switch(name){
+
+		}
+	}
+}
+
+
 
 window.customElements.define('invite-form', inviteForm);
 window.customElements.define('document-form', newDocumentForm);

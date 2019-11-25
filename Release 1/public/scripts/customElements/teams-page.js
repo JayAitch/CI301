@@ -105,18 +105,17 @@ class TeamCard extends HTMLElement{
 
 	// setup elmenet when connected
 	connectedCallback() {
-		const userAccountTemplate = `<div class="team-wrapper">
+		const userAccountTemplate = `
 													<div class="name-header">
 														<h3 class="name"></h3>
 														
 													</div>
 													<div class="control-group">
 														<button class="team-view-button control">view</button>
-														<button class="team-edit-button control">edit</button>
+														<button is="edit-button" class="team-edit-button control"  obj-type="team">edit</button>
 														<button class="team-invite-button control">invite</button>								
 													</div>
-													<!--this elemnent should have its on custom element-->
-												</div>
+
 											`;
 
 		// dont do it like this maybe? potential dom lag
@@ -159,7 +158,7 @@ class TeamCard extends HTMLElement{
 	_editTeam(ev) {
 		let docLocation = this.getAttribute("doc-location");
 		const changeDocForm = document.getElementById("change-document-form");
-		changeDocForm.setAttribute("type", "team");
+		changeDocForm.setAttribute("obj-type", "team");
 		changeDocForm.setAttribute("document-target", docLocation);
 		changeDocForm.hidden = false;
 	}

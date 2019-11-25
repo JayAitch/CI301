@@ -41,14 +41,16 @@ class TaskCard extends HTMLElement{
 
     // setup elmenet when connected
     connectedCallback() {
-        const userAccountTemplate = `<div class="task-card">
+        const userAccountTemplate = `
 													<div class="name-header">
 														<h3 class="name"></h3>
 													</div>
 													<div class="description-wrapper">
 													    <p class="description"></p>
 													</div>
-												</div>
+													<div class="control-group">
+														<button is="edit-button" class="team-edit-button control" obj-type="task">edit</button>						
+													</div>
 											`;
 
         // dont do it like this maybe? potential dom lag

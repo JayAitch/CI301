@@ -84,3 +84,13 @@ function createCurrentViewedTeamCookie(pViewedTeams){
 	document.cookie = "lastviewedTeam=" + pViewedTeams + ";" + "expires=" + date.toUTCString();
 }
 /* section */
+
+// convert firebase date into a date format understood by html 5
+function convertToHTMLDate(fireBaseDate){
+	let date = new Date(fireBaseDate);
+	let day = ("0" + date.getDate()).slice(-2);
+	let month = ("0" + (date.getMonth() + 1)).slice(-2);
+
+	let HTMLDateFormat = date.getFullYear()+"-"+(month)+"-"+(day);
+	return HTMLDateFormat;
+}
