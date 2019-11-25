@@ -159,6 +159,7 @@ class ActiveQueryListElement extends StaticQueryListElement{
 			console.log(snapshot);
 			snapshot.docChanges().forEach((change) =>{
 				if (change.type === "added") {
+					console.log(change);
 					this._onDocumentAdded(change);
 				}
 				else if(change.type === "modified"){

@@ -94,3 +94,25 @@ function convertToHTMLDate(fireBaseDate){
 	let HTMLDateFormat = date.getFullYear()+"-"+(month)+"-"+(day);
 	return HTMLDateFormat;
 }
+function calculateReward(requirements, importance, urgency, impact){
+	let reward = {};
+	for(let requirement in requirements){
+		reward[requirement] = calculateExperiencePoints(requirements[requirement], importance, urgency, impact);
+	}
+	return reward;
+}
+function calculateExperiencePoints(levelRequirement, pImportance, pUrgency, pImpact){
+	let importance = pImportance || 0;
+	let urgency = pUrgency || 0;
+	let impact = pImpact || 0;
+	let reward = levelRequirement * importance * 100;
+	console.log(levelRequirement);
+	console.log(pImportance);
+	console.log(pUrgency);
+	console.log(pImpact);
+	reward = reward * Math.pow(urgency, 3);
+	console.log(reward);
+	reward = reward * impact;
+	console.log();
+	return reward;
+}

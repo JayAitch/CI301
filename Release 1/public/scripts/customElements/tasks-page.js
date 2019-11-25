@@ -34,7 +34,7 @@ class ExperienceRewardTile extends HTMLElement{
 class TaskCard extends HTMLElement{
     constructor() {
         super();
-
+        this.currentRewardTiles = {};
 
     }
 
@@ -82,14 +82,35 @@ class TaskCard extends HTMLElement{
     }
 
     createRewardTiles(reward){
-        //todo: create and update a map
+
+
         let rewardsArr = reward.split(",");
         for(let rewardPos = 0; rewardsArr.length > rewardPos; rewardPos++){
+
             let currentReward = rewardsArr[rewardPos];
             let currentRewardArr = currentReward.split(':');
+            let currentRewardType = currentRewardArr[0];
+            let currentRewardAmount = currentRewardArr[1];
 
-            this.createRewardTile(currentRewardArr[0], currentRewardArr[1]);
+            let currentRewardTile = this.currentRewardTiles[currentRewardType];
+
+
+            if(currentRewardTile){
+                this.setRewardAttributes(currentRewardTile, currentRewardAmount);
+            }
+            else{
+                this.createRewardTile(currentRewardType, currentRewardAmount);
+
+            }
+
+
+
         }
+    }
+
+    setRewardAttributes(tile, amount){
+        // consider chaining to use data instead of attributes
+        tile.setAttribute("amount", amount);
     }
 
     createRewardTile(type, amount){
@@ -99,6 +120,7 @@ class TaskCard extends HTMLElement{
         // consider chaining to use data instead of attributes
         newRewardTile.setAttribute("amount", amount);
         newRewardTile.setAttribute("skill-type", type);
+        this.currentRewardTiles[type] = newRewardTile;
     }
 }
 

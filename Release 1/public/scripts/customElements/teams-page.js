@@ -72,6 +72,7 @@ class TeamsList extends ActiveQueryListElement{
 	getQueryReference(){
 		// get all the teams the user is a member of
 		const queryRef = firebase.firestore().collection("teams").where('members', 'array-contains', getUserId());
+
 		//const queryRef = firebase.firestore().collection("teams").where(firebase.firestore.FieldPath.documentId(), '==', "7uVn6SNaK4gBJYz0VKk79wG1doh2");
 		return queryRef;
 	}
