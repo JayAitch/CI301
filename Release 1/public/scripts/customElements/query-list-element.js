@@ -5,18 +5,19 @@
 class StaticQueryListElement extends HTMLElement {
 	constructor() {
 		super();
-		this.initQueryelement();
+		this.initQueryListElement();
 
 
 	}
 
-	initQueryelement(){
+	initQueryListElement(){
+		// local variable of dom elements order is defined when documents are added as part of the query
+		this.cardElemsArray = [];
 		// get the current user from the authentication object
 		this.currentUserID = getUserId();
 		this.setupSnapshot();
 
-		// local variable of dom elements order is defined when documents are added as part of the query
-		this.cardElemsArray = [];
+
 	}
 
 	setupSnapshot() {
@@ -37,8 +38,6 @@ class StaticQueryListElement extends HTMLElement {
 	createNewCard(doc){
 
 		let docData = doc.data();
-		let changeIndex = change.newIndex;
-
 
 		// allow implementations to define their on creation logic
 		let newCard = this.createCardDOMElement(docData);
@@ -145,7 +144,7 @@ class ActiveQueryListElement extends StaticQueryListElement{
 		// use the change position to find which dom element should be removed
 		let docIndex = change.oldIndex
 		let card = this.cardElemsArray[docIndex];
-
+		// may need to resize the array here
 		this.removeChild(card);
 	}
 
@@ -153,7 +152,6 @@ class ActiveQueryListElement extends StaticQueryListElement{
   setupSnapshot(){
 		// create a query reference of dataset
 		const queryRef = this.getQueryReference();
-		// this maybe a bit ott with notifcations concider switching to https://firebase.google.com/docs/database/admin/retrieve-data
 		// attach listeners to the reference to apply com updates
 		this.snapshotListener = queryRef.onSnapshot((snapshot) => {
 			console.log(snapshot);
@@ -172,16 +170,13 @@ class ActiveQueryListElement extends StaticQueryListElement{
 		});
   }
 
-  // override this to give a list of queries
-  getQueryReference(){
-  }
 }
 
 // class to reform list when collection target property is changed.
 // Should be a simple way of having a list that reloads.
 class ChangeableActiveQueryList extends ActiveQueryListElement{
 
-	initQueryelement(){
+	initQueryListElement(){
 		// local variable of dom elements order is defined when documents are added as part of the query
 		this.cardElemsArray = [];
 	}
@@ -205,6 +200,7 @@ class ChangeableActiveQueryList extends ActiveQueryListElement{
 
 	// bin this list contents
 	removeAllCards(){
+		this.removeListeners();
 		let activeCards = this.cardElemsArray
 		for(var i=0; i < activeCards.length; i++){
 			this.removeChild(activeCards[i]);
@@ -214,6 +210,8 @@ class ChangeableActiveQueryList extends ActiveQueryListElement{
 		this.cardElemsArray = [];
 	}
 }
+
+
 
 class EditButton extends HTMLButtonElement{
 	constructor(){

@@ -162,6 +162,7 @@ class TasksPage extends HTMLElement{
             this.taskListElem.setAttribute("collection-target", this.collectionTarget);
         }
     }
+
     _onNewTaskBtnClick(){
         const newDocumentForm = document.getElementById("new-document-form");
         let collectionTargetString = this.collectionTarget + "/tasks/"
@@ -177,7 +178,7 @@ class TasksPage extends HTMLElement{
 class TasksList extends ChangeableActiveQueryList{
     constructor() {
         super();
-        this.collectionRef = "teams/TDqZl0heImxDJRr5ZGis/tasks/"
+        this.collectionRef = ""
     }
 
     getQueryReference(){

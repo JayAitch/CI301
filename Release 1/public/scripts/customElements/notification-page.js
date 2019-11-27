@@ -19,7 +19,6 @@ class NotificationCard extends HTMLElement{
 				
 				// dont do it like this maybe? potential dom lag
 				this.innerHTML = userAccountTemplate;
-				this.isRead = this.querySelector(".is-read");
 				this.message = this.querySelector(".message");
 				// find the top wrapper and add the click listener to it
 				this.querySelector(".notification-wrapper").addEventListener("click", this._clickHandler);
@@ -33,25 +32,25 @@ class NotificationCard extends HTMLElement{
 	// set the display for these values onto the txt of the displays
 	attributeChangedCallback(name, oldValue, newValue) {
 		let isRead = this.getAttribute("is-read");
-		this.isRead.innerHTML = isRead;
 		this.message.innerHTML = this.getAttribute("message");
-		if(isRead) this.classList.add("read-notification")
-		// do something when an attribute has changed
-//		console.log(this);
+		if(!isRead) this.classList.add("read-notification")
 	}
 	
   	_clickHandler(ev){
-//		console.log("clicked");
+		this.markAsRead();
+	}
+
+	markAsRead(){
 		const docLocation = this.getAttribute("doc-location")
 		let notification = firebase.firestore().doc(docLocation);
 		notification.set({
-				"is-read": true,
-			}, { merge: true });
+			"is-read": true,
+		}, { merge: true });
 	}
 }
 
 
-class InviteNotificationCard extends HTMLElement{
+class InviteNotificationCard extends NotificationCard{
 	constructor() {  
 		super();
 		
@@ -80,16 +79,7 @@ class InviteNotificationCard extends HTMLElement{
 				this.querySelector(".accept-btn").addEventListener("click", this._clickAccept);
 				this.querySelector(".decline-btn").addEventListener("click", this._clickDecline);
 	}
-	
-	// observe the attribute changes so we can modify dispalyed data
-	static get observedAttributes() {
-		return ['is-read', 'message'];
-	}
 
-	// set the display for these values onto the txt of the displays
-	attributeChangedCallback(name, oldValue, newValue) {
-		this.message.innerHTML = this.getAttribute("message");
-	}
 	
 	// the user has accepeted the invite so lets add the team to their collection
 	_clickAccept(ev){
@@ -100,13 +90,14 @@ class InviteNotificationCard extends HTMLElement{
 		// we should be able to secure this by adding the users id to a collection under the team on inviting
 		let addToPendingInvites = firebase.firestore().doc(teamDocLocation).set({
 			"members": firebase.firestore.FieldValue.arrayUnion(getUserId())
-		}, { merge: true })
+		}, { merge: true });
+		this.markAsRead();
 	}
 	
 	// delete the notification???
 	_clickDecline(ev){
-		
-		alert('declined');
+
+		this.markAsRead();
 	}
 }
 
@@ -114,7 +105,8 @@ class InviteNotificationCard extends HTMLElement{
 // list of all notifications
 class NotificationList extends ActiveQueryListElement{
   constructor() { 
-    super();
+  	  super();
+	  this.collectionRef = "notifications/"
   }
 
 
@@ -157,9 +149,6 @@ class NotificationList extends ActiveQueryListElement{
 
 // list of all notifications
 class NotificationPage extends HTMLElement {
-	constructor() {
-		super();
-	}
 
 	// set up the element on connection
 	connectedCallback() {

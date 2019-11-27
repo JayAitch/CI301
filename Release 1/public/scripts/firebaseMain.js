@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", event =>{
 			document.getElementById("team-wrapper").appendChild(document.createElement("team-page"));
 			taskPage = document.createElement("tasks-page");
 			document.getElementById("tasks-wrapper").appendChild(taskPage);
-			getLastViewedTeam();
+			setLastViewedTeam();
 		} else {
 			const authenticator = new firebase.auth.GoogleAuthProvider();
 			firebase.auth().signInWithRedirect(authenticator)
@@ -71,7 +71,7 @@ function setCurrentViewedTeam(pViewedTeams){
 	createCurrentViewedTeamCookie(pViewedTeams);
 }
 
-function getLastViewedTeam(){
+function setLastViewedTeam(){
 	let cookieName = "lastviewedTeam=";
 	let cookies = document.cookie;
 	let lastViewedTeam = cookies.substr(cookieName.length, cookies.length)

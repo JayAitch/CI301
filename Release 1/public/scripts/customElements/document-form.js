@@ -202,13 +202,12 @@ function createMapInputField(mapkey, values, parent){
 
 
 // basic form to create handlers and form data wrapper
-class basicForm extends HTMLElement{
+class BasicForm extends HTMLElement{
 	constructor() {
 		super();
 		this._submitHandler = this._submitHandler.bind(this);
 		this._cancelHandler = this._cancelHandler.bind(this);
 		this.currentDocument;
-		this.isEditMode;
 	}
 
 	// create any elements required by the form
@@ -283,7 +282,7 @@ class basicForm extends HTMLElement{
 
 
 // implementation of basic form, used to create invites through reading qr codes
-class inviteForm extends basicForm {
+class InviteForm extends BasicForm {
 	connectedCallback() {
 		// use supers version to create the basic form layout and fetch relivant dom elements
 		super.connectedCallback();
@@ -406,17 +405,17 @@ class inviteForm extends basicForm {
 
 // base document for knows how to create an ok button and how to generate data from form fields
 //todo: create checking
-class documentForm extends basicForm{
+class DocumentForm extends BasicForm{
 
 
   // to be overriden does form submit action
   submitForm(){
-	this.populateObjectFromForm();
+	this.populateDocumentFromForm();
   }
 
   // breaks down form data into our new object
   // we submit that object to firebase
-  populateObjectFromForm(){
+  populateDocumentFromForm(){
 
 	// let formChildren = this.formDataElem.elements;
 	  let formChildren = this.formDataElem.children;
@@ -425,7 +424,7 @@ class documentForm extends basicForm{
 	  // going through these manually to have control over elements that need ignoring
 	 for(let i = 0; i < formChildrenCount; i++){
 
-		let currentFormRow = formChildren[i];
+		 let currentFormRow = formChildren[i];
 		 let fieldName = currentFormRow.name;
 		 let fieldValue = currentFormRow.value;
 
@@ -469,7 +468,6 @@ class documentForm extends basicForm{
 			this.currentDocument['experience-rewards'] = reward;
 		}
 	 }
-	  console.log(this.currentDocument);
   }
 
   mapDataFromValueSelectMap(formRow){
@@ -493,13 +491,11 @@ class documentForm extends basicForm{
 
   mapDataFromMultiSelect(formRow){
 	  let selectedOptions = formRow.selectedOptions;
-	  let formatedSelection = {};
+	  let formatedSelection = [];
 	  for(let selectionCount = 0; selectedOptions.length > selectionCount; selectionCount++){
 	  	let selectedOption = selectedOptions[selectionCount];
 	  	let fieldName = selectedOption.value;
-	  	// hardcoded for now this will need to be a new custom element look into this post
-		  //todo:  this, is wrong needs some different kind of custom element to add lookup values against a number
-	  	formatedSelection[fieldName] = 10;
+	  	formatedSelection[selectionCount] = fieldName;
 	  }
 	  return formatedSelection;
   }
@@ -510,36 +506,36 @@ class documentForm extends basicForm{
 	// assign the object from the types list and trigger the relivant generation
 	createNewForm(type){
 		this.clearFormDataFields();
-		let object = newObjectLookup[type];
+		let document = newObjectLookup[type];
 		this.documentType = type;
 		// this will be more than just the team form, we may be able to do this with the same function
 		switch(type) {
 			case "team":
-				this.createNewTeamForm(object);
+				this.createNewTeamForm(document);
 				break;
 			case"task":
-				this.createNewTaskForm(object);
+				this.createNewTaskForm(document);
 				break;
 
 		}
-		this.currentDocument = object;
+		this.currentDocument = document;
 	}
 
-	createFormFromExisting(type, object){
+	createFormFromExisting(type, document){
   		this.clearFormDataFields();
 		this.documentType = type;
 		// this will be more than just the team form, we may be able to do this with the same function
 		// in this case we are passing in a populated object
 		switch(type) {
 			case "team":
-				this.createNewTeamForm(object);
+				this.createNewTeamForm(document);
 				break;
 			case"task":
-				this.createNewTaskForm(object);
+				this.createNewTaskForm(document);
 				break;
 		}
 
-		this.currentDocument = object;
+		this.currentDocument = document;
 	}
 
 	clearFormDataFields(){
@@ -624,7 +620,7 @@ class documentForm extends basicForm{
 
 
 
-class newDocumentForm extends documentForm{
+class NewDocumentForm extends DocumentForm{
 	  constructor() {
 		super();
 	  }
@@ -654,7 +650,7 @@ class newDocumentForm extends documentForm{
 	
 	// override of the submit changes, different actions for creating differnt objects
 	submitForm(){
-		this.populateObjectFromForm();
+		this.populateDocumentFromForm();
 
 		switch(this.documentType){
 			case "team":
@@ -710,7 +706,7 @@ class newDocumentForm extends documentForm{
 
 
 
-class changeDocumentForm extends documentForm{
+class ChangeDocumentForm extends DocumentForm{
 	constructor() {
 		super();
 	}
@@ -746,7 +742,7 @@ class changeDocumentForm extends documentForm{
 
 	submitForm(){
 		console.log(this.currentDocument)
-		this.populateObjectFromForm();
+		this.populateDocumentFromForm();
 		let change = this.documentReference.update (
 			this.currentDocument
 		);
@@ -757,14 +753,13 @@ class changeDocumentForm extends documentForm{
 
 }
 
-class SelectAndValue extends HTMLElement{
+
+
+class SelectAndValueField extends HTMLElement{
 	constructor(){
 		super();
 	}
 
-	static get observedAttributes() {
-		return ['select-lookup','selected-value','value'];
-	}
 	connectedCallback(){
 		let lookup = this.getAttribute('select-lookup');
 		let selected = this.getAttribute('selected-value');
@@ -806,8 +801,8 @@ class SelectAndValue extends HTMLElement{
 
 
 
-window.customElements.define('select-value-map', SelectAndValue);
+window.customElements.define('select-value-map', SelectAndValueField);
 
-window.customElements.define('invite-form', inviteForm);
-window.customElements.define('document-form', newDocumentForm);
-window.customElements.define('change-document-form', changeDocumentForm);
+window.customElements.define('invite-form', InviteForm);
+window.customElements.define('document-form', NewDocumentForm);
+window.customElements.define('change-document-form', ChangeDocumentForm);

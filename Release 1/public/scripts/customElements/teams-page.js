@@ -35,10 +35,8 @@ class TeamsPage extends HTMLElement{
 	this.newTeamBtn = document.getElementById("new-team-btn").addEventListener("click", this._onNewTeamBtnClick);
 	
 
+	//  this should probably move from here
 	this.inviteCodeBtn = document.getElementById("invite-code-btn").addEventListener("click", this._showInviteCode);
-
-
-
 	this.QRcode = document.getElementById("qr-code");
 	let QRCodeData = {"text": getUserId()};
 	console.log(this.QRcode);
@@ -122,7 +120,7 @@ class TeamCard extends HTMLElement{
 		// dont do it like this maybe? potential dom lag
 		this.innerHTML = userAccountTemplate;
 
-		this.name = this.querySelector(".name");
+		this.headerEle = this.querySelector(".name");
 		// find the top wrapper and add the click listener to it
 
 		this.querySelector(".team-edit-button").addEventListener("click", this._editTeam);
@@ -140,12 +138,12 @@ class TeamCard extends HTMLElement{
 	attributeChangedCallback(name, oldValue, newValue) {
 		//let isRead = this.getAttribute("is-read");
 		//this.isRead.innerHTML = isRead;
-		this.name.innerHTML = this.getAttribute("name");
+		this.headerEle.innerHTML = this.getAttribute("name");
 		//	if(isRead) this.classList.add("read-notification")
 		// do something when an attribute has changed
 	}
 
-	_viewTeam(ev){
+	_viewTeam(){
 			let teamDocLocation = this.getAttribute("doc-location");
 		setCurrentViewedTeam(teamDocLocation);
 		document.location = '#tasks-page';
