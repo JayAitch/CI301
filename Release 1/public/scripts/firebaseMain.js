@@ -50,7 +50,7 @@ function getUserId(){
 	 return firebase.auth().currentUser.uid;
 }
 function getCurrentUserDocRef(){
-	const workaholicCurrentUserID = firebase.auth().currentUser.uid;
+	const workaholicCurrentUserID = getUserId();
 	// promote this variable u
 	let currentUserDocRef = firebase.firestore().doc("accounts/" + workaholicCurrentUserID)
 	
@@ -105,14 +105,11 @@ function calculateExperiencePoints(levelRequirement, pImportance, pUrgency, pImp
 	let importance = pImportance || 0;
 	let urgency = pUrgency || 0;
 	let impact = pImpact || 0;
-	let reward = levelRequirement * importance * 100;
-	console.log(levelRequirement);
-	console.log(pImportance);
-	console.log(pUrgency);
-	console.log(pImpact);
+	let reward = (levelRequirement + 100) * importance * 5;
+
 	reward = reward * Math.pow(urgency, 3);
-	console.log(reward);
+
 	reward = reward * impact;
-	console.log();
+
 	return reward;
 }
