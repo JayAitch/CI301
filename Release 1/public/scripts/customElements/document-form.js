@@ -263,9 +263,12 @@ function createTextInputField(key, value, parent, fieldConfig){
 	newTextField.type = "text";
 	newTextField.value = value;
 	newTextField.placeholder = key;
-	newTextField.required = fieldConfig.validation.required || false;
-	newTextField.minLength = fieldConfig.validation.min || 0;
-	newTextField.maxLength = fieldConfig.validation.max || 999;
+	if(fieldConfig){
+        newTextField.required = fieldConfig.validation.required || false;
+        newTextField.minLength = fieldConfig.validation.min || 0;
+        newTextField.maxLength = fieldConfig.validation.max || 999;
+    }
+
 	parent.appendChild(newTextField);
 	return newTextField;
 }
@@ -756,8 +759,9 @@ class DocumentForm extends BasicForm{
 	// assign the object from the types list and trigger the relivant generation
 	createNewForm(type){
 		this.clearFormDataFields();
-		//let document = JSON.parse(JSON.stringify(newObjectLookup[type])) ;
-		let formConfiguration = newObjectLookup[type];
+
+        let formConfiguration = jQuery.extend(true, {}, newObjectLookup[type]);
+
 		this.documentType = type;
 		this.generateFormDisplay(formConfiguration);
 
@@ -936,7 +940,7 @@ class ChangeDocumentForm extends DocumentForm{
 	createFormFromExisting(type, document){
 		this.clearFormDataFields();
 		this.documentType = type;
-		let formConfiguration = newObjectLookup[type];
+		let formConfiguration = jQuery.extend(true, {}, newObjectLookup[type]);
 
 		for(let documentField in document)
 		{
