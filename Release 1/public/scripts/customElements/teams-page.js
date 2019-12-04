@@ -68,6 +68,7 @@ class TeamsList extends ActiveQueryListElement{
 		this.collectionRef = "teams/"
 	}
 	getQueryReference(){
+
 		// get all the teams the user is a member of
 		const queryRef = firebase.firestore().collection("teams").where('members', 'array-contains', getUserId());
 
@@ -96,7 +97,7 @@ class TeamCard extends HTMLElement{
 		super();
 
 		// bind 'this' to the click handler for this component
-		this._editTeam = this._editTeam.bind(this);
+		//this._editTeam = this._editTeam.bind(this);
 		this._viewTeam = this._viewTeam.bind(this);
 		this._showInviteForm = this._showInviteForm.bind(this);
 	}
@@ -123,7 +124,7 @@ class TeamCard extends HTMLElement{
 		this.headerEle = this.querySelector(".name");
 		// find the top wrapper and add the click listener to it
 
-		this.querySelector(".team-edit-button").addEventListener("click", this._editTeam);
+		//this.querySelector(".team-edit-button").addEventListener("click", this._editTeam);
 		this.querySelector(".team-view-button").addEventListener("click", this._viewTeam);
 		this.querySelector(".team-invite-button").addEventListener("click", this._showInviteForm);
 	}
@@ -152,15 +153,15 @@ class TeamCard extends HTMLElement{
 
 
 
-
-	// todo move this functionality into a seperate element so we can just put edit buttons everywhere
-	_editTeam(ev) {
-		let docLocation = this.getAttribute("doc-location");
-		const changeDocForm = document.getElementById("change-document-form");
-		changeDocForm.setAttribute("obj-type", "team");
-		changeDocForm.setAttribute("document-target", docLocation);
-		changeDocForm.hidden = false;
-	}
+	//
+	// // todo move this functionality into a seperate element so we can just put edit buttons everywhere
+	// _editTeam(ev) {
+	// 	let docLocation = this.getAttribute("doc-location");
+	// 	const changeDocForm = document.getElementById("change-document-form");
+	// 	changeDocForm.setAttribute("obj-type", "team");
+	// 	changeDocForm.setAttribute("document-target", docLocation);
+	// 	changeDocForm.hidden = false;
+	// }
 
 	_showInviteForm(ev){
 		const inviteForm = document.getElementById("invite-form");

@@ -83,6 +83,7 @@ class ActiveQueryListElement extends StaticQueryListElement{
 	}
   // remove all listeners on this list
   removeListeners(){
+		if(this.snapshotListener)
 	  this.snapshotListener();
   }
 

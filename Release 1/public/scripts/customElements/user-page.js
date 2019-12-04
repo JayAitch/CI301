@@ -17,7 +17,9 @@ class UserPage extends HTMLElement{
 		this.userAccount = firebase.firestore().collection('accounts').doc(workaholicCurrentUser);
 		var testText = ""
 		this.userAccount.set({
-			"logged-on": true
+			"logged-on": true,
+            "last-logged": new Date(),
+            "skill-level":{}
 		}, { merge: true });
 		// use arrow function to preserve the value of this
 		this.userAccount.get().then(doc => {

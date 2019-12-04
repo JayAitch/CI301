@@ -1,3 +1,6 @@
+let currentlyViewTeamData;
+
+// tile to display experience rewards to the user
 class ExperienceRewardTile extends HTMLElement{
     constructor() {
         super();
@@ -35,7 +38,7 @@ class TaskCard extends HTMLElement{
     constructor() {
         super();
         this.currentRewardTiles = {};
-
+        this._completeBtnClicked = this._completeBtnClicked.bind(this);
     }
 
 
@@ -49,7 +52,8 @@ class TaskCard extends HTMLElement{
 													    <p class="description"></p>
 													</div>
 													<div class="control-group">
-														<button is="edit-button" class="team-edit-button control" obj-type="task">edit</button>						
+														<button is="edit-button" class="team-edit-button control" obj-type="task">edit</button>				
+														<button class="complete-task-button control">complete</button>					
 													</div>
 											`;
 
@@ -57,8 +61,8 @@ class TaskCard extends HTMLElement{
         this.innerHTML = userAccountTemplate;
         this.nameEle = this.querySelector(".name");
         this.descrEle = this.querySelector(".description");
-        // find the top wrapper and add the click listener to it
-     //   this.querySelector(".notification-wrapper").addEventListener("click", this._clickHandler);
+        this.querySelector(".complete-task-button").addEventListener("click", this._completeBtnClicked);
+
     }
 
     // observe the attribute changes so we can modify dispalyed data
@@ -80,6 +84,51 @@ class TaskCard extends HTMLElement{
         }
 
     }
+
+    _completeBtnClicked(){
+        let documentLocation = this.getAttribute("doc-location");
+
+        let taskToComplete = firebase.firestore().doc(documentLocation);
+
+
+        taskToComplete.get().then((doc) => {
+
+            let taskData = doc.data();
+            let taskRewards = taskData['experience-rewards']
+            console.log(taskRewards);
+
+            // TODO: add check to requirements
+            //       add levelup check and fanfare
+            let userAccountRef = getCurrentUserDocRef();
+            userAccountRef.get().then((doc) => {
+
+                let userAccountData = doc.data();
+                let userAccountSkillLevels = userAccountData['skill-levels']
+
+                for(let key in taskRewards){
+                    let rewardXPValue = taskRewards[key] || 0;
+                    let currentXPValue = userAccountSkillLevels[key] || 0;
+                    userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
+                }
+
+                userAccountRef.set({
+                     "skill-levels": userAccountSkillLevels,
+                 }, { merge: true });
+
+                taskToComplete.set({
+                    "status": taskStatus.Complete,
+                }, { merge: true });
+
+            }).catch(function(error) {
+                console.error("Could not complete task: ", error);
+            });
+
+        }).catch(function(error) {
+            console.error("Could not complete task: ", error);
+        });
+
+    }
+
 
     createRewardTiles(reward){
 
@@ -103,10 +152,9 @@ class TaskCard extends HTMLElement{
 
             }
 
-
-
         }
     }
+
 
     setRewardAttributes(tile, amount){
         // consider chaining to use data instead of attributes
@@ -135,7 +183,7 @@ class TasksPage extends HTMLElement{
     // set up the element on connection
     connectedCallback() {
         const teamTemplate = `				<h2 class="name-header">
-													Tasks
+													please select a team to view tasks
 												</h2>
 												<button id="new-task-btn">new task</button>
 											`;
@@ -143,6 +191,7 @@ class TasksPage extends HTMLElement{
         // dont do it like this maybe? potential dom lag
         this.innerHTML = teamTemplate;
         this.taskListElem = document.createElement("tasks-list");
+        this.header = this.querySelector(".name-header");
         this.appendChild(this.taskListElem);
          document.getElementById("new-task-btn").addEventListener("click", this._onNewTaskBtnClick);
 
@@ -158,14 +207,20 @@ class TasksPage extends HTMLElement{
         // we may want to change this to a filter so that a user can query multiple teams at once
         // todo: flow and wireframe to deside
         if(name == 'teams-watched' && oldValue != newValue){
-            this.collectionTarget = newValue;
-            this.taskListElem.setAttribute("collection-target", this.collectionTarget);
+            this.teamTarget = newValue;
+
+            // assign the team we are viewing to a global variable, components of the app will use this for configuration
+            firebase.firestore().doc(this.teamTarget).get().then((doc)=> {
+                currentlyViewTeamData = doc.data(); this.header.innerHTML = currentlyViewTeamData.name || 'error';
+            });
+
+            this.taskListElem.setAttribute("collection-target", this.teamTarget);
         }
     }
 
     _onNewTaskBtnClick(){
         const newDocumentForm = document.getElementById("new-document-form");
-        let collectionTargetString = this.collectionTarget + "/tasks/"
+        let collectionTargetString = this.teamTarget + "/tasks/"
         newDocumentForm.setAttribute("obj-type", "task");
         newDocumentForm.setAttribute("collection-target", collectionTargetString);
         newDocumentForm.hidden = false;
@@ -184,10 +239,12 @@ class TasksList extends ChangeableActiveQueryList{
     getQueryReference(){
         // todo: check that this value is a document reference, we are going to want a global expr for this
         let targetDocument = this.getAttribute('collection-target');
-       // if(!targetDocument) return false
+
         this.collectionRef =  targetDocument + "/tasks/"
+        console.log(this.collectionRef);
+        console.log("tasks");
         // find all notifications refering to the current user
-        return firebase.firestore().collection(this.collectionRef)
+        return firebase.firestore().collection(this.collectionRef).where("status", "==", taskStatus.Active)
     }
 
     createCardDOMElement(docData) {

@@ -102,14 +102,15 @@ function calculateReward(requirements, importance, urgency, impact){
 	return reward;
 }
 function calculateExperiencePoints(levelRequirement, pImportance, pUrgency, pImpact){
-	let importance = pImportance || 0;
-	let urgency = pUrgency || 0;
-	let impact = pImpact || 0;
+	let importance = pImportance + 0.4 || 0;
+	let urgency = pUrgency + 0.4 || 0;
+	let impact = pImpact  + 0.4 || 0;
 	let reward = (levelRequirement + 100) * importance * 5;
 
-	reward = reward * Math.pow(urgency, 3);
+	reward = reward * Math.pow(urgency, 2);
 
 	reward = reward * impact;
-
+	reward = reward + 15;
+	reward = Math.floor(reward);
 	return reward;
 }

@@ -1,15 +1,16 @@
 // lookups for statuses/types doing it this way means we dont have to store/transfer the big strings
+// consider changing these to form configuration to allow for ordering and validation rules
 
 const taskStatus = {
-	"UNAPPROVED": 0,
-	"ACTIVE": 1,
-	"COMPLETE": 2
+	"Unapproved": "Unapproved",
+	"Active": "Active",
+	"Complete": "Complete"
 }
 const teamType = {
 	"HORIZONTAL":0,
 	"VERTICAL":1
 }
-const experienceType = {
+const baseExperienceTypes = {
 	"Strength":"Strength",
 	"Intelligence":"Intelligence",
 	"Endurance":"Endurance",
@@ -17,26 +18,175 @@ const experienceType = {
 }
 
 
-// base team used on creating a new team to create the form
+
+
+
+//team form configuration
 const team = {
-//	"timestamp" : "",
-//	"owner": "",
-	"team-type": teamType.HORIZONTAL,
-	"name": "",
-	"description": "",
-	"personalised-skills":{},
+	'name': {
+		'value': '',
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true,
+				min:3,
+				max:25
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createTextInputField(key, value, parent, fieldProperties)
+		},
+	},
+	'description': {
+		'value': '',
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true,
+				min:0,
+				max:25
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createTextInputField(key, value, parent, fieldProperties)
+		},
+	},
+	'team-type': {
+		'value': teamType.HORIZONTAL,
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createSelectField(key, value, parent, fieldProperties)
+		}
+	},
+	'personalised-skills': {
+		'value': '',
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createStringCollectionField(key, value, parent, fieldProperties)
+		},
+	},
 }
 
-const task = {
-	"name": "",
-	"description": "",
-	"urgency":1,
-	"importance":1,
-	"impact":1,
-	"experience-rewards": {},
-	"deadline":	new Date(),
-	"requirements": {}
 
+
+
+// task form configuration
+const task = {
+	'name': {
+		'value': '',
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true,
+				min:3,
+				max:25
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createTextInputField(key, value, parent, fieldProperties)
+		},
+	},
+	'description': {
+		'value': '',
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true,
+				min:0,
+				max:25
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createTextInputField(key, value, parent, fieldProperties)
+		},
+	},
+	'urgency': {
+		'value': 1,
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true,
+				min:0,
+				max:2
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createSliderInput(key, value, parent, fieldProperties)
+		}
+	},
+	'importance': {
+		'value': 1,
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true,
+				min:0,
+				max:2
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createSliderInput(key, value, parent, fieldProperties)
+		}
+	},
+	'impact': {
+		'value': 1,
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true,
+				min:0,
+				max:2
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createSliderInput(key, value, parent, fieldProperties)
+		}
+	},
+	'requirements': {
+		'value': 1,
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createMapInputField(key, value, parent, fieldProperties)
+		}
+	},
+	'deadline': {
+		'value': new Date(),
+		'field-properties': {
+			'label-text': 'deadline',
+			'help-text': 'select how your team creates and manages tasks.',
+			'validation': {
+				required: true
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createDateInputField(key, value, parent, fieldProperties)
+		}
+	}
 }
 
 
@@ -44,7 +194,23 @@ const task = {
 const newObjectLookup = {"team":team, "task":task}
 
 // all lookups to link data options with field name
-const selectLookup = {"team-type":teamType, "requirements":experienceType, "rewards":experienceType}
+const selectLookup = {"team-type":teamType, "requirements":baseExperienceTypes, "rewards": baseExperienceTypes}
+
+
+
+function getExperienceTypes(){
+	// copy the default experience types, for a pass by value, this would otherwise be a reference to the JSON
+	let experienceTypes = JSON.parse(JSON.stringify(baseExperienceTypes)) ;
+
+	// add any personalised skills defined on the team data this task is for
+	let personalExperienceTypes = currentlyViewTeamData["personalised-skills"];
+	for(experienceType in personalExperienceTypes){
+		experienceTypes[experienceType] = experienceType;
+	}
+	return experienceTypes;
+}
+
+
 
 function createInputLabel(key, parent){
 
@@ -54,20 +220,22 @@ function createInputLabel(key, parent){
 	parent.appendChild(newLabelField);
 }
 
-function createSliderInput(key, value, parent){
+function createSliderInput(key, value, parent, fieldConfig){
 	createInputLabel(key, parent);
 	let newSliderField = document.createElement("input");
 	newSliderField.name = key;
 	newSliderField.type = "range";
 	newSliderField.value = value;
-	newSliderField.step = "0.01";
-	newSliderField.min = "0";
-	newSliderField.max = "2";
+	newSliderField.step = fieldConfig.step || 0.1
+	newSliderField.min = fieldConfig.validation.min || 0;
+	newSliderField.max = fieldConfig.validation.max || Infinity;
 	newSliderField.placeholder = key;
+	newSliderField.required = fieldConfig.validation.required || false;
 	parent.appendChild(newSliderField);
+	return newSliderField
 }
 
-function createNumberInput(key, value, parent){
+function createNumberInput(key, value, parent, fieldConfig){
 	createInputLabel(key, parent);
 	// create the field and propulate with any data from the object
 	let newNumberField = document.createElement("input");
@@ -75,26 +243,34 @@ function createNumberInput(key, value, parent){
 	newNumberField.type = "number";
 	newNumberField.value = value;
 	newNumberField.placeholder = key;
-	newNumberField.required = true;
+	if(fieldConfig){
+		newNumberField.required = fieldConfig.validation.required || false;
+		newNumberField.min = fieldConfig.validation.min || 0;
+		newNumberField.max = fieldConfig.validation.max || Infinity;
+	}
+
 	parent.appendChild(newNumberField);
 	return newNumberField;
 }
 
 // create text field for the user to input data
-function createTextInputField(key, value, parent){
+function createTextInputField(key, value, parent, fieldConfig){
 	createInputLabel(key, parent);
+
 	// create the field and propulate with any data from the object
 	let newTextField = document.createElement("input");
 	newTextField.name = key;
 	newTextField.type = "text";
 	newTextField.value = value;
 	newTextField.placeholder = key;
-	newTextField.required = true;
-	newTextField.minLength = 4;
+	newTextField.required = fieldConfig.validation.required || false;
+	newTextField.minLength = fieldConfig.validation.min || 0;
+	newTextField.maxLength = fieldConfig.validation.max || 999;
 	parent.appendChild(newTextField);
+	return newTextField;
 }
 
-function createDateInputField(key, value, parent){
+function createDateInputField(key, value, parent, fieldConfig){
 	createInputLabel(key, parent);
 	let newDateField = document.createElement("input");
 	let date = value;
@@ -102,24 +278,27 @@ function createDateInputField(key, value, parent){
 	newDateField.name = key;
 	newDateField.type = "date";
 	newDateField.value =  convertToHTMLDate(date);
-	newDateField.required = true;
+	newDateField.required = fieldConfig.validation.required || false;
 	parent.appendChild(newDateField);
+	return newDateField
 }
 
 
 
-function createMultiSelect(key, value, parent){
+function createMultiSelect(key, value, parent, fieldConfig){
 	createInputLabel(key, parent);
 	// set-up the select parent element
 	let newSelectField = document.createElement("select");
 	newSelectField.name = key;
 	newSelectField.value = value;
 	newSelectField.multiple = true;
+	newSelectField.required = fieldConfig.validation.required || false;
 	// get the lookup values from our list of lookups
 	let selectOptionsJson = selectLookup[key];
 
+
 	// make an option field for each
-	for(let option in selectOptionsJson){
+	for(let option in selectOptionsJson, fieldConfig){
 		let optionElem = this.createOption(option, selectOptionsJson[option])
 		newSelectField.appendChild(optionElem);
 
@@ -129,19 +308,31 @@ function createMultiSelect(key, value, parent){
 	}
 
 	parent.appendChild(newSelectField);
+	return newSelectField;
 }
 
 // create select for the user to input data
-function createSelectField(key, value, parent){
+function createSelectField(key, value, parent, fieldConfig){
 	createInputLabel(key, parent);
 
 	// set-up the select parent element
 	let newSelectField = document.createElement("select");
 	newSelectField.name = key;
 	newSelectField.value = value;
-
+	if(fieldConfig)	newSelectField.required = fieldConfig.validation.required || false;
 	// get the lookup values from our list of lookups
-	let selectOptionsJson = selectLookup[key];
+	let selectOptionsJson
+
+
+	// special case for requirements, allow team document to add experiences types to this list
+	if(key === "requirements")
+	{
+		selectOptionsJson = getExperienceTypes();
+	}
+	else{
+		selectOptionsJson = selectLookup[key];
+	}
+
 
 	// make an option field for each
 	for(let option in selectOptionsJson){
@@ -167,9 +358,9 @@ function createOption(key, value, isSelected){
 }
 
 
-function createMapInputField(mapkey, values, parent){
+function createMapInputField(mapkey, values, parent, fieldConfig){
 	createInputLabel(mapkey, parent);
-
+	// create wrapper to remove input fields from the top level of this array
 	let fieldMapWrapper = document.createElement("div");
 	let addRowButton = document.createElement("button");
 	addRowButton.innerHTML = "add " + mapkey;
@@ -196,8 +387,46 @@ function createMapInputField(mapkey, values, parent){
 		fieldMapWrapper.appendChild(runTimeSelectMap);
 	});
 
-
+	return fieldMapWrapper;
 }
+
+function createStringCollectionField(skey, values, parent, fieldConfig){
+	let fieldMapWrapper = document.createElement("div");
+	let addRowButton = document.createElement("button");
+
+	createInputLabel(skey, parent);
+
+
+	addRowButton.innerHTML = "add " + skey;
+	fieldMapWrapper.type = "string-collection";
+	fieldMapWrapper.name = skey;
+
+	for(let value in values){
+		let newSelectValueMap = document.createElement("string-collection");
+
+		let amount = value
+		newSelectValueMap.setAttribute('key', skey);
+		newSelectValueMap.setAttribute('value', amount);
+		fieldMapWrapper.appendChild(newSelectValueMap);
+	}
+	parent.appendChild(addRowButton);
+	parent.appendChild(fieldMapWrapper);
+
+	addRowButton.addEventListener("click", () => {
+		event.preventDefault();
+		let runTimeSelectMap = document.createElement("string-collection");
+		runTimeSelectMap.setAttribute('key', skey);
+		runTimeSelectMap.setAttribute('value', "");
+		fieldMapWrapper.appendChild(runTimeSelectMap);
+	});
+
+	return fieldMapWrapper;
+}
+
+
+
+
+
 
 
 
@@ -420,7 +649,7 @@ class DocumentForm extends BasicForm{
 	// let formChildren = this.formDataElem.elements;
 	  let formChildren = this.formDataElem.children;
 	 let formChildrenCount = formChildren.length;
-	 let currentDocument = this.currentDocument;
+	 let currentDocument = {};
 	  // going through these manually to have control over elements that need ignoring
 	 for(let i = 0; i < formChildrenCount; i++){
 
@@ -456,6 +685,9 @@ class DocumentForm extends BasicForm{
 				 case "select-value-map":
 					 currentDocument[fieldName] = this.mapDataFromValueSelectMap(currentFormRow);
 					 break;
+				 case "string-collection":
+					 currentDocument[fieldName] = this.buildStringCollectionmap(currentFormRow);
+					 break;
 				 default:
 			 }
 
@@ -465,9 +697,27 @@ class DocumentForm extends BasicForm{
 			let impo = currentDocument.importance;
 			let impa = currentDocument.impact;
 			let reward = calculateReward(req, urg, impo,impa);
-			this.currentDocument['experience-rewards'] = reward;
+			currentDocument['experience-rewards'] = reward;
 		}
 	 }
+
+	  this.currentDocument = currentDocument;
+  }
+
+  buildStringCollectionmap(formRow){
+	  let dataMap = formRow.childNodes;
+	  let jsonMapping = {};
+
+	  for(let dataMapIncrementor = 0; dataMap.length > dataMapIncrementor; dataMapIncrementor++){
+		  let dataRowElem = dataMap[dataMapIncrementor];
+
+		  let key = dataRowElem.getAttribute("value");
+		  let value = key;
+
+		  jsonMapping[key] = value;
+	  }
+
+	  return jsonMapping;
   }
 
   mapDataFromValueSelectMap(formRow){
@@ -506,44 +756,23 @@ class DocumentForm extends BasicForm{
 	// assign the object from the types list and trigger the relivant generation
 	createNewForm(type){
 		this.clearFormDataFields();
-		let document = newObjectLookup[type];
+		//let document = JSON.parse(JSON.stringify(newObjectLookup[type])) ;
+		let formConfiguration = newObjectLookup[type];
 		this.documentType = type;
-		// this will be more than just the team form, we may be able to do this with the same function
-		switch(type) {
-			case "team":
-				this.createNewTeamForm(document);
-				break;
-			case"task":
-				this.createNewTaskForm(document);
-				break;
+		this.generateFormDisplay(formConfiguration);
 
-		}
-		this.currentDocument = document;
+
+		this.currentDocument = formConfiguration;
 	}
 
-	createFormFromExisting(type, document){
-  		this.clearFormDataFields();
-		this.documentType = type;
-		// this will be more than just the team form, we may be able to do this with the same function
-		// in this case we are passing in a populated object
-		switch(type) {
-			case "team":
-				this.createNewTeamForm(document);
-				break;
-			case"task":
-				this.createNewTaskForm(document);
-				break;
-		}
 
-		this.currentDocument = document;
-	}
-
+	// remove any existing forms from the DOM
 	clearFormDataFields(){
 		let formChildren = this.formDataElem.childNodes;
 		let formChildrenCount = this.formDataElem.childElementCount;
 		console.log(formChildren);
-		// going through these manually to have control over elements that need ignoring
 
+		// remove like this as removing a field will reduce the size of the array
 		let lastFormDataChild = this.formDataElem.lastElementChild;
 		while(lastFormDataChild){
 			this.formDataElem.removeChild(lastFormDataChild);
@@ -553,63 +782,22 @@ class DocumentForm extends BasicForm{
 
 
 	// create fields on the form to allow the user change specific values on the object
-	createNewTeamForm(object){
-		for(var fieldName in object){
-			console.log(fieldName);
-			switch(fieldName){
-				case "name":
-					createTextInputField(fieldName, object[fieldName],this.formDataElem);
-					break;
-				case "description":
-					createTextInputField(fieldName, object[fieldName], this.formDataElem);
-					break;
-				case "team-type":
-					createSelectField(fieldName, object[fieldName], this.formDataElem);
-					break;
-				case"personalised-skills":
-					createMapInputField(fieldName, object[fieldName], this.formDataElem);
-					break;
-				default:
+	generateFormDisplay(formConfiguration){
+		console.log(formConfiguration);
 
-			}
+		// go through the configuration objects and create as required
+		for(let fieldRow in formConfiguration){
+
+			let currentFieldRowConfig = formConfiguration[fieldRow];
+			let documentField = fieldRow;
+			let currentValue = currentFieldRowConfig['value'];
+			let fieldProperties = currentFieldRowConfig['field-properties']
+
+			let newFormElement = currentFieldRowConfig.construction(documentField, currentValue, this.formDataElem, fieldProperties)
+
+
 		}
 	}
-	createNewTaskForm(object){
-		for(var fieldName in object){
-			//console.log(fieldName);
-
-			switch(fieldName){
-				case "name":
-					createTextInputField(fieldName, object[fieldName], this.formDataElem);
-					break;
-				case "description":
-					createTextInputField(fieldName, object[fieldName], this.formDataElem);
-					break;
-				case"requirements":
-					// this will not be a multiselect but will instead be some kind of custom element so the number canmatch the level type
-					createMapInputField(fieldName, object[fieldName], this.formDataElem);
-					break;
-				case"rewards":
-					createMultiSelect(fieldName, object[fieldName], this.formDataElem);
-					break;
-				case "urgency":
-					createSliderInput(fieldName, object[fieldName], this.formDataElem);
-					break;
-				case "importance":
-					createSliderInput(fieldName, object[fieldName], this.formDataElem);
-					break;
-				case "impact":
-					createSliderInput(fieldName, object[fieldName], this.formDataElem);
-					break;
-				case "deadline":
-					createDateInputField(fieldName, object[fieldName], this.formDataElem);
-					break;
-				default:
-			}
-		}
-	}
-
-
 
 }
 
@@ -625,7 +813,7 @@ class NewDocumentForm extends DocumentForm{
 		super();
 	  }
 
-	
+
 	// observe the attribute changes so we can modify dispalyed data
 	static get observedAttributes() {
 		return ['obj-type','collection-target'];
@@ -633,16 +821,14 @@ class NewDocumentForm extends DocumentForm{
 
 	// set the display for these values onto the txt of the displays
 	attributeChangedCallback(name, oldValue, newValue) {
-
+		let type = this.getAttribute("obj-type");
 		if(name === "obj-type"){
-
-			let type = this.getAttribute("obj-type");
 			this.formHeader.innerHTML = "create new " + type;
-			this.createNewForm(type);
-		}else{
+			//this.createNewForm(type);
+		} else {
 			this.collectionTarget = this.getAttribute('collection-target');
 		}
-
+		this.createNewForm(type);
 	}
 	
 
@@ -677,10 +863,10 @@ class NewDocumentForm extends DocumentForm{
 		newTeam.owner = userId;
 		newTeam.members = [userId];
 
-
+		console.log(newTeam);
 		firebase.firestore().collection("teams").add(newTeam)
 		.catch(function(error) {
-			console.error("Error adding document: ", error);
+			console.error("Error adding a new team: ", error);
 		});
 
 
@@ -691,19 +877,18 @@ class NewDocumentForm extends DocumentForm{
 
 		let userId = getUserId();
 		let collectionLocation = this.collectionTarget
-		console.log(this.currentDocument);
+
 		let newTask = this.currentDocument
 		newTask.owner = userId;
+		newTask.status = taskStatus.Active;
 
 		firebase.firestore().collection(collectionLocation).add(newTask)
 			.catch(function(error) {
-				console.error("Error adding document: ", error);
+				console.error("Error adding a new task: ", error);
 			});
 	}
 
 }
-
-
 
 
 class ChangeDocumentForm extends DocumentForm{
@@ -741,7 +926,6 @@ class ChangeDocumentForm extends DocumentForm{
 	}
 
 	submitForm(){
-		console.log(this.currentDocument)
 		this.populateDocumentFromForm();
 		let change = this.documentReference.update (
 			this.currentDocument
@@ -749,7 +933,26 @@ class ChangeDocumentForm extends DocumentForm{
 
 		this.closeForm();
 	}
+	createFormFromExisting(type, document){
+		this.clearFormDataFields();
+		this.documentType = type;
+		let formConfiguration = newObjectLookup[type];
 
+		for(let documentField in document)
+		{
+			// check to see if we have a configuration to edit this type>field
+			if(formConfiguration.hasOwnProperty(documentField)){
+				formConfiguration[documentField].value = document[documentField];
+			}
+
+		}
+
+
+		this.generateFormDisplay(formConfiguration);
+
+
+		this.currentDocument = formConfiguration;
+	}
 
 }
 
@@ -801,6 +1004,47 @@ class SelectAndValueField extends HTMLElement{
 
 
 
+class StringCollectionField extends HTMLElement{
+	constructor(){
+		super();
+	}
+
+	connectedCallback(){
+		let value = this.getAttribute('value');
+		let key = this.getAttribute('key');
+
+		let removeRowBtn = document.createElement("button");
+		removeRowBtn.innerHTML = "X";
+
+		let newMapFields = document.createElement("div");
+
+		let newTextField = createTextInputField(key, value, newMapFields);
+		newMapFields.appendChild(newTextField);
+		newMapFields.appendChild(removeRowBtn);
+		this.appendChild(newMapFields);
+
+
+
+
+		removeRowBtn.addEventListener('click', () =>{
+			this.parentElement.removeChild(this);
+		})
+
+
+		newTextField.addEventListener('change', () =>{
+			let newSelectedValue = newTextField.value;
+			this.setAttribute('value', newSelectedValue)
+		})
+	}
+
+}
+
+
+
+
+
+
+window.customElements.define('string-collection', StringCollectionField);
 window.customElements.define('select-value-map', SelectAndValueField);
 
 window.customElements.define('invite-form', InviteForm);
