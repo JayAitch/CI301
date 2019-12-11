@@ -732,7 +732,7 @@ class DocumentForm extends BasicForm{
   		let keyValueElem = dataRowElem;
 
 		let key = dataRowElem.getAttribute("selected-value");
-		let value = dataRowElem.getAttribute("value");
+		let value = parseInt(dataRowElem.getAttribute("value"));
 
 		jsonMapping[key] = value;
 	}

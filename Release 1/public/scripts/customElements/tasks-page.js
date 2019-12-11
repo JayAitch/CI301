@@ -97,31 +97,48 @@ class TaskCard extends HTMLElement{
             let taskRewards = taskData['experience-rewards']
             console.log(taskRewards);
 
-            // TODO: add check to requirements
-            //       add levelup check and fanfare
-            let userAccountRef = getCurrentUserDocRef();
-            userAccountRef.get().then((doc) => {
 
-                let userAccountData = doc.data();
-                let userAccountSkillLevels = userAccountData['skill-levels']
 
-                for(let key in taskRewards){
-                    let rewardXPValue = taskRewards[key] || 0;
-                    let currentXPValue = userAccountSkillLevels[key] || 0;
-                    userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
-                }
+                // TODO: add check to requirements
+                //       add levelup check and fanfare
+                let userAccountRef = getCurrentUserDocRef();
+                userAccountRef.get().then((doc) => {
 
-                userAccountRef.set({
-                     "skill-levels": userAccountSkillLevels,
-                 }, { merge: true });
+                    let userAccountData = doc.data();
 
-                taskToComplete.set({
-                    "status": taskStatus.Complete,
-                }, { merge: true });
+                    // this will error for new users
+                    let userAccountSkillLevels = userAccountData['skill-levels']
 
-            }).catch(function(error) {
-                console.error("Could not complete task: ", error);
-            });
+                    for (let key in taskRewards) {
+
+                        let userLevel = experiencePointsAsLevel(userAccountSkillLevels[key]);
+                        let requiredLevel = taskData["requirements"][key]
+
+                        if(!requiredLevel || requiredLevel <= userLevel){
+                            let rewardXPValue = taskRewards[key] || 0;
+                            let currentXPValue = userAccountSkillLevels[key] || 0;
+                            userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
+                        }
+                        else{
+                            console.log(" failed at level check:" + key);
+                            //show something to the users!
+                            return;
+                        }
+                    }
+
+                    userAccountRef.set({
+                        "skill-levels": userAccountSkillLevels,
+                    }, {merge: true});
+
+                    taskToComplete.set({
+                        "status": taskStatus.Complete,
+                    }, {merge: true});
+
+                }).catch(function (error) {
+                    console.error("Could not complete task: ", error);
+                });
+
+
 
         }).catch(function(error) {
             console.error("Could not complete task: ", error);

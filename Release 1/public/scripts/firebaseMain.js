@@ -114,3 +114,20 @@ function calculateExperiencePoints(levelRequirement, pImportance, pUrgency, pImp
 	reward = Math.floor(reward);
 	return reward;
 }
+
+function experiencePointsAsLevel(exp){
+	let level = Math.pow(exp,0.5);
+	level = level / 10;
+	return Math.floor(level);
+}
+
+
+function levelAsExperiencePoints(level){
+	let exp = level * 10;
+	exp = Math.pow(exp, 2);
+	return exp;
+}
+
+function canUserCompleteTask(task){
+
+}
