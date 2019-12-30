@@ -26,8 +26,7 @@ const team = {
 	'name': {
 		'value': '',
 		'field-properties': {
-			'label-text': 'deadline',
-			'help-text': 'select how your team creates and manages tasks.',
+			'label-text': 'name',
 			'validation': {
 				required: true,
 				min:3,
@@ -41,10 +40,10 @@ const team = {
 	'description': {
 		'value': '',
 		'field-properties': {
-			'label-text': 'deadline',
+			'label-text': 'description',
 			'help-text': 'select how your team creates and manages tasks.',
 			'validation': {
-				required: true,
+				required: false,
 				min:0,
 				max:25
 			}
@@ -56,7 +55,7 @@ const team = {
 	'team-type': {
 		'value': teamType.HORIZONTAL,
 		'field-properties': {
-			'label-text': 'deadline',
+			'label-text': 'team type',
 			'help-text': 'select how your team creates and manages tasks.',
 			'validation': {
 				required: true
@@ -69,8 +68,8 @@ const team = {
 	'personalised-skills': {
 		'value': '',
 		'field-properties': {
-			'label-text': 'deadline',
-			'help-text': 'select how your team creates and manages tasks.',
+			'label-text': 'team skills',
+			'help-text': 'create skills to add to tasks.',
 			'validation': {
 				required: true
 			}
@@ -89,12 +88,11 @@ const task = {
 	'name': {
 		'value': '',
 		'field-properties': {
-			'label-text': 'deadline',
-			'help-text': 'select how your team creates and manages tasks.',
+			'label-text': 'name',
 			'validation': {
 				required: true,
 				min:3,
-				max:25
+				max:250
 			}
 		},
 		'construction': function (key, value, parent, fieldProperties) {
@@ -104,12 +102,11 @@ const task = {
 	'description': {
 		'value': '',
 		'field-properties': {
-			'label-text': 'deadline',
-			'help-text': 'select how your team creates and manages tasks.',
+			'label-text': 'description',
 			'validation': {
 				required: true,
 				min:0,
-				max:25
+				max:250
 			}
 		},
 		'construction': function (key, value, parent, fieldProperties) {
@@ -119,8 +116,7 @@ const task = {
 	'urgency': {
 		'value': 1,
 		'field-properties': {
-			'label-text': 'deadline',
-			'help-text': 'select how your team creates and manages tasks.',
+			'label-text': 'urgency',
 			'validation': {
 				required: true,
 				min:0,
@@ -134,8 +130,7 @@ const task = {
 	'importance': {
 		'value': 1,
 		'field-properties': {
-			'label-text': 'deadline',
-			'help-text': 'select how your team creates and manages tasks.',
+			'label-text': 'importance',
 			'validation': {
 				required: true,
 				min:0,
@@ -149,8 +144,7 @@ const task = {
 	'impact': {
 		'value': 1,
 		'field-properties': {
-			'label-text': 'deadline',
-			'help-text': 'select how your team creates and manages tasks.',
+			'label-text': 'impact',
 			'validation': {
 				required: true,
 				min:0,
@@ -164,8 +158,8 @@ const task = {
 	'requirements': {
 		'value': 1,
 		'field-properties': {
-			'label-text': 'deadline',
-			'help-text': 'select how your team creates and manages tasks.',
+			'label-text': 'level requirements',
+			'help-text': 'Levels required to complete tasks, set to 0 to add experience rewards without requirement.',
 			'validation': {
 				required: true
 			}
@@ -178,7 +172,6 @@ const task = {
 		'value': new Date(),
 		'field-properties': {
 			'label-text': 'deadline',
-			'help-text': 'select how your team creates and manages tasks.',
 			'validation': {
 				required: true
 			}
@@ -212,16 +205,22 @@ function getExperienceTypes(){
 
 
 
-function createInputLabel(key, parent){
+function createInputLabel(text,key, parent){
 
-	let newLabelField = document.createElement("label");
-	newLabelField.setAttribute("for", key);
-	newLabelField.innerText = key;
-	parent.appendChild(newLabelField);
+	if(text.length > 0){
+		let newLabelField = document.createElement("label");
+		newLabelField.setAttribute("for", key);
+		newLabelField.className = "form-label";
+		newLabelField.innerText = key;
+		newLabelField.className = "form-row label";
+		parent.appendChild(newLabelField);
+	}
+
 }
 
 function createSliderInput(key, value, parent, fieldConfig){
-	createInputLabel(key, parent);
+	let labelText = getLabelText(key, fieldConfig);
+	createInputLabel(labelText,key, parent);
 	let newSliderField = document.createElement("input");
 	newSliderField.name = key;
 	newSliderField.type = "range";
@@ -231,31 +230,65 @@ function createSliderInput(key, value, parent, fieldConfig){
 	newSliderField.max = fieldConfig.validation.max || Infinity;
 	newSliderField.placeholder = key;
 	newSliderField.required = fieldConfig.validation.required || false;
+	newSliderField.className = "form-row slider";
+
+	if(fieldConfig && fieldConfig["help-text"]){
+		createHelpTextRow(parent,fieldConfig["help-text"]);
+	}
+
+
+
+	let newSliderValueDisplay = document.createElement("div");
+	newSliderValueDisplay.className = "form-row slider-text";
+	newSliderValueDisplay.innerHTML = value;
+
+	newSliderField.oninput = function(){
+		newSliderValueDisplay.innerHTML = newSliderField.value;
+	}
+
 	parent.appendChild(newSliderField);
+	parent.appendChild(newSliderValueDisplay);
+
+
+
 	return newSliderField
 }
 
+function getLabelText(key, fieldConfig){
+	let labelText = "";
+	if(fieldConfig && fieldConfig["label-text"])
+	{
+		labelText = fieldConfig["label-text"];
+	}
+	return labelText;
+}
+
 function createNumberInput(key, value, parent, fieldConfig){
-	createInputLabel(key, parent);
+	let labelText = getLabelText(key, fieldConfig);
+	createInputLabel(labelText,key, parent);
 	// create the field and propulate with any data from the object
 	let newNumberField = document.createElement("input");
 	newNumberField.name = key;
 	newNumberField.type = "number";
 	newNumberField.value = value;
 	newNumberField.placeholder = key;
+	newNumberField.className = "form-row number";
 	if(fieldConfig){
 		newNumberField.required = fieldConfig.validation.required || false;
 		newNumberField.min = fieldConfig.validation.min || 0;
 		newNumberField.max = fieldConfig.validation.max || Infinity;
 	}
-
+	if(fieldConfig && fieldConfig["help-text"]){
+		createHelpTextRow(parent,fieldConfig["help-text"]);
+	}
 	parent.appendChild(newNumberField);
 	return newNumberField;
 }
 
 // create text field for the user to input data
 function createTextInputField(key, value, parent, fieldConfig){
-	createInputLabel(key, parent);
+	let labelText = getLabelText(key, fieldConfig);
+	createInputLabel(labelText,key, parent);
 
 	// create the field and propulate with any data from the object
 	let newTextField = document.createElement("input");
@@ -263,6 +296,8 @@ function createTextInputField(key, value, parent, fieldConfig){
 	newTextField.type = "text";
 	newTextField.value = value;
 	newTextField.placeholder = key;
+	newTextField.className = "form-row text";
+
 	if(fieldConfig){
         newTextField.required = fieldConfig.validation.required || false;
         newTextField.minLength = fieldConfig.validation.min || 0;
@@ -270,11 +305,26 @@ function createTextInputField(key, value, parent, fieldConfig){
     }
 
 	parent.appendChild(newTextField);
+
+
+	if(fieldConfig && fieldConfig["help-text"]){
+		createHelpTextRow(parent,fieldConfig["help-text"]);
+	}
+
+
 	return newTextField;
 }
 
+function createHelpTextRow(parent, text){
+	let helpTextSpan = document.createElement("span");
+	helpTextSpan.innerHTML = text;
+	helpTextSpan.className = "form-row help-text";
+	parent.appendChild(helpTextSpan);
+}
+
 function createDateInputField(key, value, parent, fieldConfig){
-	createInputLabel(key, parent);
+	let labelText = getLabelText(key, fieldConfig);
+	createInputLabel(labelText,key, parent);
 	let newDateField = document.createElement("input");
 	let date = value;
 	if(value.toDate) date = value.toDate();
@@ -282,14 +332,22 @@ function createDateInputField(key, value, parent, fieldConfig){
 	newDateField.type = "date";
 	newDateField.value =  convertToHTMLDate(date);
 	newDateField.required = fieldConfig.validation.required || false;
+	newDateField.className = "form-row date";
+
 	parent.appendChild(newDateField);
+
+
+	if(fieldConfig && fieldConfig["help-text"]){
+		createHelpTextRow(parent,fieldConfig["help-text"]);
+	}
 	return newDateField
 }
 
 
 
 function createMultiSelect(key, value, parent, fieldConfig){
-	createInputLabel(key, parent);
+	let labelText = getLabelText(key, fieldConfig);
+	createInputLabel(labelText,key, parent);
 	// set-up the select parent element
 	let newSelectField = document.createElement("select");
 	newSelectField.name = key;
@@ -298,7 +356,7 @@ function createMultiSelect(key, value, parent, fieldConfig){
 	newSelectField.required = fieldConfig.validation.required || false;
 	// get the lookup values from our list of lookups
 	let selectOptionsJson = selectLookup[key];
-
+	newSelectField.className = "form-row multi-select";
 
 	// make an option field for each
 	for(let option in selectOptionsJson, fieldConfig){
@@ -311,17 +369,24 @@ function createMultiSelect(key, value, parent, fieldConfig){
 	}
 
 	parent.appendChild(newSelectField);
+
+	if(fieldConfig && fieldConfig["help-text"]){
+		createHelpTextRow(parent,fieldConfig["help-text"]);
+	}
 	return newSelectField;
 }
 
 // create select for the user to input data
 function createSelectField(key, value, parent, fieldConfig){
-	createInputLabel(key, parent);
+	let labelText = getLabelText(key, fieldConfig);
+	createInputLabel(labelText,key, parent);
 
 	// set-up the select parent element
 	let newSelectField = document.createElement("select");
 	newSelectField.name = key;
 	newSelectField.value = value;
+	newSelectField.className = "form-row select";
+
 	if(fieldConfig)	newSelectField.required = fieldConfig.validation.required || false;
 	// get the lookup values from our list of lookups
 	let selectOptionsJson
@@ -348,6 +413,10 @@ function createSelectField(key, value, parent, fieldConfig){
 	}
 
 	parent.appendChild(newSelectField);
+
+	if(fieldConfig && fieldConfig["help-text"]){
+		createHelpTextRow(parent,fieldConfig["help-text"]);
+	}
 	return newSelectField;
 }
 
@@ -362,7 +431,8 @@ function createOption(key, value, isSelected){
 
 
 function createMapInputField(mapkey, values, parent, fieldConfig){
-	createInputLabel(mapkey, parent);
+	let labelText = getLabelText(mapkey, fieldConfig);
+	createInputLabel(labelText,mapkey, parent);
 	// create wrapper to remove input fields from the top level of this array
 	let fieldMapWrapper = document.createElement("div");
 	let addRowButton = document.createElement("button");
@@ -376,8 +446,16 @@ function createMapInputField(mapkey, values, parent, fieldConfig){
 		newSelectValueMap.setAttribute('select-lookup', mapkey);
 		newSelectValueMap.setAttribute('selected-value', type);
 		newSelectValueMap.setAttribute('value', amount);
+		newSelectValueMap.className = "form-row select-map-wrapper";
 		fieldMapWrapper.appendChild(newSelectValueMap);
 	}
+
+	if(fieldConfig["help-text"]){
+		createHelpTextRow(parent,fieldConfig["help-text"]);
+	}
+	addRowButton.className = "form-row select-map-btn";
+
+
 	parent.appendChild(addRowButton);
 	parent.appendChild(fieldMapWrapper);
 
@@ -397,7 +475,8 @@ function createStringCollectionField(skey, values, parent, fieldConfig){
 	let fieldMapWrapper = document.createElement("div");
 	let addRowButton = document.createElement("button");
 
-	createInputLabel(skey, parent);
+	let labelText = getLabelText(skey, fieldConfig);
+	createInputLabel(labelText,skey, parent);
 
 
 	addRowButton.innerHTML = "add " + skey;
@@ -410,8 +489,15 @@ function createStringCollectionField(skey, values, parent, fieldConfig){
 		let amount = value
 		newSelectValueMap.setAttribute('key', skey);
 		newSelectValueMap.setAttribute('value', amount);
+		newSelectValueMap.className = "form-row select-map-wrapper";
 		fieldMapWrapper.appendChild(newSelectValueMap);
 	}
+
+	if(fieldConfig["help-text"]){
+		createHelpTextRow(parent,fieldConfig["help-text"]);
+	}
+	addRowButton.className = "form-row select-map-btn";
+
 	parent.appendChild(addRowButton);
 	parent.appendChild(fieldMapWrapper);
 
@@ -420,6 +506,7 @@ function createStringCollectionField(skey, values, parent, fieldConfig){
 		let runTimeSelectMap = document.createElement("string-collection");
 		runTimeSelectMap.setAttribute('key', skey);
 		runTimeSelectMap.setAttribute('value', "");
+		runTimeSelectMap.className = "form-row select-map-wrapper";
 		fieldMapWrapper.appendChild(runTimeSelectMap);
 	});
 

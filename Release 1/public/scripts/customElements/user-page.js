@@ -16,19 +16,30 @@ class UserPage extends HTMLElement{
 		const workaholicCurrentUser = getUserId();
 		this.userAccount = firebase.firestore().collection('accounts').doc(workaholicCurrentUser);
 		var testText = ""
-		this.userAccount.set({
-			"logged-on": true,
-            "last-logged": new Date()
-		}, { merge: true });
+
 		// use arrow function to preserve the value of this
 		this.userAccount.get().then(doc => {
 
-			if (doc.exists) {
+		    // make sure we arnt going to blat the users experience values.
+            if (doc.exists) {
+                this.userAccount.set({
+                    "logged-on": true,
+                    "last-logged": new Date()
+                }, {merge: true});
+            } else {
+                this.userAccount.set({
+                    "logged-on": true,
+                    "last-logged": new Date(),
+                    "skill-levels": {}
+                }, {merge: true});
+            }
 
-				let user = doc.data();
-				let template = document.createElement('template');
 
-				const userAccountTemplate = `
+            this.userAccount.get().then(doc => {
+                let user = doc.data();
+                let template = document.createElement('template');
+
+                const userAccountTemplate = `
 											<style>:host { ... }</style>
 												<div class="name-header">
 												<form method="post" id="username-form">
@@ -41,42 +52,47 @@ class UserPage extends HTMLElement{
 													<div><span>points:</span><span>${user.points}</span></div>
 												</div>
 											`;
-				
-				
-				template.innerHTML = userAccountTemplate;
-		
-				var clone = document.importNode(template, true);
-				
-				// dont do it like this maybe? potential dom lag
-				this.innerHTML = userAccountTemplate;
-				
-				//let shadowRoot = this.attachShadow({mode: 'open'});
-				this.accountSettingsFormBtn = document.getElementById('submit-change-btn');
-				this.accountSettingsFormBtn.addEventListener('click', this._clickHandler);
-				let skillLevels =  user["skill-levels"];
-				for(let skillType in skillLevels){
 
-				    let skillXP = skillLevels[skillType];
+
+                template.innerHTML = userAccountTemplate;
+
+                var clone = document.importNode(template, true);
+
+                // dont do it like this maybe? potential dom lag
+                this.innerHTML = userAccountTemplate;
+
+                //let shadowRoot = this.attachShadow({mode: 'open'});
+                this.accountSettingsFormBtn = document.getElementById('submit-change-btn');
+                this.accountSettingsFormBtn.addEventListener('click', this._clickHandler);
+                let skillLevels =  user["skill-levels"];
+                for(let skillType in skillLevels){
+
+                    let skillXP = skillLevels[skillType];
                     let xpLevelTest = document.createElement("p");
                     let testText = skillType + ":  " ;
                     let level = experiencePointsAsLevel(skillXP);
                     testText += "    level: " + level
-					xpLevelTest.innerHTML = testText;
+                    xpLevelTest.innerHTML = testText;
                     this.appendChild(xpLevelTest);
 
 
 
                     let experienceBar = document.createElement("experience-bar");
 
-					this.appendChild(experienceBar);
-					experienceBar.setAttribute("current-experience", skillXP);
-                }
-;
-			}	
-		}).catch(function(error) {
-					
-			console.log("could not get user data:", error);
-		});
+                    this.appendChild(experienceBar);
+                    experienceBar.setAttribute("current-experience", skillXP);
+                } ;
+
+            }).catch(function(error) {
+
+                console.log("could not get user data:", error);
+            });
+
+
+
+
+        })
+
 		
 
 		

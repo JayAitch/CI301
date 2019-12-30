@@ -7,13 +7,13 @@ class ExperienceRewardTile extends HTMLElement{
     }
 
     connectedCallback() {
-        const rewardTileTemplate = `<img class="skill-icon" src="skill icon"><span class="amount"></span>`;
+        const rewardTileTemplate = `<img class="skill-icon" src="skill icon"><span class="skill-text" src="skill icon"></span><span class="amount"></span>`;
 
         // dont do it like this maybe? potential dom lag
         this.innerHTML = rewardTileTemplate;
         this.amountElem = this.querySelector(".amount");
         this.skillIconElem = this.querySelector(".skill-icon");
-
+        this.skillTextElem = this.querySelector(".skill-text");
     }
     static get observedAttributes() {
         return ['amount', 'skill-type']; // status and experience
@@ -23,6 +23,7 @@ class ExperienceRewardTile extends HTMLElement{
             this.amountElem.innerHTML = newValue;
         }
         else if(name === 'skill-type'){
+            this.skillTextElem.innerHTML = newValue +":  ";
             // we want to work out the type and get the icon<<<<<<,
         }
     }
@@ -79,7 +80,6 @@ class TaskCard extends HTMLElement{
         this.descrEle.textContent = taskDescription;
 
         if(name === "rewards"){
-            console.log(this.getAttribute("rewards"));
             this.createRewardTiles(newValue);
         }
 
@@ -121,6 +121,7 @@ class TaskCard extends HTMLElement{
                         }
                         else{
                             console.log(" failed at level check:" + key);
+                            $(this).notify(`requires ${key} level ${requiredLevel}`);
                             //show something to the users!
                             return;
                         }
