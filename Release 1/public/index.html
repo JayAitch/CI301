@@ -47,7 +47,7 @@
   </head>
   <body>
   
-	
+  <span id="notification-area" style="position:absolute; margin-left: 50%;margin-top: 30%;"></span>
 	<div data-role="page" id="teams-page" class="page" data-theme="a">
 		<div data-role="header" data-position="fixed">
 			<h1>Teams</h1>
@@ -221,6 +221,7 @@
 		  margin:0 auto;
 		  padding: 10px;
 		  width:30%;
+		  display: inline-block;
 	  }
 
 	  .form-row{
@@ -244,6 +245,94 @@
 
 		  display:inline-block;
 	  }
+
+
+
+	  .notifyjs-container{
+		  background-color: goldenrod;
+	  }
+	  .notifyjs-foo-base {
+		  opacity: 0.85;
+		  width: 200px;
+		  background: #F5F5F5;
+		  padding: 5px;
+		  border-radius: 10px;
+		  background-color: goldenrod;
+	  }
+
+	  .notifyjs-foo-base .title {
+		  width: 100px;
+		  float: left;
+		  margin: 10px 0 0 10px;
+		  text-align: right;
+	  }
+
+	  .notifyjs-foo-base .buttons {
+		  width: 70px;
+		  float: right;
+		  font-size: 9px;
+		  padding: 5px;
+		  margin: 2px;
+	  }
+
+	  .notifyjs-foo-base button {
+		  font-size: 9px;
+		  padding: 5px;
+		  margin: 2px;
+		  width: 60px;
+	  }
+
+
+
+
+
+
+		.skill-icon{
+			width:28px;
+			height:28px;
+		}
+
+
+
+	  .card-wrapper{
+		  background-color: rgba(211,211,211,.5);
+		  padding: 28px;
+		  margin: 28px;
+	  }
+	  .card-wrapper .description, .card-wrapper .skill-rewards{
+		  margin-left:14px;
+	  }
+	  .skill-icon{
+		  margin:5px;
+	  }
+	  .skill-rewards span{
+		  padding-botton:14px;
+	  }
+	  .reward-tile{
+		  display:inline-block;
+	  }
+
+
+
+
+
+
+	  .bar-wrapper{
+		  border-radius: 5px;
+
+	  }
+	  .progress{
+		  border-radius: 5px;
+		  padding: 10px;
+		  text-shadow: none;
+	  }
+	  .skill-card{
+		  margin: 40px 40px 0px 40px;
+
+	  }
+
+
+
 
   </style>
 </html>

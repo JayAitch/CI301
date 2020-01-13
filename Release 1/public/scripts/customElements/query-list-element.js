@@ -188,7 +188,7 @@ class ChangeableActiveQueryList extends ActiveQueryListElement{
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {
-		if(name == 'collection-target' && oldValue != newValue){
+		if(name == 'collection-target'){
 
 			// remove the cards and re setup snapshot
 			this.removeAllCards();
@@ -202,10 +202,14 @@ class ChangeableActiveQueryList extends ActiveQueryListElement{
 	// bin this list contents
 	removeAllCards(){
 		this.removeListeners();
-		let activeCards = this.cardElemsArray
-		for(var i=0; i < activeCards.length; i++){
-			this.removeChild(activeCards[i]);
+
+		let lastActiveCard = this.lastElementChild;
+
+		while(lastActiveCard){
+			this.removeChild(lastActiveCard);
+			lastActiveCard = this.lastElementChild;
 		}
+
 
 		// remove any potential ghost elements
 		this.cardElemsArray = [];
@@ -214,7 +218,7 @@ class ChangeableActiveQueryList extends ActiveQueryListElement{
 
 
 
-class EditButton extends HTMLButtonElement{
+class EditButton extends HTMLAnchorElement{
 	constructor(){
 		super();
 		this._onClick = this._onClick.bind(this);
@@ -224,7 +228,7 @@ class EditButton extends HTMLButtonElement{
 
 
 	_onClick(){
-		let docLocation = this.parentElement.parentElement.getAttribute("doc-location");
+		let docLocation = this.parentElement.parentElement.parentElement.getAttribute("doc-location"); //this is bad
 
 		let docType = this.getAttribute("obj-type");
 
@@ -236,4 +240,4 @@ class EditButton extends HTMLButtonElement{
 
 }
 
-window.customElements.define('edit-button', EditButton, {extends: 'button'});
+window.customElements.define('edit-button', EditButton, {extends: 'a'});

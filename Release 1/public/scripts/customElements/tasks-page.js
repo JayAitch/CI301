@@ -1,5 +1,37 @@
 let currentlyViewTeamData;
 
+
+
+
+
+function LookupIconURI(skillType){
+
+    // change to a map?
+    let baseURI = "/images/789_Lorc_RPG_icons/"
+    console.log(skillType);
+    let URI = "";
+    switch(skillType) {
+        case "Strength":
+            URI = baseURI + "Icon.3_31.png"
+            break;
+        case "Agility":
+            URI = baseURI + "Icons8_87.png"
+            break;
+        case "Intelligence":
+            URI = baseURI + "Icon.2_94.png"
+            break;
+        case "Endurance":
+            URI = baseURI + "Icon.1_09.png"
+            break;
+        default:
+            URI = baseURI + "Icon.2_92.png"
+    }
+
+    return URI;
+}
+
+
+
 // tile to display experience rewards to the user
 class ExperienceRewardTile extends HTMLElement{
     constructor() {
@@ -7,7 +39,10 @@ class ExperienceRewardTile extends HTMLElement{
     }
 
     connectedCallback() {
-        const rewardTileTemplate = `<img class="skill-icon" src="skill icon"><span class="skill-text" src="skill icon"></span><span class="amount"></span>`;
+
+        let skillType = this.getAttribute("skill-type");
+        let iconURI = LookupIconURI(skillType);
+        const rewardTileTemplate = `<div class="reward-tile"><img class="skill-icon" src="${iconURI}"><span class="skill-text" src="skill icon"></span><span class="amount"></span></div>`;
 
         // dont do it like this maybe? potential dom lag
         this.innerHTML = rewardTileTemplate;
@@ -22,10 +57,7 @@ class ExperienceRewardTile extends HTMLElement{
         if(name === 'amount'){
             this.amountElem.innerHTML = newValue;
         }
-        else if(name === 'skill-type'){
-            this.skillTextElem.innerHTML = newValue +":  ";
-            // we want to work out the type and get the icon<<<<<<,
-        }
+
     }
 
 }
@@ -45,7 +77,7 @@ class TaskCard extends HTMLElement{
 
     // setup elmenet when connected
     connectedCallback() {
-        const userAccountTemplate = `
+        const userAccountTemplate = `			<div class="card-wrapper">
 													<div class="name-header">
 														<h3 class="name"></h3>
 													</div>
@@ -53,15 +85,18 @@ class TaskCard extends HTMLElement{
 													    <p class="description"></p>
 													</div>
 													<div class="control-group">
-														<button is="edit-button" class="team-edit-button control" obj-type="task">edit</button>				
-														<button class="complete-task-button control">complete</button>					
+														<a is="edit-button" class="team-edit-button control ui-btn" obj-type="task" href="#">edit</a>				
+														<a class="complete-task-button control ui-btn" href="#">complete</a>					
 													</div>
+													<div class="skill-rewards"></div>
+												</div>
 											`;
 
         // dont do it like this maybe? potential dom lag
         this.innerHTML = userAccountTemplate;
         this.nameEle = this.querySelector(".name");
         this.descrEle = this.querySelector(".description");
+        this.skillRewardsWraper =  this.querySelector(".skill-rewards");
         this.querySelector(".complete-task-button").addEventListener("click", this._completeBtnClicked);
 
     }
@@ -91,6 +126,7 @@ class TaskCard extends HTMLElement{
         let taskToComplete = firebase.firestore().doc(documentLocation);
 
 
+        // move this logic to a function
         taskToComplete.get().then((doc) => {
 
             let taskData = doc.data();
@@ -181,12 +217,15 @@ class TaskCard extends HTMLElement{
 
     createRewardTile(type, amount){
         let newRewardTile = document.createElement("reward-tile");
-        this.appendChild(newRewardTile);
+        newRewardTile.setAttribute("skill-type", type);
+        this.skillRewardsWraper.appendChild(newRewardTile);
 
         // consider chaining to use data instead of attributes
+
         newRewardTile.setAttribute("amount", amount);
-        newRewardTile.setAttribute("skill-type", type);
         this.currentRewardTiles[type] = newRewardTile;
+
+
     }
 }
 
@@ -203,7 +242,7 @@ class TasksPage extends HTMLElement{
         const teamTemplate = `				<h2 class="name-header">
 													please select a team to view tasks
 												</h2>
-												<button id="new-task-btn">new task</button>
+												<a class="ui-btn" id="new-task-btn" href="#">new task</a>
 											`;
 
         // dont do it like this maybe? potential dom lag

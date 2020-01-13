@@ -128,6 +128,40 @@ function levelAsExperiencePoints(level){
 	return exp;
 }
 
-function canUserCompleteTask(task){
 
+
+
+function createFanFareNotification(text){
+
+
+	$.notify.addStyle('foo', {
+		html:
+			"<div>" +
+			"<div class='clearfix'>" +
+			"<div class='title' data-notify-html='title'/>" +
+			"<div class='title' data-notify-text='text'/>" +
+			"<div class='buttons'>" +
+			"<button class='ok' data-notify-text='button'></button>" +
+			"</div>" +
+			"</div>" +
+			"</div>"
+	});
+
+
+	$(document).on('click', '.notifyjs-foo-base .ok', function() {
+
+		$(this).trigger('notify-hide');
+	});
+
+
+	$('#notification-area').notify({
+		title: 'Congratulations!',
+		text: text,
+		button: 'Okay'
+	}, {
+		style: 'foo',
+		autoHide: false,
+		clickToHide: false
+	});
 }
+
