@@ -463,7 +463,7 @@ function createMapInputField(mapkey, values, parent, fieldConfig){
 		event.preventDefault();
 		let runTimeSelectMap = document.createElement("select-value-map");
 		runTimeSelectMap.setAttribute('select-lookup', mapkey);
-		runTimeSelectMap.setAttribute('selected-value', "strength");
+		runTimeSelectMap.setAttribute('selected-value', "Strength");
 		runTimeSelectMap.setAttribute('value', 0);
 		fieldMapWrapper.appendChild(runTimeSelectMap);
 	});
@@ -667,8 +667,7 @@ class InviteForm extends BasicForm {
 							<form class="document-form">
 								<fieldset class="form-data">
 								<img class="qr-scan-display" class="media" src="">
-									<label for="qr-input"><img src="something here instead of the browse"/></label><input hidden id="qr-input" type="file" accept="image/*" capture="camera">
-									<input hidden class="invite-code-input" name="code" type="text"  required  maxlength="28" minlength="28">
+									<label for="qr-input"><img src="something here instead of the browse"/></label><input hidden name="qr-input" id="qr-input" type="file" accept="image/*" capture="camera">
 								</fieldset>
 								<div class="form-controls-row">
 								<input type="submit" value="Invite">

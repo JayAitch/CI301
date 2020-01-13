@@ -18,8 +18,8 @@ class TeamsPage extends HTMLElement{
 													Teams
 												</h2>												
 												<div id="team-wrapper">
-													<button id="invite-code-btn">invite code</button>
-													<button id="new-team-btn">new team</button>
+													<a id="invite-code-btn" class="ui-btn" href="#">invite code</a>
+													<a id="new-team-btn" class="ui-btn" href="#">new team</a>
 													<!--move qr code out of here when creating the show hide top level modls-->
 													<div hidden id="qr-code"></div>
 												</div>
@@ -105,17 +105,17 @@ class TeamCard extends HTMLElement{
 
 	// setup elmenet when connected
 	connectedCallback() {
-		const userAccountTemplate = `
+		const userAccountTemplate = `			<div class="card-wrapper">
 													<div class="name-header">
 														<h3 class="name"></h3>
 														
 													</div>
 													<div class="control-group">
-														<button class="team-view-button control">view</button>
-														<button is="edit-button" class="team-edit-button control"  obj-type="team">edit</button>
-														<button class="team-invite-button control">invite</button>								
+														<a class="team-view-button control ui-btn" href="#">view</a>
+														<a is="edit-button" class="team-edit-button control ui-btn" href="#" obj-type="team">edit</a>
+														<a class="team-invite-button control ui-btn" href="#">invite</a>								
 													</div>
-
+												</div>
 											`;
 
 		// dont do it like this maybe? potential dom lag

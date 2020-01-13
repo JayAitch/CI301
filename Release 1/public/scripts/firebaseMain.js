@@ -129,39 +129,65 @@ function levelAsExperiencePoints(level){
 }
 
 
-
+setTimeout(function () {
+	createFanFareNotification("strength levels to 4")
+},5)
 
 function createFanFareNotification(text){
 
 
-	$.notify.addStyle('foo', {
+	$.notify.addStyle('level-up', {
 		html:
-			"<div>" +
-			"<div class='clearfix'>" +
-			"<div class='title' data-notify-html='title'/>" +
-			"<div class='title' data-notify-text='text'/>" +
+			"<div class='notify-fanfare'>" +
+
+			"<div class='notification-title' data-notify-html='title'/>" +
+			"<div class='notification-body' data-notify-text='text'/>" +
 			"<div class='buttons'>" +
-			"<button class='ok' data-notify-text='button'></button>" +
-			"</div>" +
+
+
 			"</div>" +
 			"</div>"
-	});
-
-
-	$(document).on('click', '.notifyjs-foo-base .ok', function() {
-
-		$(this).trigger('notify-hide');
 	});
 
 
 	$('#notification-area').notify({
 		title: 'Congratulations!',
 		text: text,
-		button: 'Okay'
+		button: 'Ok',
 	}, {
-		style: 'foo',
+		style: 'level-up',
 		autoHide: false,
-		clickToHide: false
+		clickToHide: true,
+		arrowShow: false,
+		position:'bottom center'
 	});
 }
 
+
+
+
+function LookupIconURI(skillType, notificationType){
+
+	// change to a map?
+	let baseURI = "/images/789_Lorc_RPG_icons/"
+	console.log(skillType);
+	let URI = "";
+	switch(skillType) {
+		case "Strength":
+			URI = baseURI + "Icon.3_31.png"
+			break;
+		case "Agility":
+			URI = baseURI + "Icons8_87.png"
+			break;
+		case "Intelligence":
+			URI = baseURI + "Icon.2_94.png"
+			break;
+		case "Endurance":
+			URI = baseURI + "Icon.1_09.png"
+			break;
+		default:
+			URI = baseURI + "Icon.2_92.png"
+	}
+
+	return URI;
+}

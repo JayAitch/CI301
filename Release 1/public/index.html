@@ -47,7 +47,7 @@
   </head>
   <body>
   
-  <span id="notification-area" style="position:absolute; margin-left: 50%;margin-top: 30%;"></span>
+  <div id="notification-area" style="width:100%;height:80px;"><div style="width:33%;" id="team-notification-area"></div><div id="tasks-notification-area" style="width:33%;"></div><div id="user-notification-area" style="width:33%;"></div><div id="notification-notification-area" style="width:33%;"></div></div>
 	<div data-role="page" id="teams-page" class="page" data-theme="a">
 		<div data-role="header" data-position="fixed">
 			<h1>Teams</h1>
@@ -220,7 +220,7 @@
 	  .control-group .control{
 		  margin:0 auto;
 		  padding: 10px;
-		  width:30%;
+		  //width:30%;
 		  display: inline-block;
 	  }
 
@@ -248,26 +248,34 @@
 
 
 
-	  .notifyjs-container{
+
+	  .notifyjs-level-up-base {
+		  opacity: 0.95;
+		  zzwidth: 30vw;
+
 		  background-color: goldenrod;
-	  }
-	  .notifyjs-foo-base {
-		  opacity: 0.85;
-		  width: 200px;
-		  background: #F5F5F5;
 		  padding: 5px;
 		  border-radius: 10px;
+		  text-shadow: none;
+	  }
+	  .notify-fanfare{
 		  background-color: goldenrod;
+		  padding: 5px;
+		  border-radius: 10px;
 	  }
-
-	  .notifyjs-foo-base .title {
-		  width: 100px;
-		  float: left;
-		  margin: 10px 0 0 10px;
-		  text-align: right;
+	  .notifyjs-level-up-base .notification-title {
+		  margin: 25px auto;
+		  font-weight: bolder;
+		  font-size: 1.2em;
+		  width: 250px;
+		  text-align: center;
 	  }
-
-	  .notifyjs-foo-base .buttons {
+	  .notifyjs-level-up-base .notification-body {
+		  margin: 25px auto;
+		  width: 250px;
+		  text-align: center
+	  }
+	  .notifyjs-level-up-base .buttons {
 		  width: 70px;
 		  float: right;
 		  font-size: 9px;
@@ -297,7 +305,7 @@
 	  .card-wrapper{
 		  background-color: rgba(211,211,211,.5);
 		  padding: 28px;
-		  margin: 28px;
+		  margin: 28px 7px;
 	  }
 	  .card-wrapper .description, .card-wrapper .skill-rewards{
 		  margin-left:14px;
