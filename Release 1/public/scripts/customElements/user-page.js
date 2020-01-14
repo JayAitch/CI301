@@ -12,7 +12,7 @@ class UserPage extends HTMLElement{
   
   connectedCallback() {
 	  
-	  
+	    this.isLoading = true;
 		// we want the currently logged in users reference in our accounts collection
 		// this document will be used to populate the users account page
 		const workaholicCurrentUser = getUserId();
@@ -47,17 +47,34 @@ class UserPage extends HTMLElement{
 
                     let skillXP = skillLevels[skillType];
                     let experienceBar  = this.experienceBars[skillType];
+                    let skillLevel = experiencePointsAsLevel(skillXP);
 
                     if(!experienceBar){
                         experienceBar = document.createElement("experience-bar");
+
+                        if(!this.isLoading){
+                            createFanFareNotification(`your ${skillType} leveled up to ${skillLevel}`);
+                        }
+
                         this.experienceBars[skillType] = experienceBar;
                     }
 
                     experienceBar.setAttribute("skill-type", skillType);
                     experienceBar.setAttribute("current-experience", skillXP);
                     this.appendChild(experienceBar);
+
                 }
+
+                
             })
+
+            // we want to do this with JQM loading trigger to so a loading thing
+
+            setTimeout(function () {
+                this.isLoading = false;
+            },100)
+
+
         })
 
 	}
