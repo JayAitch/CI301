@@ -62,12 +62,12 @@ class InviteNotificationCard extends NotificationCard{
 	
 	// setup elmenet when connected
 	connectedCallback() {
-				const userAccountTemplate = `<div class="notification-wrapper">
+				const userAccountTemplate = `<div class="card-wrapper">
 													<div class="name-header">
 														<h3 class="message"></h3>
 													</div>
 													<span class="is-read"></span><span class="message"></span>
-													<button class="accept-btn">accept</button><button class="decline-btn">decline</button>
+													<a href="#" class="accept-btn ui-btn">accept</a><a href="#" class="decline-btn ui-btn">decline</a>
 												</div>
 											`;
 				

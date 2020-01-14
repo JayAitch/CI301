@@ -129,9 +129,6 @@ function levelAsExperiencePoints(level){
 }
 
 
-setTimeout(function () {
-	createFanFareNotification("strength levels to 4")
-},5)
 
 function createFanFareNotification(text){
 

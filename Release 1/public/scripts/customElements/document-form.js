@@ -668,6 +668,7 @@ class InviteForm extends BasicForm {
 								<fieldset class="form-data">
 								<img class="qr-scan-display" class="media" src="">
 									<label for="qr-input"><img src="something here instead of the browse"/></label><input hidden name="qr-input" id="qr-input" type="file" accept="image/*" capture="camera">
+									<input type="text" class="invite-code-input">
 								</fieldset>
 								<div class="form-controls-row">
 								<input type="submit" value="Invite">

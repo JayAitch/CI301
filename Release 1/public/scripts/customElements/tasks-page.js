@@ -4,34 +4,6 @@ let currentlyViewTeamData;
 
 
 
-function LookupIconURI(skillType){
-
-    // change to a map?
-    let baseURI = "/images/789_Lorc_RPG_icons/"
-    console.log(skillType);
-    let URI = "";
-    switch(skillType) {
-        case "Strength":
-            URI = baseURI + "Icon.3_31.png"
-            break;
-        case "Agility":
-            URI = baseURI + "Icons8_87.png"
-            break;
-        case "Intelligence":
-            URI = baseURI + "Icon.2_94.png"
-            break;
-        case "Endurance":
-            URI = baseURI + "Icon.1_09.png"
-            break;
-        default:
-            URI = baseURI + "Icon.2_92.png"
-    }
-
-    return URI;
-}
-
-
-
 // tile to display experience rewards to the user
 class ExperienceRewardTile extends HTMLElement{
     constructor() {
