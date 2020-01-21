@@ -143,10 +143,13 @@ class ActiveQueryListElement extends StaticQueryListElement{
 	// this scenario should only rarely happen, remove deleted document from the DOM
 	removeCard(change){
 		// use the change position to find which dom element should be removed
-		let docIndex = change.oldIndex
+		let docIndex = change.oldIndex;
+		console.log(docIndex);
 		let card = this.cardElemsArray[docIndex];
 		// may need to resize the array here
+		console.log(card);
 		this.removeChild(card);
+		this.cardElemsArray.splice(docIndex,docIndex + 1);
 	}
 
 

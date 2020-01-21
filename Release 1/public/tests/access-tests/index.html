@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <script defer src="/__/firebase/7.2.3/firebase-app.js"></script>
+      <!-- include only the Firebase features as you need -->
+      <script defer src="/__/firebase/7.2.3/firebase-auth.js"></script>
+      <script defer src="/__/firebase/7.2.3/firebase-database.js"></script>
+      <script defer src="/__/firebase/7.2.3/firebase-messaging.js"></script>
+      <script defer src="/__/firebase/7.2.3/firebase-storage.js"></script>
+      <script defer src="/__/firebase/7.2.3/firebase-firestore.js"></script>
+  </head>
+  <body>
+	<div>
+        <h1>User</h1>
+        <div>
+            <div id="user-results-container">
+            </div>
+            <button onclick="startUserTestOwnUserDocument()">
+                Attempt to access own user document
+            </button>
+            <button onclick="startUserTestOtherUserDocument()">
+                Attempt to access other user document
+            </button>
+
+        </div>
+	</div>
+
+    <div>
+        <h1>Teams</h1>
+        <div>
+            <div id="tasks-results-container">
+            </div>
+            <button onclick="startTestAccessAllTeams()">
+                Attempt to all teams
+            </button>
+            <button onclick="startTestAccessUsersTeams()">
+                Attempt to current users teams
+            </button>
+
+
+        </div>
+    </div>
+
+
+
+
+    <div>
+        <h1>Tasks</h1>
+    </div>
+
+
+	<script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1LiymKHpZp6HRYwu-AYj9jw072Oqp0AU",
+            authDomain: "testfire-60064.firebaseapp.com",
+            databaseURL: "https://testfire-60064.firebaseio.com",
+            projectId: "testfire-60064",
+            storageBucket: "testfire-60064.appspot.com",
+            messagingSenderId: "497572840612",
+            appId: "1:497572840612:web:311417ad0a342883b7d231",
+            measurementId: "G-D6D9ZR077L"
+        };
+
+
+        let userTestDisplay;
+        let taskResultDisplay;
+        let currentUserID;
+
+
+
+        document.addEventListener("DOMContentLoaded", event =>{
+            const app = firebase.initializeApp(firebaseConfig);
+            userTestDisplay = document.getElementById("user-results-container");
+            taskResultDisplay = document.getElementById("tasks-results-container");
+
+
+
+            firebase.auth().onAuthStateChanged(function(user) {
+                    if (user) {
+                        currentUserID = firebase.auth().currentUser.uid;
+                    }
+                    else{
+                        const authenticator = new firebase.auth.GoogleAuthProvider();
+                        firebase.auth().signInWithRedirect(authenticator);
+                    }
+                });
+
+
+
+        });
+
+
+
+        function startUserTestOtherUserDocument(){
+
+            otherUserID = "Q9RR2Zwk5UQBHCHIPHjBQDkgePj2"
+            addToTestPrint(userTestDisplay, "<br><h3> Access other user</h3><br>");
+            addToTestPrint(userTestDisplay, "logged in as: " + currentUserID);
+            addToTestPrint(userTestDisplay, "attempting to acccess user: " + otherUserID);
+
+            collectionReference =  firebase.firestore().doc("accounts/" + otherUserID);
+            attemptToAccessDocument(collectionReference, userTestDisplay, false);
+        }
+
+        function startUserTestOwnUserDocument() {
+
+            //currentUserID = firebase.auth().currentUser.uid;
+            addToTestPrint(userTestDisplay, "<br><h3> Access own user</h3>");
+            addToTestPrint(userTestDisplay, "logged in as: " + currentUserID);
+            addToTestPrint(userTestDisplay, "attempting to acccess user: " + currentUserID);
+
+            collectionReference =  firebase.firestore().doc("accounts/" + currentUserID);
+            attemptToAccessDocument(collectionReference, userTestDisplay, true);
+        }
+
+
+        function startTestAccessAllTeams() {
+
+           // currentUserID = firebase.auth().currentUser.uid;
+            addToTestPrint(taskResultDisplay, "<br><h3> Access all teams</h3><br>");
+            addToTestPrint(taskResultDisplay, "logged in as: " + taskResultDisplay);
+            addToTestPrint(taskResultDisplay, "attempting to acccess all team collection");
+
+            collectionReference =  firebase.firestore().collection("teams");
+            // this maybe true!!!!
+            attemptToAccessCollection(collectionReference, taskResultDisplay, false);
+        }
+
+
+
+        function startTestAccessUsersTeams() {
+
+           // currentUserID = firebase.auth().currentUser.uid;
+            addToTestPrint(taskResultDisplay, "<br><h3> Access all teams</h3><br>");
+            addToTestPrint(taskResultDisplay, "logged in as: " + taskResultDisplay);
+            addToTestPrint(taskResultDisplay, "attempting to acccess all team collection");
+
+            collectionReference =  firebase.firestore().collection("teams").where('members', 'array-contains', currentUserID);
+
+            attemptToAccessCollection(collectionReference, taskResultDisplay, true);
+        }
+
+
+
+        function addToTestPrint2(displayElem, text){
+            displayElem.innerHTML = displayElem.innerHTML + text;
+        }
+
+
+
+
+        function addToTestPrint(displayElem, text){
+            displayElem.innerHTML = displayElem.innerHTML + text + "<br>";
+        }
+
+
+
+        function attemptToAccessDocument(documentRef, displayElement, shouldAccessBePossible){
+            documentRef.get().then(doc => {
+                doc.id;
+                addToTestPrint(displayElement, "accessed document, result:  " + booleanToTestResultText(true, shouldAccessBePossible));
+            }).catch(function(error) {
+                addToTestPrint(displayElement, "firebase error:" + error.toString());
+                addToTestPrint(displayElement, "failed to access document, result: "  + booleanToTestResultText(false, shouldAccessBePossible));
+            });
+        }
+
+
+
+
+
+        function attemptToAccessCollection(queryRef, displayElement, shouldAccessBePossible){
+            queryRef.get().then(collection => {
+                console.log(collection);
+
+
+
+
+               // addToTestPrint2(displayElement, "<table>");
+
+                collection.forEach(function (doc) {
+                    let tableString = "<table>";
+                    tableString = tableString + "<tr><td>ID</td><td>"+ doc.id +"</td></tr>";
+                    tableString = tableString + documentObjectTableRowString(doc.data());
+                    console.log(doc.data)
+                    //addToTestPrint(displayElement, "managed to find" + doc.id);
+                    //logDocumentObject(displayElement, doc.data());
+                    tableString = tableString +"</table>"
+                    addToTestPrint(displayElement, tableString);
+                });
+
+
+
+
+                let size = collection.size;
+                addToTestPrint(displayElement, "accessed collection of size " + size + ", result :  " + booleanToTestResultText(true, shouldAccessBePossible));
+
+
+            }).catch(function(error) {
+                addToTestPrint(displayElement, "firebase error:" + error.toString());
+                addToTestPrint(displayElement, "failed to access collection, result: "  + booleanToTestResultText(false, shouldAccessBePossible));
+            });
+        }
+
+
+
+        function createDocumentTable(displayElement, collection){
+            let Table
+        }
+
+        function logDocumentObject(logElement, document){
+
+            for (var key in document) {
+                let outputText;
+                if (document.hasOwnProperty(key)) {
+                    outputText = outputText + "<tr><td>"+ key + "</td><td>"+ document.key + "</td></tr>";
+
+                }
+
+                logElement.innerHTML = logElement.innerHTML + outputText;
+            }
+        }
+
+        function documentObjectTableRowString(document){
+            let outputText = "";
+            for (var key in document) {
+
+                if (document.hasOwnProperty(key)) {
+                    outputText = outputText + "<tr><td>"+ key + "</td><td>"+ document[key] + "</td></tr>";
+
+                }
+            }
+            return outputText;
+        }
+        function booleanToTestResultText(result, expected){
+            let resultTest = "FAIL";
+
+            if(result === expected){
+                resultTest = "PASS";
+            }
+            return resultTest;
+        }
+
+		
+	</script>
+  </body>
+  
+  <style>
+      table{
+                 width:100%;
+          margin: 10px;
+             }
+      table td{
+          width:48%;
+      }
+  </style>
+</html>
