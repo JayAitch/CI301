@@ -56,7 +56,7 @@ class TaskCard extends HTMLElement{
 													    <p class="description"></p>
 													</div>
 													<div class="control-group">
-														<a is="edit-button" class="team-edit-button control ui-btn" obj-type="task" href="#">edit</a>				
+																
 														<a class="complete-task-button control ui-btn" href="#">complete</a>					
 													</div>
 													<div class="skill-requirements tile-group"><span class="tile-group-label">Required:</span></div>
@@ -64,17 +64,29 @@ class TaskCard extends HTMLElement{
 
 												</div>
 											`;
-
         // dont do it like this maybe? potential dom lag
+
         this.innerHTML = userAccountTemplate;
+        this.controlGroup = this.querySelector(".control-group");
         this.nameEle = this.querySelector(".name");
         this.descrEle = this.querySelector(".description");
         this.skillRequirementsWrapper = this.querySelector(".skill-requirements");
         this.skillRewardsWraper =  this.querySelector(".skill-rewards");
         this.deadlineDateDiv = this.querySelector(".deadline-date-display");
         this.querySelector(".complete-task-button").addEventListener("click", this._completeBtnClicked);
-
+        this.createEditButton();
     }
+
+
+    createEditButton(){
+        if(this.getAttribute("show-edit") == "true"){
+            let editButton = document.createElement("a", {is: "edit-button"});
+            editButton.setAttribute("doc-location", this.getAttribute("doc-location"));
+            editButton.setAttribute("obj-type","task");
+            this.controlGroup.appendChild(editButton);
+        }
+    }
+
 
     // observe the attribute changes so we can modify dispalyed data
     static get observedAttributes() {
@@ -111,9 +123,6 @@ class TaskCard extends HTMLElement{
 
             let taskData = doc.data();
             let taskRewards = taskData['experience-rewards']
-            console.log(taskRewards);
-
-
 
                 // TODO: add check to requirements
                 //       add levelup check and fanfare
@@ -279,12 +288,13 @@ class TasksPage extends HTMLElement{
 
         // we may want to change this to a filter so that a user can query multiple teams at once
         // todo: flow and wireframe to deside
-        if(name == 'teams-watched' && oldValue != newValue){
+        if(name == 'teams-watched' ){
             this.teamTarget = newValue;
 
             // assign the team we are viewing to a global variable, components of the app will use this for configuration
             firebase.firestore().doc(this.teamTarget).get().then((doc)=> {
-                currentlyViewTeamData = doc.data(); this.header.innerHTML = currentlyViewTeamData.name || 'error';
+                currentlyViewTeamData = doc.data();
+                this.header.innerHTML = currentlyViewTeamData.name || 'error';
             });
 
             this.taskListElem.setAttribute("collection-target", this.teamTarget);
@@ -314,20 +324,26 @@ class TasksList extends ChangeableActiveQueryList{
         let targetDocument = this.getAttribute('collection-target');
 
         this.collectionRef =  targetDocument + "/tasks/"
-        console.log(this.collectionRef);
-        console.log("tasks");
-        // find all notifications refering to the current user
+        // find all tasks underneith refering to the current team
         return firebase.firestore().collection(this.collectionRef).where("status", "==", taskStatus.Active)
     }
 
     createCardDOMElement(docData) {
         let teamTemplate = document.createElement("task-card");
+        this.setTaskCardCreationAttributes(teamTemplate, docData);
         return teamTemplate;
     }
+
+    setTaskCardCreationAttributes(teamTemplate, docData){
+        let showEdit = this.shouldShowEditButton(docData);
+        teamTemplate.setAttribute("show-edit", showEdit);
+    }
+
 
     setAttributesFromDoc(elem, docData) {
         let name = docData.name;
         let desc = docData.description;
+
         let rewards = docData["experience-rewards"];
         let requirements = docData["requirements"];
         let deadline = convertToHTMLDate(docData["deadline"].toDate());
@@ -345,6 +361,23 @@ class TasksList extends ChangeableActiveQueryList{
         elem.setAttribute("description", desc);
 
 
+    }
+
+    shouldShowEditButton(docData){
+        let teamType = currentlyViewTeamData["team-type"];
+        let taskOwnerID = docData.owner;
+        let teamOwnerID = currentlyViewTeamData.owner;
+        let currentUserID = getUserId();
+
+        // is the team type verticle? is the current user not the owner of the team
+        if(teamType == 1 && teamOwnerID != currentUserID) {
+            // is the current user not the owner of the task
+            if (taskOwnerID != currentUserID) {
+                // dont show edit button
+                return false;
+            }
+        }
+        return true
     }
 
     buildRewardString(rewards) {

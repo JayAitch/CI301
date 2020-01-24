@@ -226,13 +226,15 @@ class EditButton extends HTMLAnchorElement{
 		super();
 		this._onClick = this._onClick.bind(this);
 		this.addEventListener("click", this._onClick);
+		this.innerHTML = "edit";
+		this.classList = "ui-btn control";
 	}
 
 
 
 	_onClick(){
-		let docLocation = this.parentElement.parentElement.parentElement.getAttribute("doc-location"); //this is bad
-
+		let docLocation = this.getAttribute("doc-location");
+		console.log(docLocation);
 		let docType = this.getAttribute("obj-type");
 
 		const changeDocForm = document.getElementById("change-document-form");

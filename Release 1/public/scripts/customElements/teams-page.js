@@ -5,15 +5,12 @@
 class TeamsPage extends HTMLElement{
   constructor() { 
     super();
-	//this._onNewTeamBtnClick = this._onNewTeamBtnClick.bind(this);
 	this._showInviteCode = this._showInviteCode.bind(this);
 
   }
   
   // set up the element on connection
   connectedCallback() {
-	  //super();
-	  console.log("connected-teams");
 	  const teamListTemplate = `				<h2 class="name-header">
 													Teams
 												</h2>												
@@ -25,15 +22,13 @@ class TeamsPage extends HTMLElement{
 												</div>
 												<team-list></team-list>
 											`;
-				
 
-	
+
+
 	
 	// dont do it like this maybe? potential dom lag
 	this.innerHTML = teamListTemplate;
-	// find the UL containing the nofications
 	this.newTeamBtn = document.getElementById("new-team-btn").addEventListener("click", this._onNewTeamBtnClick);
-	
 
 	//  this should probably move from here
 	this.inviteCodeBtn = document.getElementById("invite-code-btn").addEventListener("click", this._showInviteCode);
@@ -77,9 +72,29 @@ class TeamsList extends ActiveQueryListElement{
 	}
 
 	createCardDOMElement(docData){
-		return document.createElement("team-card");
+		let newTeamCard = document.createElement("team-card");
+		this.addCardCreationAttributes(newTeamCard, docData);
+		return newTeamCard;
 	}
 
+
+	addCardCreationAttributes(newTeamCard, docData){
+		let shouldShowEditButton = this.shouldShowEditButton(docData)
+		newTeamCard.setAttribute("show-edit", shouldShowEditButton);
+	}
+
+	shouldShowEditButton(docData){
+		let teamType = docData["team-type"];
+		let teamOwnerID = docData.owner;
+		let currentUserID = getUserId();
+
+		// is the team type verticle? is the current user not the owner of the team
+		if(teamType == 1 && teamOwnerID != currentUserID) {
+				// dont show edit button
+				return false;
+		}
+		return true
+	}
 
 
 	// set/update any relevant attributes on the card
@@ -89,6 +104,7 @@ class TeamsList extends ActiveQueryListElement{
 		elem.setAttribute("name", name)
 
 	}
+
 
 }
 
@@ -112,7 +128,6 @@ class TeamCard extends HTMLElement{
 													</div>
 													<div class="control-group">
 														<a class="team-view-button control ui-btn" href="#">view</a>
-														<a is="edit-button" class="team-edit-button control ui-btn" href="#" obj-type="team">edit</a>
 														<a class="team-invite-button control ui-btn" href="#">invite</a>								
 													</div>
 												</div>
@@ -120,14 +135,25 @@ class TeamCard extends HTMLElement{
 
 		// dont do it like this maybe? potential dom lag
 		this.innerHTML = userAccountTemplate;
-
+		this.controlGroup = this.querySelector(".control-group");
 		this.headerEle = this.querySelector(".name");
 		// find the top wrapper and add the click listener to it
-
-		//this.querySelector(".team-edit-button").addEventListener("click", this._editTeam);
+		this.createEditButton();
 		this.querySelector(".team-view-button").addEventListener("click", this._viewTeam);
 		this.querySelector(".team-invite-button").addEventListener("click", this._showInviteForm);
 	}
+
+
+
+	createEditButton(){
+		if(this.getAttribute("show-edit") == "true"){
+			let editButton = document.createElement("a", {is: "edit-button"});
+			editButton.setAttribute("doc-location", this.getAttribute("doc-location"));
+			editButton.setAttribute("obj-type","team");
+			this.controlGroup.appendChild(editButton);
+		}
+	}
+
 
 
 	// observe the attribute changes so we can modify dispalyed data
@@ -150,18 +176,6 @@ class TeamCard extends HTMLElement{
 		document.location = '#tasks-page';
 
 	}
-
-
-
-	//
-	// // todo move this functionality into a seperate element so we can just put edit buttons everywhere
-	// _editTeam(ev) {
-	// 	let docLocation = this.getAttribute("doc-location");
-	// 	const changeDocForm = document.getElementById("change-document-form");
-	// 	changeDocForm.setAttribute("obj-type", "team");
-	// 	changeDocForm.setAttribute("document-target", docLocation);
-	// 	changeDocForm.hidden = false;
-	// }
 
 	_showInviteForm(ev){
 		const inviteForm = document.getElementById("invite-form");
