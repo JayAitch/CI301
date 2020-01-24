@@ -166,8 +166,7 @@ function createFanFareNotification(text){
 function LookupIconURI(skillType, notificationType){
 
 	// change to a map?
-	let baseURI = "/images/789_Lorc_RPG_icons/"
-	console.log(skillType);
+	let baseURI = "/images/789_Lorc_RPG_icons/";
 	let URI = "";
 	switch(skillType) {
 		case "Strength":
