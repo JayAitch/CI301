@@ -251,13 +251,13 @@
 
 	  .notifyjs-level-up-base {
 		  opacity: 0.95;
-		  zzwidth: 30vw;
-
 		  background-color: goldenrod;
 		  padding: 5px;
 		  border-radius: 10px;
 		  text-shadow: none;
 	  }
+
+
 	  .notify-fanfare{
 		  background-color: goldenrod;
 		  padding: 5px;
@@ -307,14 +307,26 @@
 		  padding: 28px;
 		  margin: 28px 7px;
 	  }
-	  .card-wrapper .description, .card-wrapper .skill-rewards{
+	  .card-wrapper h3{
+		  display: inline-block;
+	  }
+	  .card-wrapper .description{
+		  width:100%;
+	  }
+	  .card-wrapper .description, .card-wrapper .skill-rewards, .card-wrapper .skill-requirements{
 		  margin-left:14px;
+	  }
+	  .tile-group{
+		  border-radius: 8px;
+		  margin:8px;
+		  background-color: rgba(244,244,244, 0.5);
+
 	  }
 	  .skill-icon{
 		  margin:5px;
 	  }
 	  .skill-rewards span{
-		  padding-botton:14px;
+		  //padding-botton:14px;
 	  }
 	  .reward-tile{
 		  display:inline-block;
@@ -338,8 +350,17 @@
 		  margin: 40px 40px 0px 40px;
 
 	  }
-
-
+	  .tile-group-label{
+		  background-color: #6c757d;
+		  float:left;
+		  border-top-left-radius: 8px;
+		  padding: 4px;
+		  color:white;
+	  }
+	.deadline-date-display{
+		float:right;
+		font-weight: bolder;
+	}
 
 
   </style>

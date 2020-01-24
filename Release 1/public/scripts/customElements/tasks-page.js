@@ -37,12 +37,11 @@ class ExperienceRewardTile extends HTMLElement{
 
 
 
-
-
 class TaskCard extends HTMLElement{
     constructor() {
         super();
         this.currentRewardTiles = {};
+        this.currentRequirementTiles = {};
         this._completeBtnClicked = this._completeBtnClicked.bind(this);
     }
 
@@ -51,7 +50,7 @@ class TaskCard extends HTMLElement{
     connectedCallback() {
         const userAccountTemplate = `			<div class="card-wrapper">
 													<div class="name-header">
-														<h3 class="name"></h3>
+														 <div class="deadline-date-display"></div><h3 class="name"></h3>
 													</div>
 													<div class="description-wrapper">
 													    <p class="description"></p>
@@ -60,7 +59,9 @@ class TaskCard extends HTMLElement{
 														<a is="edit-button" class="team-edit-button control ui-btn" obj-type="task" href="#">edit</a>				
 														<a class="complete-task-button control ui-btn" href="#">complete</a>					
 													</div>
-													<div class="skill-rewards"></div>
+													<div class="skill-requirements tile-group"><span class="tile-group-label">Required:</span></div>
+													<div class="skill-rewards tile-group"><span class="tile-group-label">Rewards:</span></div>
+
 												</div>
 											`;
 
@@ -68,26 +69,33 @@ class TaskCard extends HTMLElement{
         this.innerHTML = userAccountTemplate;
         this.nameEle = this.querySelector(".name");
         this.descrEle = this.querySelector(".description");
+        this.skillRequirementsWrapper = this.querySelector(".skill-requirements");
         this.skillRewardsWraper =  this.querySelector(".skill-rewards");
+        this.deadlineDateDiv = this.querySelector(".deadline-date-display");
         this.querySelector(".complete-task-button").addEventListener("click", this._completeBtnClicked);
 
     }
 
     // observe the attribute changes so we can modify dispalyed data
     static get observedAttributes() {
-        return ['name', 'description', 'rewards']; // status and experience
+        return ['name', 'description', 'rewards', 'requirements', 'deadline']; // status and experience
     }
 
     // set the display for these values onto the txt of the displays
     attributeChangedCallback(name, oldValue, newValue) {
         let taskName = this.getAttribute("name");
         let taskDescription = this.getAttribute("description");
+        let deadline = this.getAttribute("deadline");
 
         this.nameEle.textContent = taskName;
         this.descrEle.textContent = taskDescription;
-
+        this.deadlineDateDiv.textContent = deadline;
         if(name === "rewards"){
             this.createRewardTiles(newValue);
+        }
+        if(name === "requirements" && newValue.length > 0){
+            console.log();
+            this.createRequirementTiles(newValue);
         }
 
     }
@@ -155,6 +163,29 @@ class TaskCard extends HTMLElement{
 
     }
 
+    createRequirementTiles(requirement){
+        let requirementsArray = requirement.split(",");
+        for(let rewardPos = 0; requirementsArray.length > rewardPos; rewardPos++){
+
+            let currentReward = requirementsArray[rewardPos];
+            let currentRewardArr = currentReward.split(':');
+            let currentRewardType = currentRewardArr[0];
+            let currentRewardAmount = currentRewardArr[1];
+
+            let currentRewardTile = this.currentRequirementTiles[currentRewardType];
+
+
+            if(currentRewardTile){
+                this.setRewardAttributes(currentRewardTile, currentRewardAmount);
+            }
+            else{
+                this.createRequirmentTile(currentRewardType, currentRewardAmount);
+
+            }
+
+        }
+    }
+
 
     createRewardTiles(reward){
 
@@ -196,6 +227,19 @@ class TaskCard extends HTMLElement{
 
         newRewardTile.setAttribute("amount", amount);
         this.currentRewardTiles[type] = newRewardTile;
+
+
+    }
+
+    createRequirmentTile(type, amount){
+        let newRewardTile = document.createElement("reward-tile");
+        newRewardTile.setAttribute("skill-type", type);
+        this.skillRequirementsWrapper.appendChild(newRewardTile);
+
+        // consider chaining to use data instead of attributes
+
+        newRewardTile.setAttribute("amount", amount);
+        this.currentRequirementTiles[type] = newRewardTile;
 
 
     }
@@ -285,13 +329,18 @@ class TasksList extends ChangeableActiveQueryList{
         let name = docData.name;
         let desc = docData.description;
         let rewards = docData["experience-rewards"];
+        let requirements = docData["requirements"];
+        let deadline = convertToHTMLDate(docData["deadline"].toDate());
 
         if(rewards){
             let rewardString = this.buildRewardString(rewards);
             elem.setAttribute("rewards", rewardString);
+
+            let requirementsString = this.buildRequirementString(requirements);
+            elem.setAttribute("requirements", requirementsString);
         }
 
-
+        elem.setAttribute("deadline", deadline);
         elem.setAttribute("name", name);
         elem.setAttribute("description", desc);
 
@@ -309,7 +358,20 @@ class TasksList extends ChangeableActiveQueryList{
         rewardString = rewardString.substr(0, rewardString.length - 1)
         return rewardString;
     }
+    buildRequirementString(requirements) {
+        let requirementString = "";
 
+        for (let key in requirements) {
+            if (requirements.hasOwnProperty(key)) {
+                if(requirements[key] && requirements[key] != 0){
+                    requirementString += key + ":" + requirements[key] + ",";
+                }
+
+            }
+        }
+        requirementString = requirementString.substr(0, requirementString.length - 1)
+        return requirementString;
+    }
 }
 
 window.customElements.define('reward-tile', ExperienceRewardTile);

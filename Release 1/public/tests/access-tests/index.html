@@ -15,7 +15,7 @@
 	<div>
         <h1>User</h1>
         <div>
-            <div id="user-results-container">
+            <div id="user-results-container" class="test-display">
             </div>
             <button onclick="startUserTestOwnUserDocument()">
                 Attempt to access own user document
@@ -23,14 +23,16 @@
             <button onclick="startUserTestOtherUserDocument()">
                 Attempt to access other user document
             </button>
-
+            <button onclick="clearTestContainer(this)">
+                Clear
+            </button>
         </div>
 	</div>
 
     <div>
         <h1>Teams</h1>
         <div>
-            <div id="tasks-results-container">
+            <div id="teams-results-container" class="test-display">
             </div>
             <button onclick="startTestAccessAllTeams()">
                 Attempt to all teams
@@ -38,7 +40,9 @@
             <button onclick="startTestAccessUsersTeams()">
                 Attempt to current users teams
             </button>
-
+            <button onclick="clearTestContainer(this)">
+                Clear
+            </button>
 
         </div>
     </div>
@@ -48,6 +52,20 @@
 
     <div>
         <h1>Tasks</h1>
+        <div>
+            <div id="tasks-results-container" class="test-display">
+            </div>
+            <button onclick="accessAllowedTask()">
+                Attempt to access task should have access too
+            </button>
+            <button onclick="accessNonAllowedTask()">
+                Attempt to access task shouldn't have access too
+            </button>
+            <button onclick="clearTestContainer(this)">
+                Clear
+            </button>
+
+        </div>
     </div>
 
 
@@ -65,6 +83,7 @@
 
 
         let userTestDisplay;
+        let teamResultDisplay;
         let taskResultDisplay;
         let currentUserID;
 
@@ -73,8 +92,8 @@
         document.addEventListener("DOMContentLoaded", event =>{
             const app = firebase.initializeApp(firebaseConfig);
             userTestDisplay = document.getElementById("user-results-container");
+            teamResultDisplay = document.getElementById("teams-results-container");
             taskResultDisplay = document.getElementById("tasks-results-container");
-
 
 
             firebase.auth().onAuthStateChanged(function(user) {
@@ -118,48 +137,72 @@
 
         function startTestAccessAllTeams() {
 
-           // currentUserID = firebase.auth().currentUser.uid;
-            addToTestPrint(taskResultDisplay, "<br><h3> Access all teams</h3><br>");
-            addToTestPrint(taskResultDisplay, "logged in as: " + taskResultDisplay);
-            addToTestPrint(taskResultDisplay, "attempting to acccess all team collection");
+
+            addToTestPrint(teamResultDisplay, "<br><h3> Access all teams</h3><br>");
+            addToTestPrint(teamResultDisplay, "logged in as: " + currentUserID);
+            addToTestPrint(teamResultDisplay, "attempting to access all team collection");
 
             collectionReference =  firebase.firestore().collection("teams");
             // this maybe true!!!!
-            attemptToAccessCollection(collectionReference, taskResultDisplay, false);
+            attemptToAccessCollection(collectionReference, teamResultDisplay, false);
         }
 
 
 
         function startTestAccessUsersTeams() {
 
-           // currentUserID = firebase.auth().currentUser.uid;
-            addToTestPrint(taskResultDisplay, "<br><h3> Access all teams</h3><br>");
-            addToTestPrint(taskResultDisplay, "logged in as: " + taskResultDisplay);
-            addToTestPrint(taskResultDisplay, "attempting to acccess all team collection");
+
+            addToTestPrint(teamResultDisplay, "<br><h3> Access all teams</h3><br>");
+            addToTestPrint(teamResultDisplay, "logged in as: " + currentUserID);
+            addToTestPrint(teamResultDisplay, "attempting to users team collection");
 
             collectionReference =  firebase.firestore().collection("teams").where('members', 'array-contains', currentUserID);
 
-            attemptToAccessCollection(collectionReference, taskResultDisplay, true);
+            attemptToAccessCollection(collectionReference, teamResultDisplay, true);
         }
 
 
 
-        function addToTestPrint2(displayElem, text){
-            displayElem.innerHTML = displayElem.innerHTML + text;
+        function accessNonAllowedTask(){
+            currentUserID = firebase.auth().currentUser.uid;
+            addToTestPrint(taskResultDisplay, "<br><h3> Access as non task owner</h3><br>");
+            addToTestPrint(taskResultDisplay, "logged in as: " + currentUserID);
+            addToTestPrint(taskResultDisplay, "<br>");
+            addToTestPrint(taskResultDisplay, "team a this isnt the owner of");
+            addToTestPrint(taskResultDisplay, "<br>");
+            addToTestPrint(taskResultDisplay, "teams/YoOlVmrtFscMKIIIBlVY/tasks/gcCUKM3TKZJAnATvP0TU");
+            ///collectionReference =  firebase.firestore().collection("teams").where('members', 'array-contains', currentUserID);
+
+
+            taskDocumentReference =  firebase.firestore().doc("teams/YoOlVmrtFscMKIIIBlVY/tasks/gcCUKM3TKZJAnATvP0TU");
+            attemptToAccessDocument(taskDocumentReference, taskResultDisplay, false);
         }
 
 
+        function accessAllowedTask(){
+            currentUserID = firebase.auth().currentUser.uid;
+            addToTestPrint(taskResultDisplay, "<br><h3> Access as task owner</h3><br>");
+            addToTestPrint(taskResultDisplay, "logged in as: " + currentUserID);
+            addToTestPrint(taskResultDisplay, "<br>");
+            addToTestPrint(taskResultDisplay, "team this is the owner of");
+            addToTestPrint(taskResultDisplay, "<br>");
+            addToTestPrint(taskResultDisplay, "teams/4KPb4pFzJ3YsQ3cxmh3g/tasks/4OGTfFmWKbRkn2hx67iU");
+
+
+            taskDocumentReference =  firebase.firestore().doc("teams/4KPb4pFzJ3YsQ3cxmh3g/tasks/4OGTfFmWKbRkn2hx67iU");
+            attemptToAccessDocument(taskDocumentReference, taskResultDisplay, true);
+        }
 
 
         function addToTestPrint(displayElem, text){
-            displayElem.innerHTML = displayElem.innerHTML + text + "<br>";
+            displayElem.innerHTML = displayElem.innerHTML + text; //+ "<br>";
         }
 
 
 
         function attemptToAccessDocument(documentRef, displayElement, shouldAccessBePossible){
             documentRef.get().then(doc => {
-                doc.id;
+                logDocumentObject(displayElement, doc.data());
                 addToTestPrint(displayElement, "accessed document, result:  " + booleanToTestResultText(true, shouldAccessBePossible));
             }).catch(function(error) {
                 addToTestPrint(displayElement, "firebase error:" + error.toString());
@@ -173,26 +216,8 @@
 
         function attemptToAccessCollection(queryRef, displayElement, shouldAccessBePossible){
             queryRef.get().then(collection => {
-                console.log(collection);
 
-
-
-
-               // addToTestPrint2(displayElement, "<table>");
-
-                collection.forEach(function (doc) {
-                    let tableString = "<table>";
-                    tableString = tableString + "<tr><td>ID</td><td>"+ doc.id +"</td></tr>";
-                    tableString = tableString + documentObjectTableRowString(doc.data());
-                    console.log(doc.data)
-                    //addToTestPrint(displayElement, "managed to find" + doc.id);
-                    //logDocumentObject(displayElement, doc.data());
-                    tableString = tableString +"</table>"
-                    addToTestPrint(displayElement, tableString);
-                });
-
-
-
+                createDocumentTable(displayElement, collection);
 
                 let size = collection.size;
                 addToTestPrint(displayElement, "accessed collection of size " + size + ", result :  " + booleanToTestResultText(true, shouldAccessBePossible));
@@ -207,21 +232,28 @@
 
 
         function createDocumentTable(displayElement, collection){
-            let Table
+
+            collection.forEach(function (doc) {
+                let tableString = "<table>";
+                tableString = tableString + "<tr><td>ID</td><td>"+ doc.id +"</td></tr>";
+                tableString = tableString + documentObjectTableRowString(doc.data());
+                console.log(doc.data)
+                //addToTestPrint(displayElement, "managed to find" + doc.id);
+                //logDocumentObject(displayElement, doc.data());
+                tableString = tableString +"</table>"
+                addToTestPrint(displayElement, tableString);
+            });
+
         }
 
         function logDocumentObject(logElement, document){
-
-            for (var key in document) {
-                let outputText;
-                if (document.hasOwnProperty(key)) {
-                    outputText = outputText + "<tr><td>"+ key + "</td><td>"+ document.key + "</td></tr>";
-
-                }
-
-                logElement.innerHTML = logElement.innerHTML + outputText;
-            }
+            let tableString = "<table>";
+            tableString = tableString + documentObjectTableRowString(document);
+            tableString = tableString + "</table>"
+            addToTestPrint(logElement, tableString);
         }
+
+
 
         function documentObjectTableRowString(document){
             let outputText = "";
@@ -229,11 +261,14 @@
 
                 if (document.hasOwnProperty(key)) {
                     outputText = outputText + "<tr><td>"+ key + "</td><td>"+ document[key] + "</td></tr>";
-
                 }
             }
             return outputText;
         }
+
+
+
+
         function booleanToTestResultText(result, expected){
             let resultTest = "FAIL";
 
@@ -243,7 +278,9 @@
             return resultTest;
         }
 
-		
+		function clearTestContainer(btnElem){
+            btnElem.parentElement.querySelector(".test-display").innerHTML = "";
+        }
 	</script>
   </body>
   
@@ -254,6 +291,14 @@
              }
       table td{
           width:48%;
+      }
+      .test-display{
+          height:500px;
+          overflow: scroll;
+      }
+      h3{
+          margin-top:36px;
+          margin-bottom:12px;
       }
   </style>
 </html>
