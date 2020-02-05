@@ -4,9 +4,10 @@
 
 class UserPage extends HTMLElement{
 
-    experienceBars = {};
   constructor() {
     super();
+
+    this.experienceBars = {};
 
   }
   

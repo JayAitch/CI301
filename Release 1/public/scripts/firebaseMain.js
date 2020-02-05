@@ -9,8 +9,8 @@ const firebaseConfig = {
   measurementId: "G-D6D9ZR077L"
 };
 
-var currentViewedTeams;
-var taskPage;
+let currentViewedTeams;
+let taskPage;
 // Initialize Firebase
 
 document.addEventListener("DOMContentLoaded", event =>{
@@ -49,6 +49,8 @@ function logOut(){
 function getUserId(){
 	 return firebase.auth().currentUser.uid;
 }
+
+
 function getCurrentUserDocRef(){
 	const workaholicCurrentUserID = getUserId();
 	// promote this variable u

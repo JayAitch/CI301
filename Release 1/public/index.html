@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>workaholic</title>
 	  <link defer rel="stylesheet" href="/scripts/libs/jquery/jquerymobile/css/themes/default/jquery.mobile-1.4.5.min.css">
-
+	  <script src="/scripts/libs/modernizr/modernizr-custom.js"></script>
 	  <script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.js"></script>
 	  <script defer src="/scripts/libs/jquery/jquerymobile/js/jquery.mobile-1.4.5.min.js"></script>
     <!-- update the version number as needed -->
@@ -46,7 +46,12 @@
 
   </head>
   <body>
-  
+  <script>
+	  if (!this.customElements)
+		  document.write('<script src="//unpkg.com/document-register-element"><\x2fscript>');
+  </script>
+
+
   <div id="notification-area" style="width:100%;height:80px;"><div style="width:33%;" id="team-notification-area"></div><div id="tasks-notification-area" style="width:33%;"></div><div id="user-notification-area" style="width:33%;"></div><div id="notification-notification-area" style="width:33%;"></div></div>
 	<div data-role="page" id="teams-page" class="page" data-theme="a">
 		<div data-role="header" data-position="fixed">
@@ -223,7 +228,14 @@
 		  flex: max-content;
 		  flex-direction: row;
 	  }
+	  .control-group .edit-wrapper{
+		  flex: max-content;
+		  flex-direction: row;
+	  }
 
+	  .control-group .edit-wrapper a{
+			margin:0;
+	  }
 	  .form-row{
 				 margin:10px!important;
 	  }

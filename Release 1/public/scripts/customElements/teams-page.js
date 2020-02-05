@@ -87,7 +87,6 @@ class TeamsList extends ActiveQueryListElement{
 		let teamType = docData["team-type"];
 		let teamOwnerID = docData.owner;
 		let currentUserID = getUserId();
-
 		// is the team type verticle? is the current user not the owner of the team
 		if(teamType == 1 && teamOwnerID != currentUserID) {
 				// dont show edit button
@@ -147,10 +146,11 @@ class TeamCard extends HTMLElement{
 
 	createEditButton(){
 		if(this.getAttribute("show-edit") == "true"){
-			let editButton = document.createElement("a", {is: "edit-button"});
+			
+			let editButton = document.createElement("edit-button");
 			editButton.setAttribute("doc-location", this.getAttribute("doc-location"));
 			editButton.setAttribute("obj-type","team");
-			this.controlGroup.appendChild(editButton);
+			this.controlGroup.insertBefore(editButton, this.controlGroup.firstChild);
 		}
 	}
 
