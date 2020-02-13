@@ -30,6 +30,8 @@ class StaticQueryListElement extends HTMLElement {
 				this.createNewCard(childSnapshot.doc);
 			});
 
+		}).catch(function(error) {
+			console.log("Error query list getting collection:", error);
 		});
 
 	}
@@ -220,21 +222,23 @@ class ChangeableActiveQueryList extends ActiveQueryListElement{
 }
 
 
-
-class EditButton extends HTMLAnchorElement{
+// this cannot extend anchor due to issue with safari support of createElement("a", {is:"edit-button"})
+class EditButton extends HTMLElement{
 	constructor(){
 		super();
 		this._onClick = this._onClick.bind(this);
-		this.addEventListener("click", this._onClick);
-		this.innerHTML = "edit";
-		this.classList = "ui-btn control";
-	}
 
+
+	}
+	connectedCallback() {
+		this.innerHTML = "<a href='#' class='ui-btn '>edit</a>";
+		this.classList = "edit-wrapper";
+		this.addEventListener("click", this._onClick);
+	}
 
 
 	_onClick(){
 		let docLocation = this.getAttribute("doc-location");
-		console.log(docLocation);
 		let docType = this.getAttribute("obj-type");
 
 		const changeDocForm = document.getElementById("change-document-form");
@@ -245,4 +249,4 @@ class EditButton extends HTMLAnchorElement{
 
 }
 
-window.customElements.define('edit-button', EditButton, {extends: 'a'});
+window.customElements.define('edit-button', EditButton);

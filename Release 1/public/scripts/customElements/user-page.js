@@ -76,7 +76,9 @@ class UserPage extends HTMLElement{
             },100)
 
 
-        })
+        }).catch(function(error) {
+            console.log("Error getting document:", error);
+        });
 
 	}
 

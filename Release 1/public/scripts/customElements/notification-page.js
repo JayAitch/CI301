@@ -33,7 +33,7 @@ class NotificationCard extends HTMLElement{
 	attributeChangedCallback(name, oldValue, newValue) {
 		let isRead = this.getAttribute("is-read");
 		this.message.innerHTML = this.getAttribute("message");
-		if(!isRead) this.classList.add("read-notification")
+		if(isRead) this.classList.add("read-notification")
 	}
 	
   	_clickHandler(ev){
@@ -44,7 +44,7 @@ class NotificationCard extends HTMLElement{
 		const docLocation = this.getAttribute("doc-location")
 		let notification = firebase.firestore().doc(docLocation);
 		notification.set({
-			"is-read": true,
+				"is-read": true,
 		}, { merge: true });
 	}
 }

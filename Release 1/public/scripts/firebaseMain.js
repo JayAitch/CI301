@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", event =>{
 function logOut(){
 	firebase.auth().signOut().then(function() {
 			// Sign-out successful.
-			
+		document.cookie = "";
 	}, function(error) {
 			// An error happened.
 	});

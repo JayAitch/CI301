@@ -80,7 +80,7 @@ class TaskCard extends HTMLElement{
 
     createEditButton(){
         if(this.getAttribute("show-edit") == "true"){
-            let editButton = document.createElement("a", {is: "edit-button"});
+            let editButton = document.createElement("edit-button");
             editButton.setAttribute("doc-location", this.getAttribute("doc-location"));
             editButton.setAttribute("obj-type","task");
             this.controlGroup.appendChild(editButton);
