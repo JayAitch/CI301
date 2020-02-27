@@ -99,10 +99,10 @@ class ExperienceBar extends HTMLElement {
 		this.innerHTML = `
 			<style>
 				.progress{
-					background-color:green;
+					background-color:#96ff96;
 				}
 				.bar-wrapper{
-							background-color:grey;
+							background-color:#d7d7d7;
 				}
 			</style>
             

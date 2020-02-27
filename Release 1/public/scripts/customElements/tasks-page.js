@@ -4,6 +4,7 @@ let currentlyViewTeamData;
 
 
 
+
 // tile to display experience rewards to the user
 class ExperienceRewardTile extends HTMLElement{
     constructor() {
@@ -14,16 +15,14 @@ class ExperienceRewardTile extends HTMLElement{
 
         let skillType = this.getAttribute("skill-type");
         let iconURI = LookupIconURI(skillType);
-        const rewardTileTemplate = `<div class="reward-tile"><img class="skill-icon" src="${iconURI}"><span class="skill-text" src="skill icon"></span><span class="amount"></span></div>`;
+        const rewardTileTemplate = `<div class="reward-tile"><img class="skill-icon" src="${iconURI}"><div class="amount"></div></div>`;
 
         // dont do it like this maybe? potential dom lag
         this.innerHTML = rewardTileTemplate;
         this.amountElem = this.querySelector(".amount");
-        this.skillIconElem = this.querySelector(".skill-icon");
-        this.skillTextElem = this.querySelector(".skill-text");
     }
     static get observedAttributes() {
-        return ['amount', 'skill-type']; // status and experience
+        return ['amount']; // status and experience
     }
     attributeChangedCallback(name, oldValue, newValue) {
         if(name === 'amount'){
@@ -33,6 +32,7 @@ class ExperienceRewardTile extends HTMLElement{
     }
 
 }
+
 
 
 
@@ -59,9 +59,8 @@ class TaskCard extends HTMLElement{
 																
 														<a class="complete-task-button control ui-btn" href="#">complete</a>					
 													</div>
-													<div class="skill-requirements tile-group"><span class="tile-group-label">Required:</span></div>
-													<div class="skill-rewards tile-group"><span class="tile-group-label">Rewards:</span></div>
-
+													<skill-card-list class="requirements-tile-list tile-group" list-title="requirements"></skill-card-list>
+													<skill-card-list class="rewards-tile-list tile-group"  list-title="rewards"></skill-card-list>
 												</div>
 											`;
         // dont do it like this maybe? potential dom lag
@@ -70,9 +69,11 @@ class TaskCard extends HTMLElement{
         this.controlGroup = this.querySelector(".control-group");
         this.nameEle = this.querySelector(".name");
         this.descrEle = this.querySelector(".description");
-        this.skillRequirementsWrapper = this.querySelector(".skill-requirements");
-        this.skillRewardsWraper =  this.querySelector(".skill-rewards");
         this.deadlineDateDiv = this.querySelector(".deadline-date-display");
+
+        this.requirementsTileList = this.querySelector(".requirements-tile-list");
+        this.rewardsTileList = this.querySelector(".rewards-tile-list");
+
         this.querySelector(".complete-task-button").addEventListener("click", this._completeBtnClicked);
         this.createEditButton();
     }
@@ -102,14 +103,14 @@ class TaskCard extends HTMLElement{
         this.nameEle.textContent = taskName;
         this.descrEle.textContent = taskDescription;
         this.deadlineDateDiv.textContent = deadline;
-        if(name === "rewards"){
-            this.createRewardTiles(newValue);
-        }
-        if(name === "requirements" && newValue.length > 0){
-            console.log();
-            this.createRequirementTiles(newValue);
-        }
+    }
 
+    set rewards(val){
+        this.rewardsTileList.skillCardData = val;
+    }
+
+    set requirements(val){
+        this.requirementsTileList.skillCardData = val;
     }
 
     _completeBtnClicked(){
@@ -124,45 +125,45 @@ class TaskCard extends HTMLElement{
             let taskData = doc.data();
             let taskRewards = taskData['experience-rewards']
 
-                // TODO: add check to requirements
-                //       add levelup check and fanfare
-                let userAccountRef = getCurrentUserDocRef();
-                userAccountRef.get().then((doc) => {
+            // TODO: add check to requirements
+            //       add levelup check and fanfare
+            let userAccountRef = getCurrentUserDocRef();
+            userAccountRef.get().then((doc) => {
 
-                    let userAccountData = doc.data();
+                let userAccountData = doc.data();
 
-                    // this will error for new users
-                    let userAccountSkillLevels = userAccountData['skill-levels']
+                // this will error for new users
+                let userAccountSkillLevels = userAccountData['skill-levels']
 
-                    for (let key in taskRewards) {
+                for (let key in taskRewards) {
 
-                        let userLevel = experiencePointsAsLevel(userAccountSkillLevels[key]);
-                        let requiredLevel = taskData["requirements"][key]
+                    let userLevel = experiencePointsAsLevel(userAccountSkillLevels[key]);
+                    let requiredLevel = taskData["requirements"][key]
 
-                        if(!requiredLevel || requiredLevel <= userLevel){
-                            let rewardXPValue = taskRewards[key] || 0;
-                            let currentXPValue = userAccountSkillLevels[key] || 0;
-                            userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
-                        }
-                        else{
-                            console.log(" failed at level check:" + key);
-                            $(this).notify(`requires ${key} level ${requiredLevel}`);
-                            //show something to the users!
-                            return;
-                        }
+                    if(!requiredLevel || requiredLevel <= userLevel){
+                        let rewardXPValue = taskRewards[key] || 0;
+                        let currentXPValue = userAccountSkillLevels[key] || 0;
+                        userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
                     }
+                    else{
+                        console.log(" failed at level check:" + key);
+                        $(this).notify(`requires ${key} level ${requiredLevel}`);
+                        //show something to the users!
+                        return;
+                    }
+                }
 
-                    userAccountRef.set({
-                        "skill-levels": userAccountSkillLevels,
-                    }, {merge: true});
+                userAccountRef.set({
+                    "skill-levels": userAccountSkillLevels,
+                }, {merge: true});
 
-                    taskToComplete.set({
-                        "status": taskStatus.Complete,
-                    }, {merge: true});
+                taskToComplete.set({
+                    "status": taskStatus.Complete,
+                }, {merge: true});
 
-                }).catch(function (error) {
-                    console.error("Could not complete task: ", error);
-                });
+            }).catch(function (error) {
+                console.error("Could not complete task: ", error);
+            });
 
 
 
@@ -171,88 +172,8 @@ class TaskCard extends HTMLElement{
         });
 
     }
-
-    createRequirementTiles(requirement){
-        let requirementsArray = requirement.split(",");
-        for(let rewardPos = 0; requirementsArray.length > rewardPos; rewardPos++){
-
-            let currentReward = requirementsArray[rewardPos];
-            let currentRewardArr = currentReward.split(':');
-            let currentRewardType = currentRewardArr[0];
-            let currentRewardAmount = currentRewardArr[1];
-
-            let currentRewardTile = this.currentRequirementTiles[currentRewardType];
-
-
-            if(currentRewardTile){
-                this.setRewardAttributes(currentRewardTile, currentRewardAmount);
-            }
-            else{
-                this.createRequirmentTile(currentRewardType, currentRewardAmount);
-
-            }
-
-        }
-    }
-
-
-    createRewardTiles(reward){
-
-
-        let rewardsArr = reward.split(",");
-        for(let rewardPos = 0; rewardsArr.length > rewardPos; rewardPos++){
-
-            let currentReward = rewardsArr[rewardPos];
-            let currentRewardArr = currentReward.split(':');
-            let currentRewardType = currentRewardArr[0];
-            let currentRewardAmount = currentRewardArr[1];
-
-            let currentRewardTile = this.currentRewardTiles[currentRewardType];
-
-
-            if(currentRewardTile){
-                this.setRewardAttributes(currentRewardTile, currentRewardAmount);
-            }
-            else{
-                this.createRewardTile(currentRewardType, currentRewardAmount);
-
-            }
-
-        }
-    }
-
-
-    setRewardAttributes(tile, amount){
-        // consider chaining to use data instead of attributes
-        tile.setAttribute("amount", amount);
-    }
-
-    createRewardTile(type, amount){
-        let newRewardTile = document.createElement("reward-tile");
-        newRewardTile.setAttribute("skill-type", type);
-        this.skillRewardsWraper.appendChild(newRewardTile);
-
-        // consider chaining to use data instead of attributes
-
-        newRewardTile.setAttribute("amount", amount);
-        this.currentRewardTiles[type] = newRewardTile;
-
-
-    }
-
-    createRequirmentTile(type, amount){
-        let newRewardTile = document.createElement("reward-tile");
-        newRewardTile.setAttribute("skill-type", type);
-        this.skillRequirementsWrapper.appendChild(newRewardTile);
-
-        // consider chaining to use data instead of attributes
-
-        newRewardTile.setAttribute("amount", amount);
-        this.currentRequirementTiles[type] = newRewardTile;
-
-
-    }
 }
+
 
 
 
@@ -323,9 +244,9 @@ class TasksList extends ChangeableActiveQueryList{
         // todo: check that this value is a document reference, we are going to want a global expr for this
         let targetDocument = this.getAttribute('collection-target');
 
-        this.collectionRef =  targetDocument + "/tasks/"
+        this.collectionRef =  targetDocument + "/tasks/";
         // find all tasks underneith refering to the current team
-        return firebase.firestore().collection(this.collectionRef).where("status", "==", taskStatus.Active)
+        return firebase.firestore().collection(this.collectionRef).where("status", "==", taskStatus.Active);
     }
 
     createCardDOMElement(docData) {
@@ -349,12 +270,10 @@ class TasksList extends ChangeableActiveQueryList{
         let deadline = convertToHTMLDate(docData["deadline"].toDate());
 
         if(rewards){
-            let rewardString = this.buildRewardString(rewards);
-            elem.setAttribute("rewards", rewardString);
 
-            let requirementsString = this.buildRequirementString(requirements);
-            elem.setAttribute("requirements", requirementsString);
-        }
+            elem.rewards = rewards;
+            elem.requirements = requirements;
+                    }
 
         elem.setAttribute("deadline", deadline);
         elem.setAttribute("name", name);
@@ -380,33 +299,67 @@ class TasksList extends ChangeableActiveQueryList{
         return true
     }
 
-    buildRewardString(rewards) {
-        let rewardString = "";
+}
 
-        for (let key in rewards) {
-            if (rewards.hasOwnProperty(key)) {
-                rewardString += key + ":" + rewards[key] + ",";
-            }
-        }
-        rewardString = rewardString.substr(0, rewardString.length - 1)
-        return rewardString;
+
+class SkillCardList extends HTMLElement{
+    constructor() {
+        super();
     }
-    buildRequirementString(requirements) {
-        let requirementString = "";
 
-        for (let key in requirements) {
-            if (requirements.hasOwnProperty(key)) {
-                if(requirements[key] && requirements[key] != 0){
-                    requirementString += key + ":" + requirements[key] + ",";
-                }
+    connectedCallback() {
+        let listTitle = this.getAttribute("list-title");
+        this.innerHTML = `<div class="tile-list-title">${listTitle}</div><div class="tile-list"></div>`;
+        this.tileListParent = this.querySelector(".tile-list")
+    }
 
+    set skillCardData(val){
+        this.cardData = val;
+        this.removeTiles();
+        this.createTileList();
+    }
+
+    displayNone(){
+        let noneElement = document.createElement("div");
+        noneElement.textContent = "none";
+        this.tileListParent.appendChild(noneElement);
+    }
+
+
+    removeTiles(){
+        let lastChild = this.tileListParent.lastElementChild;
+        while(lastChild){
+            this.tileListParent.removeChild(lastChild);
+            lastChild = this.tileListParent.lastElementChild;
+        }
+    }
+
+    createTileList(){
+        console.log("rebuilding tiles");
+        if(!this.cardData|| this.cardData.size == 0){
+            this.displayNone();
+        } else {
+            for(let key in this.cardData){
+                let cardVal = this.cardData[key];
+                this.createTile(key, cardVal);
             }
         }
-        requirementString = requirementString.substr(0, requirementString.length - 1)
-        return requirementString;
+
+
+    }
+    createTile(type, amount){
+
+        let newTile = document.createElement("reward-tile");
+        newTile.setAttribute("skill-type", type);
+        this.tileListParent.appendChild(newTile);
+        newTile.setAttribute("amount", amount);
+
     }
 }
 
+
+
+window.customElements.define('skill-card-list', SkillCardList);
 window.customElements.define('reward-tile', ExperienceRewardTile);
 window.customElements.define('tasks-page', TasksPage);
 window.customElements.define('tasks-list', TasksList);
