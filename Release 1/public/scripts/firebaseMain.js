@@ -38,12 +38,9 @@ document.addEventListener("DOMContentLoaded", event =>{
 });
 
 function logOut(){
-	firebase.auth().signOut().then(function() {
-			// Sign-out successful.
-		document.cookie = "";
-	}, function(error) {
-			// An error happened.
-	});
+	const authenticator = new firebase.auth.GoogleAuthProvider();
+	authenticator.setCustomParameters({prompt: 'select_account'});
+	firebase.auth().signInWithRedirect(authenticator);
 }
 
 function getUserId(){

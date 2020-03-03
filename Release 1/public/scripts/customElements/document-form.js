@@ -45,11 +45,11 @@ const team = {
 			'validation': {
 				required: false,
 				min:0,
-				max:25
+				max:999
 			}
 		},
 		'construction': function (key, value, parent, fieldProperties) {
-			createTextInputField(key, value, parent, fieldProperties)
+			createTextAreaField(key, value, parent, fieldProperties);
 		},
 	},
 	'team-type': {
@@ -106,11 +106,11 @@ const task = {
 			'validation': {
 				required: true,
 				min:0,
-				max:250
+				max:999
 			}
 		},
 		'construction': function (key, value, parent, fieldProperties) {
-			createTextInputField(key, value, parent, fieldProperties)
+			createTextAreaField(key, value, parent, fieldProperties)
 		},
 	},
 	'urgency': {
@@ -315,6 +315,35 @@ function createTextInputField(key, value, parent, fieldConfig){
 	return newTextField;
 }
 
+function createTextAreaField(key, value, parent, fieldConfig){
+	let labelText = getLabelText(key, fieldConfig);
+	createInputLabel(labelText,key, parent);
+
+	// create the field and propulate with any data from the object
+	let newTextField = document.createElement("textarea");
+	newTextField.name = key;
+	newTextField.value = value;
+	newTextField.placeholder = key;
+	newTextField.className = "form-row text";
+
+	if(fieldConfig){
+		newTextField.required = fieldConfig.validation.required || false;
+		newTextField.minLength = fieldConfig.validation.min || 0;
+		newTextField.maxLength = fieldConfig.validation.max || 999;
+	}
+
+	parent.appendChild(newTextField);
+
+
+	if(fieldConfig && fieldConfig["help-text"]){
+		createHelpTextRow(parent,fieldConfig["help-text"]);
+	}
+
+
+	return newTextField;
+}
+
+
 function createHelpTextRow(parent, text){
 	let helpTextSpan = document.createElement("span");
 	helpTextSpan.innerHTML = text;
@@ -453,7 +482,7 @@ function createMapInputField(mapkey, values, parent, fieldConfig){
 	if(fieldConfig["help-text"]){
 		createHelpTextRow(parent,fieldConfig["help-text"]);
 	}
-	addRowButton.className = "form-row select-map-btn";
+	addRowButton.className = "select-map-btn";
 
 
 	parent.appendChild(addRowButton);
@@ -464,7 +493,7 @@ function createMapInputField(mapkey, values, parent, fieldConfig){
 		let runTimeSelectMap = document.createElement("select-value-map");
 		runTimeSelectMap.setAttribute('select-lookup', mapkey);
 		runTimeSelectMap.setAttribute('selected-value', "Strength");
-		runTimeSelectMap.setAttribute('value', 0);
+		runTimeSelectMap.setAttribute('value', "0");
 		fieldMapWrapper.appendChild(runTimeSelectMap);
 	});
 
@@ -619,9 +648,7 @@ class InviteForm extends BasicForm {
 				let exif = EXIF.readFromBinaryFile(new BinaryFile(reader.result));
 				let scanDisplayElem = this.querySelector(".qr-scan-display")
 				image.onrender = (target) =>{
-					console.log(target);
 					qrcode.callback = (data) => {
-						console.log(data);
 						this.querySelector(".invite-code-input").value = data;
 					};
 					qrcode.decode(target.src);
@@ -668,11 +695,11 @@ class InviteForm extends BasicForm {
 								<fieldset class="form-data">
 								<img class="qr-scan-display" class="media" src="">
 									<label for="qr-input"><img src="something here instead of the browse"/></label><input hidden name="qr-input" id="qr-input" type="file" accept="image/*" capture="camera">
-									<input type="text" class="invite-code-input">
+									<input type="text" minlength="28" maxlength="28" class="invite-code-input">
 								</fieldset>
 								<div class="form-controls-row">
-								<input type="submit" value="Invite">
-								<input type="button" class="cancel-form" value="Cancel"></form>
+								<input type="submit"  class="invite-form" value="Invite">
+								<input type="button" class="cancel-form" value="Close"></form>
 								</div>
 						</div>
 					</div>
@@ -708,11 +735,13 @@ class InviteForm extends BasicForm {
 			"type": "team-invite",
 			"is-read":false,
 			"team": teamDocLocation,
-			"message": "you have been invited to: " + this.teamName
-
+			"message": "you have been invited to: " + this.teamName,
 		}).catch(function(error) {
 			console.error("Error adding document: ", error);
-		});
+			return;
+		}).then( () => {
+			$(".invite-form").notify("invite sent");
+		})
 
 
 	}
@@ -747,16 +776,13 @@ class DocumentForm extends BasicForm{
 		 let fieldName = currentFormRow.name;
 		 let fieldValue = currentFormRow.value;
 
-
-
-			 // we want to have control over the data passed into our object via forms
-			 // should contain any different form type object and how i parse them
-			 console.log(currentFormRow.type);
-
-
 			 switch(currentFormRow.type){
 				 case "text":
 					 currentDocument[fieldName] =  fieldValue;
+					 break;
+				 case "textarea":
+					 currentDocument[fieldName] =  fieldValue;
+
 					 break;
 				 case "select-one":
 					 currentDocument[fieldName] =  parseInt(fieldValue);
@@ -861,7 +887,6 @@ class DocumentForm extends BasicForm{
 	clearFormDataFields(){
 		let formChildren = this.formDataElem.childNodes;
 		let formChildrenCount = this.formDataElem.childElementCount;
-		console.log(formChildren);
 
 		// remove like this as removing a field will reduce the size of the array
 		let lastFormDataChild = this.formDataElem.lastElementChild;
@@ -874,8 +899,6 @@ class DocumentForm extends BasicForm{
 
 	// create fields on the form to allow the user change specific values on the object
 	generateFormDisplay(formConfiguration){
-		console.log(formConfiguration);
-
 		// go through the configuration objects and create as required
 		for(let fieldRow in formConfiguration){
 
@@ -954,7 +977,6 @@ class NewDocumentForm extends DocumentForm{
 		newTeam.owner = userId;
 		newTeam.members = [userId];
 
-		console.log(newTeam);
 		firebase.firestore().collection("teams").add(newTeam)
 		.catch(function(error) {
 			console.error("Error adding a new team: ", error);
@@ -967,11 +989,11 @@ class NewDocumentForm extends DocumentForm{
 	createNewTask(){
 
 		let userId = getUserId();
-		let collectionLocation = this.collectionTarget
-
+		let collectionLocation = this.collectionTarget + "/tasks/"
 		let newTask = this.currentDocument
 		newTask.owner = userId;
 		newTask.status = taskStatus.Active;
+		newTask.team = this.collectionTarget;
 
 		firebase.firestore().collection(collectionLocation).add(newTask)
 			.catch(function(error) {
@@ -1004,8 +1026,6 @@ class ChangeDocumentForm extends DocumentForm{
 				if (doc.exists) {
 					this.createFormFromExisting(type, doc.data());
 				} else {
-					// doc.data() will be undefined in this case
-					console.log("No such document!");
 				}
 
 			})

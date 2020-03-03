@@ -228,7 +228,6 @@ class EditButton extends HTMLElement{
 		super();
 		this._onClick = this._onClick.bind(this);
 
-
 	}
 	connectedCallback() {
 		this.innerHTML = "<a href='#' class='ui-btn '>edit</a>";
@@ -236,8 +235,8 @@ class EditButton extends HTMLElement{
 		this.addEventListener("click", this._onClick);
 	}
 
-
 	_onClick(){
+		console.log(this.testProperty);
 		let docLocation = this.getAttribute("doc-location");
 		let docType = this.getAttribute("obj-type");
 

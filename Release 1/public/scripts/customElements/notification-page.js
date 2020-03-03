@@ -9,11 +9,11 @@ class NotificationCard extends HTMLElement{
 	
 	// setup elmenet when connected
 	connectedCallback() {
-				const userAccountTemplate = `<div class="notification-wrapper">
+				const userAccountTemplate = `<div class="card-wrapper">
 													<div class="name-header">
 														<h3 class="message"></h3>
 													</div>
-													<span class="is-read"></span><span class="message"></span>
+													<span class="message"></span>
 												</div>
 											`;
 				
@@ -21,7 +21,7 @@ class NotificationCard extends HTMLElement{
 				this.innerHTML = userAccountTemplate;
 				this.message = this.querySelector(".message");
 				// find the top wrapper and add the click listener to it
-				this.querySelector(".notification-wrapper").addEventListener("click", this._clickHandler);
+				this.querySelector(".card-wrapper").addEventListener("click", this._clickHandler);
 	}
 	
 	// observe the attribute changes so we can modify dispalyed data
@@ -33,7 +33,7 @@ class NotificationCard extends HTMLElement{
 	attributeChangedCallback(name, oldValue, newValue) {
 		let isRead = this.getAttribute("is-read");
 		this.message.innerHTML = this.getAttribute("message");
-		if(isRead) this.classList.add("read-notification")
+		if(isRead === "true") this.classList.add("read-notification")
 	}
 	
   	_clickHandler(ev){
@@ -66,7 +66,7 @@ class InviteNotificationCard extends NotificationCard{
 													<div class="name-header">
 														<h3 class="message"></h3>
 													</div>
-													<span class="is-read"></span><span class="message"></span>
+													<span class="message"></span>
 													<a href="#" class="accept-btn ui-btn">accept</a><a href="#" class="decline-btn ui-btn">decline</a>
 												</div>
 											`;
@@ -117,14 +117,13 @@ class NotificationList extends ActiveQueryListElement{
   
 
   createCardDOMElement(docData){
-	  if(!docData["is-read"]) $(".notification-btn").notify("unread messages");
+	  if(docData["is-read"] !== "true" ) $(".notification-btn").notify("unread messages");
 	  if(docData.type === "team-invite"){
-	  	console.log("making teaminvites");
 		  // yes - create the team notification card from the custom element registry
 		  let newNotificationCard = document.createElement("invite-notification-card");
 		  return newNotificationCard;
 	  }
-	  else{
+	  else {
 		  // no - create the normal notification card from the custom element registry
 		  let newNotificationCard = document.createElement("notification-card");
 		  return newNotificationCard;
