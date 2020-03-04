@@ -21,6 +21,7 @@ class ExperienceRewardTile extends HTMLElement{
         this.innerHTML = rewardTileTemplate;
         this.amountElem = this.querySelector(".amount");
     }
+
     static get observedAttributes() {
         return ['amount']; // status and experience
     }
@@ -37,35 +38,19 @@ class ExperienceRewardTile extends HTMLElement{
 
 
 
-class TaskCard extends HTMLElement{
+class TaskCard extends EditableDocCard{
     constructor() {
         super();
-        this.currentRewardTiles = {};
-        this.currentRequirementTiles = {};
         this._completeBtnClicked = this._completeBtnClicked.bind(this);
     }
 
 
     // setup elmenet when connected
     connectedCallback() {
-        const userAccountTemplate = `			<div class="card-wrapper">
-													<div class="name-header">
-														 <div class="deadline-date-display"></div><h3 class="name"></h3>
-													</div>
-													<div class="description-wrapper">
-													    <p class="description"></p>
-													</div>
-													<div class="control-group">
-																
-														<a class="complete-task-button control ui-btn" href="#">complete</a>					
-													</div>
-													<skill-card-list class="requirements-tile-list tile-group" list-title="requirements"></skill-card-list>
-													<skill-card-list class="rewards-tile-list tile-group"  list-title="rewards"></skill-card-list>
-												</div>
-											`;
-        // dont do it like this maybe? potential dom lag
+        const template = document.getElementById('task-card-template');
+        let content = document.importNode(template.content, true);
+        this.appendChild(content);
 
-        this.innerHTML = userAccountTemplate;
         this.controlGroup = this.querySelector(".control-group");
         this.nameEle = this.querySelector(".name");
         this.descrEle = this.querySelector(".description");
@@ -75,34 +60,37 @@ class TaskCard extends HTMLElement{
         this.rewardsTileList = this.querySelector(".rewards-tile-list");
 
         this.querySelector(".complete-task-button").addEventListener("click", this._completeBtnClicked);
-        this.createEditButton();
+        this.showHideEditButton();
     }
 
 
     createEditButton(){
-        if(this.getAttribute("show-edit") == "true"){
-            let editButton = document.createElement("edit-button");
-            editButton.setAttribute("doc-location", this.getAttribute("doc-location"));
-            editButton.setAttribute("obj-type","task");
-            this.controlGroup.appendChild(editButton);
-        }
+        let editButton = document.createElement("edit-button");
+        editButton.documentLocation = this.documentLocation;
+        editButton.documentType = "task";
+        this.controlGroup.appendChild(editButton);
+        return editButton;
     }
 
-
-    // observe the attribute changes so we can modify dispalyed data
-    static get observedAttributes() {
-        return ['name', 'description', 'rewards', 'requirements', 'deadline']; // status and experience
+    displayDocumentValues(docData) {
+        this.name = safeGetProperty(docData,"name");
+        this.description = safeGetProperty(docData,"name");
+        this.deadline = safeGetProperty(docData,"deadline");
+        this.rewards = safeGetProperty(docData,"experience-rewards");
+        this.requirements = safeGetProperty(docData,"requirements");
     }
 
-    // set the display for these values onto the txt of the displays
-    attributeChangedCallback(name, oldValue, newValue) {
-        let taskName = this.getAttribute("name");
-        let taskDescription = this.getAttribute("description");
-        let deadline = this.getAttribute("deadline");
+    set name(val){
+        this.nameEle.textContent = val;
+    }
 
-        this.nameEle.textContent = taskName;
-        this.descrEle.textContent = taskDescription;
-        this.deadlineDateDiv.textContent = deadline;
+    set description(val){
+        this.descrEle.textContent = val;
+    }
+
+    set deadline(val){
+        let htmlSafeDate = convertToHTMLDate(val.toDate());
+        this.deadlineDateDiv.textContent = htmlSafeDate;
     }
 
     set rewards(val){
@@ -112,6 +100,7 @@ class TaskCard extends HTMLElement{
     set requirements(val){
         this.requirementsTileList.skillCardData = val;
     }
+
 
     _completeBtnClicked(){
         let documentLocation = this.getAttribute("doc-location");
@@ -157,7 +146,7 @@ class TaskCard extends HTMLElement{
                 userAccountRef.set({
                     "skill-levels": userAccountSkillLevels,
                 }, {merge: true});
-
+//completed by
 
                 let teamDocumentRef =  firebase.firestore().doc(taskData.team);
                 teamDocumentRef.get().then((doc) => {
@@ -202,40 +191,38 @@ class TasksPage extends HTMLElement{
 
     // set up the element on connection
     connectedCallback() {
-        const teamTemplate = `				<h2 class="name-header">
-													please select a team to view tasks
-												</h2>
-												<a class="ui-btn" id="new-task-btn" href="#">new task</a>
-											`;
-
-        // dont do it like this maybe? potential dom lag
-        this.innerHTML = teamTemplate;
+        const template = document.getElementById('task-page-template');
+        let content = document.importNode(template.content, true);
+        this.appendChild(content);
         this.taskListElem = document.createElement("tasks-list");
+
         this.header = this.querySelector(".name-header");
         this.appendChild(this.taskListElem);
-         document.getElementById("new-task-btn").addEventListener("click", this._onNewTaskBtnClick);
-
-
-    }
-    static get observedAttributes(){
-        return['teams-watched']
+        // add this dynamically
+        document.getElementById("new-task-btn").addEventListener("click", this._onNewTaskBtnClick);
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
 
+    set teamTarget(val){
+        this.setAttribute("collection-target", val);
+        this.teamLocation = val;
+        this.getTeamInformation().then( () =>{
+            this.taskListElem.collectionTarget = val;
+        });
+    }
 
-        // we may want to change this to a filter so that a user can query multiple teams at once
-        if(name == 'teams-watched' ){
-            this.teamTarget = newValue;
+    getTeamInformation(){
+        let teamDocRef = firebase.firestore().doc(this.teamLocation);
+        let promise = teamDocRef.get().then(doc => {
+            currentlyViewTeamData = doc.data();
+            this.name = safeGetProperty(currentlyViewTeamData, "name");
+        });
+        return promise;
+    }
 
-            // assign the team we are viewing to a global variable, components of the app will use this for configuration
-            firebase.firestore().doc(this.teamTarget).get().then((doc)=> {
-                currentlyViewTeamData = doc.data();
-                this.header.innerHTML = currentlyViewTeamData.name || 'error';
-            });
-
-            this.taskListElem.setAttribute("collection-target", this.teamTarget);
-        }
+    set name(val){
+        this.setAttribute("name", val);
+        this.header.textContent = val;
     }
 
     _onNewTaskBtnClick(){
@@ -257,47 +244,19 @@ class TasksList extends ChangeableActiveQueryList{
     }
 
     getQueryReference(){
-        // todo: check that this value is a document reference, we are going to want a global expr for this
-        let targetDocument = this.getAttribute('collection-target');
-
+        let targetDocument = this.targetCollection;
         this.collectionRef =  targetDocument + "/tasks/";
         // find all tasks underneith refering to the current team
         return firebase.firestore().collection(this.collectionRef).where("status", "==", taskStatus.Active);
     }
 
     createCardDOMElement(docData) {
-        let teamTemplate = document.createElement("task-card");
-        this.setTaskCardCreationAttributes(teamTemplate, docData);
-        return teamTemplate;
+        let taskCard = document.createElement("task-card");
+        taskCard.canEdit = this.shouldShowEditButton(docData);
+        return taskCard;
     }
 
-    setTaskCardCreationAttributes(teamTemplate, docData){
-        let showEdit = this.shouldShowEditButton(docData);
-        teamTemplate.setAttribute("show-edit", showEdit);
-    }
-
-
-    setAttributesFromDoc(elem, docData) {
-        let name = docData.name;
-        let desc = docData.description;
-
-        let rewards = docData["experience-rewards"];
-        let requirements = docData["requirements"];
-        let deadline = convertToHTMLDate(docData["deadline"].toDate());
-
-        if(rewards){
-
-            elem.rewards = rewards;
-            elem.requirements = requirements;
-                    }
-
-        elem.setAttribute("deadline", deadline);
-        elem.setAttribute("name", name);
-        elem.setAttribute("description", desc);
-
-
-    }
-
+    // this can probably move onto tlcas
     shouldShowEditButton(docData){
         let teamType = currentlyViewTeamData["team-type"];
         let taskOwnerID = docData.owner;
@@ -307,10 +266,11 @@ class TasksList extends ChangeableActiveQueryList{
         // is the team type verticle? is the current user not the owner of the team
         if(teamType == 1 && teamOwnerID != currentUserID) {
             // is the current user not the owner of the task
-            if (taskOwnerID != currentUserID) {
-                // dont show edit button
-                return false;
-            }
+            // if (taskOwnerID != currentUserID) {
+            //     // dont show edit button
+            //     return false;
+            // }
+            return false
         }
         return true
     }
@@ -351,7 +311,7 @@ class SkillCardList extends HTMLElement{
     }
 
     createTileList(){
-        console.log("rebuilding tiles");
+
         if(!this.cardData|| this.cardData.size == 0){
             this.displayNone();
         } else {
@@ -360,9 +320,8 @@ class SkillCardList extends HTMLElement{
                 this.createTile(key, cardVal);
             }
         }
-
-
     }
+
     createTile(type, amount){
 
         let newTile = document.createElement("reward-tile");

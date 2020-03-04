@@ -1,4 +1,4 @@
-class NotificationCard extends HTMLElement{
+class NotificationCard extends DocCard{
 	constructor() {  
 		super();
 		
@@ -9,19 +9,13 @@ class NotificationCard extends HTMLElement{
 	
 	// setup elmenet when connected
 	connectedCallback() {
-				const userAccountTemplate = `<div class="card-wrapper">
-													<div class="name-header">
-														<h3 class="message"></h3>
-													</div>
-													<span class="message"></span>
-												</div>
-											`;
-				
-				// dont do it like this maybe? potential dom lag
-				this.innerHTML = userAccountTemplate;
-				this.message = this.querySelector(".message");
-				// find the top wrapper and add the click listener to it
-				this.querySelector(".card-wrapper").addEventListener("click", this._clickHandler);
+		const template = document.getElementById('notification-card-template');
+		let content = document.importNode(template.content, true);
+		this.appendChild(content);
+
+		this.messageElement = this.querySelector(".message");
+		// find the top wrapper and add the click listener to it
+		this.querySelector(".card-wrapper").addEventListener("click", this._clickHandler);
 	}
 	
 	// observe the attribute changes so we can modify dispalyed data
@@ -29,19 +23,29 @@ class NotificationCard extends HTMLElement{
 		return ['is-read', 'message'];
 	}
 
-	// set the display for these values onto the txt of the displays
-	attributeChangedCallback(name, oldValue, newValue) {
-		let isRead = this.getAttribute("is-read");
-		this.message.innerHTML = this.getAttribute("message");
-		if(isRead === "true") this.classList.add("read-notification")
+
+	displayDocumentValues(docData){
+		this.message = safeGetProperty(docData, "message");
+		this.isRead = safeGetProperty(docData, "isRead");
 	}
-	
+
+	set message(val){
+		this.messageElement.textContent = val;
+	}
+
+	set isRead(val){
+		if(val){
+			this.classList.add("read-notification")
+		}
+		this.hasRead = val;
+	}
+
   	_clickHandler(ev){
 		this.markAsRead();
 	}
 
 	markAsRead(){
-		const docLocation = this.getAttribute("doc-location")
+		const docLocation = this.documentLocation;
 		let notification = firebase.firestore().doc(docLocation);
 		notification.set({
 				"is-read": true,
@@ -62,32 +66,31 @@ class InviteNotificationCard extends NotificationCard{
 	
 	// setup elmenet when connected
 	connectedCallback() {
-				const userAccountTemplate = `<div class="card-wrapper">
-													<div class="name-header">
-														<h3 class="message"></h3>
-													</div>
-													<span class="message"></span>
-													<a href="#" class="accept-btn ui-btn">accept</a><a href="#" class="decline-btn ui-btn">decline</a>
-												</div>
-											`;
+		const template = document.getElementById('invite-notification-card-template');
+		let content = document.importNode(template.content, true);
+		this.appendChild(content);
 				
-				// dont do it like this maybe? potential dom lag
-				this.innerHTML = userAccountTemplate;
-				
-				this.message = this.querySelector(".message");
-				// find the top wrapper and add the click listener to it
-				this.querySelector(".accept-btn").addEventListener("click", this._clickAccept);
-				this.querySelector(".decline-btn").addEventListener("click", this._clickDecline);
+		this.messageElement = this.querySelector(".message");
+		// find the top wrapper and add the click listener to it
+		this.querySelector(".accept-btn").addEventListener("click", this._clickAccept);
+		this.querySelector(".decline-btn").addEventListener("click", this._clickDecline);
 	}
 
-	
+
+	displayDocumentValues(docData){
+		super.displayDocumentValues(docData);
+		this.teamDocumentLocation = safeGetProperty(docData, "team")
+	}
+
+	set teamDocumentLocation(val){
+		this.teamDocLocation = val;
+		this.setAttribute("team-doc-location", val);
+	}
+
 	// the user has accepeted the invite so lets add the team to their collection
 	_clickAccept(ev){
 		// get the document location from the dom object
-		let teamDocLocation = this.getAttribute("team-doc-location");
-		
-		// add a new team under the users account
-		// we should be able to secure this by adding the users id to a collection under the team on inviting
+		let teamDocLocation = this.teamDocLocation;
 		let addToPendingInvites = firebase.firestore().doc(teamDocLocation).set({
 			"members": firebase.firestore.FieldValue.arrayUnion(getUserId())
 		}, { merge: true });
@@ -117,33 +120,20 @@ class NotificationList extends ActiveQueryListElement{
   
 
   createCardDOMElement(docData){
+	  let newNotificationCard = null;
 	  if(docData["is-read"] !== "true" ) $(".notification-btn").notify("unread messages");
 	  if(docData.type === "team-invite"){
 		  // yes - create the team notification card from the custom element registry
-		  let newNotificationCard = document.createElement("invite-notification-card");
-		  return newNotificationCard;
+		  newNotificationCard = document.createElement("invite-notification-card");
+
 	  }
 	  else {
 		  // no - create the normal notification card from the custom element registry
-		  let newNotificationCard = document.createElement("notification-card");
-		  return newNotificationCard;
+		  newNotificationCard = document.createElement("notification-card");
 	  }
 
+	  return newNotificationCard;
   }
-
-
-  // set/update any relevant attributes on the card
-  setAttributesFromDoc(elem, docData){
-	let isRead = docData["is-read"];
-	let message = docData["message"];
-	elem.setAttribute("is-read", isRead);
-	elem.setAttribute("message", message);
-	elem.setAttribute("team-doc-location", docData.team);
-  }
-  
-
-
-  
 }
 
 // list of all notifications
@@ -151,40 +141,11 @@ class NotificationPage extends HTMLElement {
 
 	// set up the element on connection
 	connectedCallback() {
-		const teamListTemplate = `				<h2 class="name-header">
-													Notifications
-												</h2>
-												<notification-list></notification-list>
-											`;
-
-		// dont do it like this maybe? potential dom lag
-		this.innerHTML = teamListTemplate;
-
+		const template = document.getElementById('notification-page-template');
+		let content = document.importNode(template.content, true);
+		this.appendChild(content);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

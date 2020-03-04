@@ -59,14 +59,22 @@ function getCurrentUserDocRef(){
 
 
 
+function safeGetProperty(docData, propertyName){
+	let propertyValue = "";
 
+	if(docData.hasOwnProperty(propertyName)){
+		propertyValue = docData[propertyName];
+	}
+	return propertyValue;
+}
 
 
 // POC cookie based task loading, allows refreshes, this will break when a  user hasnt clicked on a team
 /* section */
 function setCurrentViewedTeam(pViewedTeams){
 	currentViewedTeams = pViewedTeams;
-	taskPage.setAttribute("teams-watched", currentViewedTeams);
+
+	taskPage.teamTarget = currentViewedTeams;
 	createCurrentViewedTeamCookie(pViewedTeams);
 }
 
@@ -93,6 +101,8 @@ function convertToHTMLDate(fireBaseDate){
 	let HTMLDateFormat = date.getFullYear()+"-"+(month)+"-"+(day);
 	return HTMLDateFormat;
 }
+
+
 function calculateReward(requirements, importance, urgency, impact){
 	let reward = {};
 	for(let requirement in requirements){
@@ -100,6 +110,8 @@ function calculateReward(requirements, importance, urgency, impact){
 	}
 	return reward;
 }
+
+
 function calculateExperiencePoints(levelRequirement, pImportance, pUrgency, pImpact){
 	let importance = pImportance + 0.4 || 0;
 	let urgency = pUrgency + 0.4 || 0;
