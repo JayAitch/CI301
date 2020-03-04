@@ -117,16 +117,14 @@ class TaskCard extends HTMLElement{
         let documentLocation = this.getAttribute("doc-location");
 
         let taskToComplete = firebase.firestore().doc(documentLocation);
-
+        let taskRewards = {};
 
         // move this logic to a function
         taskToComplete.get().then((doc) => {
 
             let taskData = doc.data();
-            let taskRewards = taskData['experience-rewards']
-
-            // TODO: add check to requirements
-            //       add levelup check and fanfare
+            taskRewards = taskData['experience-rewards']
+            
             let userAccountRef = getCurrentUserDocRef();
             userAccountRef.get().then((doc) => {
 
@@ -146,20 +144,39 @@ class TaskCard extends HTMLElement{
                         userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
                     }
                     else{
-                        console.log(" failed at level check:" + key);
                         $(this).notify(`requires ${key} level ${requiredLevel}`);
                         //show something to the users!
                         return;
                     }
                 }
+                taskToComplete.set({
+                    "status": taskStatus.Complete,
+                }, {merge: true});
+
 
                 userAccountRef.set({
                     "skill-levels": userAccountSkillLevels,
                 }, {merge: true});
 
-                taskToComplete.set({
-                    "status": taskStatus.Complete,
-                }, {merge: true});
+
+                let teamDocumentRef =  firebase.firestore().doc(taskData.team);
+                teamDocumentRef.get().then((doc) => {
+                    let teamData = doc.data();
+                    let members = teamData.members;
+                    console.log(members);
+                    let notificationsCollectionRef =  firebase.firestore().collection("notifications");
+                    for(var membersPos = 0;members.length > membersPos; membersPos++){
+                        let memberRef = members[membersPos];
+                        console.log(memberRef);
+                        let newNotificationDocument = {
+                            "for": memberRef,
+                            "is-read": false,
+                            "message": `the task ${taskData.name} has been completed by a team member!`
+                        }
+                        notificationsCollectionRef.add(newNotificationDocument);
+                    }
+                });
+
 
             }).catch(function (error) {
                 console.error("Could not complete task: ", error);
@@ -208,7 +225,6 @@ class TasksPage extends HTMLElement{
 
 
         // we may want to change this to a filter so that a user can query multiple teams at once
-        // todo: flow and wireframe to deside
         if(name == 'teams-watched' ){
             this.teamTarget = newValue;
 
@@ -224,7 +240,7 @@ class TasksPage extends HTMLElement{
 
     _onNewTaskBtnClick(){
         const newDocumentForm = document.getElementById("new-document-form");
-        let collectionTargetString = this.teamTarget + "/tasks/"
+        let collectionTargetString = this.teamTarget;
         newDocumentForm.setAttribute("obj-type", "task");
         newDocumentForm.setAttribute("collection-target", collectionTargetString);
         newDocumentForm.hidden = false;
