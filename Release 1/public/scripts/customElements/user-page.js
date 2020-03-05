@@ -41,7 +41,6 @@ class UserPage extends HTMLElement{
             this.userAccount.onSnapshot(doc => {
 
                 let user = doc.data();
-                let template = document.createElement('template');
 
                 let skillLevels =  user["skill-levels"];
                 for(let skillType in skillLevels){
@@ -60,8 +59,8 @@ class UserPage extends HTMLElement{
                         this.experienceBars[skillType] = experienceBar;
                     }
 
-                    experienceBar.setAttribute("skill-type", skillType);
-                    experienceBar.setAttribute("current-experience", skillXP);
+                    experienceBar.skillType = skillType
+                    experienceBar.currentExperience = skillXP;
                     this.appendChild(experienceBar);
 
                 }
@@ -112,28 +111,27 @@ class ExperienceBar extends HTMLElement {
 			    <div class="bar-wrapper"><div class="progress"></div></div>
 			</div>
 		`;
+
 		this.progressBar = this.querySelector(".progress");
-		let currentExperience = this.getAttribute("current-experience");
         this.skillLevel =  this.querySelector(".skill-level");
-        this.setTitleText(currentExperience);
-        this.setBarWidth(currentExperience);
-	}
-	// observe the attribute changes so we can modify dispalyed data
-	static get observedAttributes() {
-		return ['current-experience'];
+
+        this.setTitleText(this.experience);
+        this.setBarWidth(this.experience);
 	}
 
-	// update experience bar values
-	attributeChangedCallback(name, oldValue, newValue) {
-		if(oldValue !== newValue){
-		    if(this.progressBar) {
 
-                this.checkForLevelUp(oldValue, newValue)
-                this.setBarWidth(newValue);
+	set currentExperience(val){
+        let oldExperience = this.experience;
+	    this.experience = val;
+	    this.setAttribute("current-experience", val);
 
-            }
-		}
-	}
+        this.checkForLevelUp(oldExperience, this.experience);
+    }
+
+    set skillType(val){
+	    this.experienceType = val;
+	    this.setAttribute("skill-type", val);
+    }
 
     checkForLevelUp(oldExperience, newExperience){
 
@@ -166,7 +164,6 @@ class ExperienceBar extends HTMLElement {
     }
 
     setTitleText(experience){
-	   // let skillType = this.getAttribute("skill-type");
 	    let level = experiencePointsAsLevel(experience);
 	    this.skillLevel.innerHTML = ` ${level}`
     }

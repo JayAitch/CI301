@@ -59,14 +59,22 @@ function getCurrentUserDocRef(){
 
 
 
+function safeGetProperty(docData, propertyName){
+	let propertyValue = "";
 
+	if(docData.hasOwnProperty(propertyName)){
+		propertyValue = docData[propertyName];
+	}
+	return propertyValue;
+}
 
 
 // POC cookie based task loading, allows refreshes, this will break when a  user hasnt clicked on a team
 /* section */
 function setCurrentViewedTeam(pViewedTeams){
 	currentViewedTeams = pViewedTeams;
-	taskPage.setAttribute("teams-watched", currentViewedTeams);
+
+	taskPage.teamTarget = currentViewedTeams;
 	createCurrentViewedTeamCookie(pViewedTeams);
 }
 
@@ -93,6 +101,8 @@ function convertToHTMLDate(fireBaseDate){
 	let HTMLDateFormat = date.getFullYear()+"-"+(month)+"-"+(day);
 	return HTMLDateFormat;
 }
+
+
 function calculateReward(requirements, importance, urgency, impact){
 	let reward = {};
 	for(let requirement in requirements){
@@ -100,6 +110,8 @@ function calculateReward(requirements, importance, urgency, impact){
 	}
 	return reward;
 }
+
+
 function calculateExperiencePoints(levelRequirement, pImportance, pUrgency, pImpact){
 	let importance = pImportance + 0.4 || 0;
 	let urgency = pUrgency + 0.4 || 0;
@@ -186,3 +198,71 @@ function LookupIconURI(skillType, notificationType){
 
 	return URI;
 }
+
+
+function CompleteTask(taskDocument){
+
+	let taskData =  taskDocument.data();
+	let taskRewards = taskData['experience-rewards']
+
+	let userAccountRef = getCurrentUserDocRef();
+	userAccountRef.get().then((doc) => {
+
+			let userAccountData = doc.data();
+
+			// this will error for new users
+			let userAccountSkillLevels = userAccountData['skill-levels']
+
+			for (let key in taskRewards) {
+
+				let userLevel = experiencePointsAsLevel(userAccountSkillLevels[key]);
+				let requiredLevel = taskData["requirements"][key]
+
+				if(!requiredLevel || requiredLevel <= userLevel){
+					let rewardXPValue = taskRewards[key] || 0;
+					let currentXPValue = userAccountSkillLevels[key] || 0;
+					userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
+				}
+				else{
+					$(this).notify(`requires ${key} level ${requiredLevel}`);
+					//show something to the users!
+					return;
+				}
+			}
+			taskToComplete.set({
+				"status": taskStatus.Complete,
+			}, {merge: true});
+
+
+			userAccountRef.set({
+				"skill-levels": userAccountSkillLevels,
+			}, {merge: true});
+//completed by
+
+			let teamDocumentRef =  firebase.firestore().doc(taskData.team);
+			teamDocumentRef.get().then((doc) => {
+				let teamData = doc.data();
+				let members = teamData.members;
+				console.log(members);
+				let notificationsCollectionRef =  firebase.firestore().collection("notifications");
+				for(var membersPos = 0;members.length > membersPos; membersPos++){
+					let memberRef = members[membersPos];
+					console.log(memberRef);
+					let newNotificationDocument = {
+						"for": memberRef,
+						"is-read": false,
+						"message": `the task ${taskData.name} has been completed by a team member!`
+					}
+					notificationsCollectionRef.add(newNotificationDocument);
+				}
+			});
+
+
+		}).catch(function (error) {
+			console.error("Could not complete task: ", error);
+		});
+
+
+}
+
+function NotifyTeamMembers(){}

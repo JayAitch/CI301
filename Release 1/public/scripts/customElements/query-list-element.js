@@ -1,4 +1,72 @@
 
+
+
+class DocCard extends HTMLElement{
+	constructor(){
+		super();
+	}
+
+	set document(val){
+		this.doc = val;
+		let docData = this.doc.data();
+		this.displayDocumentValues(docData);
+	}
+
+	set documentLocation(val){
+		this.setAttribute("doc-location", val);
+		this.docLocation = val;
+	};
+
+	get documentLocation(){
+		return this.docLocation;
+	}
+
+	displayDocumentValues(val){
+
+	}
+
+}
+
+
+class EditableDocCard extends DocCard{
+	constructor(){
+		super();
+	}
+
+	set canEdit(val){
+		if(val === true || val === false){
+			this.showEdit = val;
+			this.setAttribute("is-editable", val);
+		}
+	}
+
+
+	showHideEditButton(){
+		let editBtn = this.editBtn;
+		if(this.showEdit){
+			if(editBtn){
+
+			}
+			else{
+				this.editBtn = this.createEditButton();
+			}
+		}
+		else{
+			if(editBtn){
+				editBtn.parentNode.removeChild(editBtn)
+			}
+			else{
+			}
+		}
+	}
+
+	createEditButton(){
+		return false;
+	}
+
+}
+
+
 // Base query listener, acts on query data retured	 by getQueryReferenece()
 // override snapshot listners called to modify the DOM
 // override getQueryRefernece to change the data set
@@ -6,8 +74,6 @@ class StaticQueryListElement extends HTMLElement {
 	constructor() {
 		super();
 		this.initQueryListElement();
-
-
 	}
 
 	initQueryListElement(){
@@ -16,8 +82,6 @@ class StaticQueryListElement extends HTMLElement {
 		// get the current user from the authentication object
 		this.currentUserID = getUserId();
 		this.setupSnapshot();
-
-
 	}
 
 	setupSnapshot() {
@@ -39,18 +103,18 @@ class StaticQueryListElement extends HTMLElement {
 	// create a new card from the doc passed in and add to the card array
 	createNewCard(doc){
 
-		let docData = doc.data();
+		//let docData = doc.data();
 
 		// allow implementations to define their on creation logic
 		let newCard = this.createCardDOMElement(docData);
 
 		// generate the document reference to store in the dom attribute
 		let queryString = this.collectionRef + doc.id;
-		newCard.setAttribute("doc-location", queryString);
-
+		newCard.documentLocation = queryString;
+		newCard.document = doc;
 		// just add this to our parent anyway
 		this.appendChild(newCard);
-		this.setAttributesFromDoc(newCard, docData);
+	//	this.setAttributesFromDoc(newCard, docData);
 
 		this.cardElemsArray.add(newCard);
 
@@ -69,8 +133,6 @@ class StaticQueryListElement extends HTMLElement {
 	}
 
 }
-
-
 
 
 
@@ -117,13 +179,12 @@ class ActiveQueryListElement extends StaticQueryListElement{
 
 		// generate the document reference to store in the dom attribute
 		let queryString = this.collectionRef + doc.id;
-		newCard.setAttribute("doc-location", queryString);
+		newCard.documentLocation = queryString;
 
 		// get the data from the document and apply to card attributes
 		// use the change position to find where the card should go
 		this.insertBefore(newCard, this.childNodes[changeIndex]);
-		this.setAttributesFromDoc(newCard, docData);
-
+	newCard.document = doc;
 		// splice into the array to maintain postional accuracy
 		this.cardElemsArray.splice(changeIndex, 0, newCard);
 		//return newCard;
@@ -134,10 +195,10 @@ class ActiveQueryListElement extends StaticQueryListElement{
 		let doc = change.doc;
 
 		// find the notification card from the query index
-		let notificationCard = this.cardElemsArray[docIndex];
+		let docCard = this.cardElemsArray[docIndex];
 
 		// update the data to display
-		this.setAttributesFromDoc(notificationCard, doc.data());
+		docCard.document = doc;
 
 	}
 
@@ -146,10 +207,9 @@ class ActiveQueryListElement extends StaticQueryListElement{
 	removeCard(change){
 		// use the change position to find which dom element should be removed
 		let docIndex = change.oldIndex;
-		console.log(docIndex);
+
 		let card = this.cardElemsArray[docIndex];
-		// may need to resize the array here
-		console.log(card);
+
 		this.removeChild(card);
 		this.cardElemsArray.splice(docIndex,docIndex + 1);
 	}
@@ -160,10 +220,8 @@ class ActiveQueryListElement extends StaticQueryListElement{
 		const queryRef = this.getQueryReference();
 		// attach listeners to the reference to apply com updates
 		this.snapshotListener = queryRef.onSnapshot((snapshot) => {
-			console.log(snapshot);
 			snapshot.docChanges().forEach((change) =>{
-				if (change.type === "added") {
-					console.log(change);
+				if (change.type === "added") {;
 					this._onDocumentAdded(change);
 				}
 				else if(change.type === "modified"){
@@ -187,21 +245,13 @@ class ChangeableActiveQueryList extends ActiveQueryListElement{
 		this.cardElemsArray = [];
 	}
 
-
-	static get observedAttributes(){
-		return['collection-target']
-	}
-
-	attributeChangedCallback(name, oldValue, newValue) {
-		if(name == 'collection-target'){
-
-			// remove the cards and re setup snapshot
-			this.removeAllCards();
-			// make sure the snapshot is not listening away in memory somewhere
-			if(this.snapshotListener) this.removeListeners();
-			this.setupSnapshot();
-		}
-	}
+	set collectionTarget(val){
+		this.setAttribute('collection-target', val)
+		this.targetCollection = val;
+		this.removeAllCards();
+		if(this.snapshotListener) this.removeListeners();
+		this.setupSnapshot();
+	};
 
 
 	// bin this list contents
@@ -235,14 +285,20 @@ class EditButton extends HTMLElement{
 		this.addEventListener("click", this._onClick);
 	}
 
-	_onClick(){
-		console.log(this.testProperty);
-		let docLocation = this.getAttribute("doc-location");
-		let docType = this.getAttribute("obj-type");
+	set documentType(val){
+		this.type = val;
+		this.setAttribute("obj-type", val);
+	}
 
+	set documentLocation(val){
+		this.location = val;
+		this.setAttribute("doc-location", val);
+	}
+
+	_onClick(){
 		const changeDocForm = document.getElementById("change-document-form");
-		changeDocForm.setAttribute("obj-type", docType);
-		changeDocForm.setAttribute("document-target", docLocation);
+		changeDocForm.setAttribute("obj-type", this.type);
+		changeDocForm.setAttribute("document-target", this.location);
 		changeDocForm.hidden = false;
 	}
 
