@@ -15,7 +15,7 @@ class ExperienceRewardTile extends HTMLElement{
 
         let skillType = this.getAttribute("skill-type");
         let iconURI = LookupIconURI(skillType);
-        const rewardTileTemplate = `<div class="reward-tile"><img class="skill-icon" src="${iconURI}"><div class="amount"></div></div>`;
+        const rewardTileTemplate = `<div class="reward-tile"><img alt="${skillType}" class="skill-icon" src="${iconURI}"><div class="amount"></div></div>`;
 
         // dont do it like this maybe? potential dom lag
         this.innerHTML = rewardTileTemplate;
@@ -82,102 +82,34 @@ class TaskCard extends EditableDocCard{
 
     set name(val){
         this.nameEle.textContent = val;
+        this.setAttribute("name", val);
     }
 
     set description(val){
         this.descrEle.textContent = val;
+        this.setAttribute("description", val);
     }
 
     set deadline(val){
         let htmlSafeDate = convertToHTMLDate(val.toDate());
         this.deadlineDateDiv.textContent = htmlSafeDate;
+        this.setAttribute("deadline", htmlSafeDate);
     }
 
     set rewards(val){
         this.rewardsTileList.skillCardData = val;
+        // dont reflect this as parsing is a performance loss
     }
 
     set requirements(val){
         this.requirementsTileList.skillCardData = val;
+        // dont reflect this as parsing is a performance loss
     }
 
 
     _completeBtnClicked(){
-   //     let documentLocation = this.getAttribute("doc-location");
         CompleteTask(this.doc);
-//         let taskToComplete = firebase.firestore().doc(documentLocation);
-//         let taskRewards = {};
-//
-//         // move this logic to a function
-//         taskToComplete.get().then((doc) => {
-//
-//             let taskData = doc.data();
-//             taskRewards = taskData['experience-rewards']
-//
-//             let userAccountRef = getCurrentUserDocRef();
-//             userAccountRef.get().then((doc) => {
-//
-//                 let userAccountData = doc.data();
-//
-//                 // this will error for new users
-//                 let userAccountSkillLevels = userAccountData['skill-levels']
-//
-//                 for (let key in taskRewards) {
-//
-//                     let userLevel = experiencePointsAsLevel(userAccountSkillLevels[key]);
-//                     let requiredLevel = taskData["requirements"][key]
-//
-//                     if(!requiredLevel || requiredLevel <= userLevel){
-//                         let rewardXPValue = taskRewards[key] || 0;
-//                         let currentXPValue = userAccountSkillLevels[key] || 0;
-//                         userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
-//                     }
-//                     else{
-//                         $(this).notify(`requires ${key} level ${requiredLevel}`);
-//                         //show something to the users!
-//                         return;
-//                     }
-//                 }
-//                 taskToComplete.set({
-//                     "status": taskStatus.Complete,
-//                 }, {merge: true});
-//
-//
-//                 userAccountRef.set({
-//                     "skill-levels": userAccountSkillLevels,
-//                 }, {merge: true});
-// //completed by
-//
-//                 let teamDocumentRef =  firebase.firestore().doc(taskData.team);
-//                 teamDocumentRef.get().then((doc) => {
-//                     let teamData = doc.data();
-//                     let members = teamData.members;
-//                     console.log(members);
-//                     let notificationsCollectionRef =  firebase.firestore().collection("notifications");
-//                     for(var membersPos = 0;members.length > membersPos; membersPos++){
-//                         let memberRef = members[membersPos];
-//                         console.log(memberRef);
-//                         let newNotificationDocument = {
-//                             "for": memberRef,
-//                             "is-read": false,
-//                             "message": `the task ${taskData.name} has been completed by a team member!`
-//                         }
-//                         notificationsCollectionRef.add(newNotificationDocument);
-//                     }
-//                 });
-//
-//
-//             }).catch(function (error) {
-//                 console.error("Could not complete task: ", error);
-//             });
-//
-//
-//
-//         }).catch(function(error) {
-//             console.error("Could not complete task: ", error);
-//         });
-//
-//     }
+     }
 }
 
 
@@ -229,7 +161,7 @@ class TasksPage extends HTMLElement{
         const newDocumentForm = document.getElementById("new-document-form");
         let collectionTargetString = this.teamTarget;
         newDocumentForm.setAttribute("obj-type", "task");
-        newDocumentForm.setAttribute("collection-target", collectionTargetString);
+        newDocumentForm.setAttribute("collection-target", this.teamLocation);
         newDocumentForm.hidden = false;
     }
 

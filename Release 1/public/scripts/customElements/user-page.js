@@ -12,7 +12,7 @@ class UserPage extends HTMLElement{
   }
   
   connectedCallback() {
-	  
+
 	    this.isLoading = true;
 		// we want the currently logged in users reference in our accounts collection
 		// this document will be used to populate the users account page
@@ -94,7 +94,8 @@ class ExperienceBar extends HTMLElement {
 	}
 
 	connectedCallback() {
-	    let skillTypeIconURI = LookupIconURI(this.getAttribute("skill-type"))
+	    let skillType = this.getAttribute("skill-type");
+	    let skillTypeIconURI = LookupIconURI(skillType);
 		this.innerHTML = `
 			<style>
 				.progress{
@@ -106,7 +107,7 @@ class ExperienceBar extends HTMLElement {
 			</style>
             
 			<div class="skill-card">
-			    <div class="bar-title"><img class="skill-icon" src="${skillTypeIconURI}"><span class="skill-level"></span></div>
+			    <div class="bar-title"><img class="skill-icon" alt="${skillType}"src="${skillTypeIconURI}"><span class="skill-level"></span></div>
 			    
 			    <div class="bar-wrapper"><div class="progress"></div></div>
 			</div>

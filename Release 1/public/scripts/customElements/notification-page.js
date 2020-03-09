@@ -15,18 +15,13 @@ class NotificationCard extends DocCard{
 
 		this.messageElement = this.querySelector(".message");
 		// find the top wrapper and add the click listener to it
-		this.querySelector(".card-wrapper").addEventListener("click", this._clickHandler);
-	}
-	
-	// observe the attribute changes so we can modify dispalyed data
-	static get observedAttributes() {
-		return ['is-read', 'message'];
+		this.addEventListener("click", this._clickHandler);
 	}
 
 
 	displayDocumentValues(docData){
 		this.message = safeGetProperty(docData, "message");
-		this.isRead = safeGetProperty(docData, "isRead");
+		this.isRead = safeGetProperty(docData, "is-read");
 	}
 
 	set message(val){
@@ -34,9 +29,12 @@ class NotificationCard extends DocCard{
 	}
 
 	set isRead(val){
+		console.log(val);
 		if(val){
 			this.classList.add("read-notification")
+
 		}
+		this.setAttribute("is-read", "false");
 		this.hasRead = val;
 	}
 
@@ -93,8 +91,10 @@ class InviteNotificationCard extends NotificationCard{
 		let teamDocLocation = this.teamDocLocation;
 		let addToPendingInvites = firebase.firestore().doc(teamDocLocation).set({
 			"members": firebase.firestore.FieldValue.arrayUnion(getUserId())
-		}, { merge: true });
-		this.markAsRead();
+		}, { merge: true })
+			.then(()=>{
+				this.markAsRead();
+			});
 	}
 	
 	// delete the notification???
@@ -121,11 +121,11 @@ class NotificationList extends ActiveQueryListElement{
 
   createCardDOMElement(docData){
 	  let newNotificationCard = null;
-	  if(docData["is-read"] !== "true" ) $(".notification-btn").notify("unread messages");
+	  let isRead = safeGetProperty(docData, "is-read")
+	  if(isRead !== "true" ) $(".notification-btn").notify("unread messages");
 	  if(docData.type === "team-invite"){
 		  // yes - create the team notification card from the custom element registry
 		  newNotificationCard = document.createElement("invite-notification-card");
-
 	  }
 	  else {
 		  // no - create the normal notification card from the custom element registry

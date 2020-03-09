@@ -1,3 +1,4 @@
 notify	https://github.com/jpillora/notifyjs	MIT
 qrcodejs https://github.com/davidshimjs/qrcodejs MIT
 instascan https://github.com/schmich/instascan MIT
+qrcodeicon https://icon-icons.com/icon/qr-code-scan/120401#96

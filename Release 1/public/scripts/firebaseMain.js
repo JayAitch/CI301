@@ -14,18 +14,16 @@ let taskPage;
 // Initialize Firebase
 
 document.addEventListener("DOMContentLoaded", event =>{
+
+	if(!isCookieAccepted()) document.body.appendChild(document.createElement("cookie-policy"));
+
 	const app = firebase.initializeApp(firebaseConfig);
-	//const database = firebase.firestore();
-	
-	
+;
 	firebase.auth().onAuthStateChanged(function(user) {
 		if (user) {
-			// User is signed in.
-			//console.log(user)//
-			//loadHomePage();
-
+			console.log(isCookieAccepted());
 			document.getElementById("notification-wrapper").appendChild(document.createElement("notification-page"));
-			document.getElementById("account-wrapper").appendChild(document.createElement("user-page"));	
+			document.getElementById("account-wrapper").appendChild(document.createElement("user-page"));
 			document.getElementById("team-wrapper").appendChild(document.createElement("team-page"));
 			taskPage = document.createElement("tasks-page");
 			document.getElementById("tasks-wrapper").appendChild(taskPage);
@@ -73,24 +71,60 @@ function safeGetProperty(docData, propertyName){
 /* section */
 function setCurrentViewedTeam(pViewedTeams){
 	currentViewedTeams = pViewedTeams;
-
-	taskPage.teamTarget = currentViewedTeams;
-	createCurrentViewedTeamCookie(pViewedTeams);
+	if(currentViewedTeams.length > 0) {
+		taskPage.teamTarget = currentViewedTeams;
+		createCurrentViewedTeamCookie(pViewedTeams);
+	}
 }
 
 function setLastViewedTeam(){
-	let cookieName = "lastviewedTeam=";
-	let cookies = document.cookie;
-	let lastViewedTeam = cookies.substr(cookieName.length, cookies.length)
+	let cookieName = "last-viewed-team";
+	let lastViewedTeam = getCookie(cookieName);
 	setCurrentViewedTeam(lastViewedTeam);
 }
 
 function createCurrentViewedTeamCookie(pViewedTeams){
 	let date = new Date()
 	date.setTime(date.getTime() + (1000 * 24 * 60 * 60 * 1000))
-	document.cookie = "lastviewedTeam=" + pViewedTeams + ";" + "expires=" + date.toUTCString();
+	document.cookie = "last-viewed-team=" + pViewedTeams + ";" + "expires=" + date.toUTCString();
 }
+
+function setCookieAccepted(){
+	let date = new Date()
+	date.setTime(date.getTime() + (1000 * 24 * 60 * 60 * 1000))
+	document.cookie = "cookie-policy-accepted=true;" + "expires=" + date.toUTCString();
+}
+
+function isCookieAccepted(){
+	let cookieName = "cookie-policy-accepted"
+	let state = getCookie(cookieName);
+	if(state === "true") return true;
+	return false;
+}
+
+
+function getCookie(cookieName){
+	// build name found in cookie string
+	let name = cookieName + "="
+	let cookies = decodeURIComponent(document.cookie);
+	let cookieArray = cookies.split(";")
+
+	for(let cookieIterator = 0; cookieIterator < cookieArray.length; cookieIterator++){
+		let cookie = cookieArray[cookieIterator];
+		let cookieSearch = cookie.indexOf(name);
+		if(cookieSearch !== -1){
+			return cookie.substr(name.length +1, cookie.length);
+		}
+	}
+}
+
+
+
+
+
+
 /* section */
+
 
 // convert firebase date into a date format understood by html 5
 function convertToHTMLDate(fireBaseDate){
@@ -229,7 +263,8 @@ function CompleteTask(taskDocument){
 					return;
 				}
 			}
-			taskToComplete.set({
+
+			taskDocument.ref.set({
 				"status": taskStatus.Complete,
 			}, {merge: true});
 
@@ -264,5 +299,3 @@ function CompleteTask(taskDocument){
 
 
 }
-
-function NotifyTeamMembers(){}
