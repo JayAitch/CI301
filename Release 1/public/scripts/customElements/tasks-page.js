@@ -108,7 +108,7 @@ class TaskCard extends EditableDocCard{
 
 
     _completeBtnClicked(){
-        CompleteTask(this.doc);
+        CompleteTask(this.doc, this.requirementsTileList);
      }
 }
 
@@ -130,8 +130,6 @@ class TasksPage extends HTMLElement{
 
         this.header = this.querySelector(".name-header");
         this.appendChild(this.taskListElem);
-        // add this dynamically
-        document.getElementById("new-task-btn").addEventListener("click", this._onNewTaskBtnClick);
     }
 
 
@@ -140,7 +138,39 @@ class TasksPage extends HTMLElement{
         this.teamLocation = val;
         this.getTeamInformation().then( () =>{
             this.taskListElem.collectionTarget = val;
+            this.toggleAddBtn();
         });
+    }
+
+    toggleAddBtn(){
+        let canAddTask = safeGetProperty(currentlyViewTeamData, "allow-add-task");
+        let teamOwner = safeGetProperty(currentlyViewTeamData, "owner");
+        if(canAddTask || teamOwner === getUserId()){
+            if(!this.addBtn){
+                this.showAddButton();
+            }
+
+        }
+        else{
+            this.removeAddButton();
+        }
+    }
+
+    showAddButton(){
+        let addBtn = document.createElement("a");
+        addBtn.addEventListener("click", this._onNewTaskBtnClick);
+        addBtn.src = "#";
+        addBtn.textContent = "add task"
+        addBtn.classList = "ui-btn";
+        this.insertBefore(addBtn, this.taskListElem)
+        console.log(this)
+        this.addBtn = addBtn;
+    }
+
+    removeAddButton(){
+        if(this.addBtn){
+            this.parent.removeChild(this.addBtn);
+        }
     }
 
     getTeamInformation(){
@@ -148,6 +178,7 @@ class TasksPage extends HTMLElement{
         let promise = teamDocRef.get().then(doc => {
             currentlyViewTeamData = doc.data();
             this.name = safeGetProperty(currentlyViewTeamData, "name");
+
         });
         return promise;
     }
@@ -184,27 +215,23 @@ class TasksList extends ChangeableActiveQueryList{
 
     createCardDOMElement(docData) {
         let taskCard = document.createElement("task-card");
-        taskCard.canEdit = this.shouldShowEditButton(docData);
         return taskCard;
     }
 
-    // this can probably move onto tlcas
+    // called from child element
     shouldShowEditButton(docData){
-        let teamType = currentlyViewTeamData["team-type"];
+        let allowAddTask = currentlyViewTeamData["allow-add-task"];
         let taskOwnerID = docData.owner;
         let teamOwnerID = currentlyViewTeamData.owner;
         let currentUserID = getUserId();
 
-        // is the team type verticle? is the current user not the owner of the team
-        if(teamType == 1 && teamOwnerID != currentUserID) {
-            // is the current user not the owner of the task
-            // if (taskOwnerID != currentUserID) {
-            //     // dont show edit button
-            //     return false;
-            // }
-            return false
+        // always allow the team owner to edit tasks
+        // allow the task owner to edit tasks if the permissions to add it are there
+        if(allowAddTask && taskOwnerID == currentUserID || teamOwnerID == currentUserID) {
+
+            return true
         }
-        return true
+        return false
     }
 
 }

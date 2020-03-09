@@ -32,12 +32,23 @@ class EditableDocCard extends DocCard{
 	constructor(){
 		super();
 	}
+	connectedCallback(){
+		this.innerHTML= "empty";
+	}
+
+	set document(val){
+		super.document = val;
+		if(this.parentElement && this.parentElement.shouldShowEditButton){
+			this.canEdit = this.parentElement.shouldShowEditButton(this.doc.data());
+		}
+	}
 
 	set canEdit(val){
 		if(val === true || val === false){
 			this.showEdit = val;
 			this.setAttribute("is-editable", val);
 		}
+		this.showHideEditButton();
 	}
 
 
@@ -89,7 +100,7 @@ class StaticQueryListElement extends HTMLElement {
 		const queryRef = this.getQueryReference();
 		// attach listeners to the reference to apply com updates
 		queryRef.get().then((snapshot) => {
-
+			if(snapshot.length)
 			snapshot.forEach((childSnapshot) => {
 				this.createNewCard(childSnapshot.doc);
 			});
@@ -125,6 +136,9 @@ class StaticQueryListElement extends HTMLElement {
 	getQueryReference() {
 	}
 
+	shouldShowEditButton(docData) {
+		return false;
+	}
 
 	setAttributesFromDoc(elem, docData) {
 	}
@@ -184,7 +198,7 @@ class ActiveQueryListElement extends StaticQueryListElement{
 		// get the data from the document and apply to card attributes
 		// use the change position to find where the card should go
 		this.insertBefore(newCard, this.childNodes[changeIndex]);
-	newCard.document = doc;
+		newCard.document = doc;
 		// splice into the array to maintain postional accuracy
 		this.cardElemsArray.splice(changeIndex, 0, newCard);
 		//return newCard;
@@ -202,8 +216,6 @@ class ActiveQueryListElement extends StaticQueryListElement{
 
 	}
 
-
-	// this scenario should only rarely happen, remove deleted document from the DOM
 	removeCard(change){
 		// use the change position to find which dom element should be removed
 		let docIndex = change.oldIndex;
@@ -214,8 +226,7 @@ class ActiveQueryListElement extends StaticQueryListElement{
 		this.cardElemsArray.splice(docIndex,docIndex + 1);
 	}
 
-
-  setupSnapshot(){
+  	setupSnapshot(){
 		// create a query reference of dataset
 		const queryRef = this.getQueryReference();
 		// attach listeners to the reference to apply com updates

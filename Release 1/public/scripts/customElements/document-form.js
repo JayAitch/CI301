@@ -26,7 +26,7 @@ const team = {
 	'name': {
 		'value': '',
 		'field-properties': {
-			'label-text': 'name',
+			'label-text': 'Name',
 			'validation': {
 				required: true,
 				min:3,
@@ -40,8 +40,7 @@ const team = {
 	'description': {
 		'value': '',
 		'field-properties': {
-			'label-text': 'description',
-			'help-text': 'select how your team creates and manages tasks.',
+			'label-text': 'Description',
 			'validation': {
 				required: false,
 				min:0,
@@ -52,24 +51,36 @@ const team = {
 			createTextAreaField(key, value, parent, fieldProperties);
 		},
 	},
-	'team-type': {
-		'value': teamType.HORIZONTAL,
+	'allow-add-task': {
+		'value': false,
 		'field-properties': {
-			'label-text': 'team type',
-			'help-text': 'select how your team creates and manages tasks.',
+			'label-text': 'Allow Members to add tasks?',
+			'help-text': 'Only you or tasks owners can modify task data',
 			'validation': {
 				required: true
 			}
 		},
 		'construction': function (key, value, parent, fieldProperties) {
-			createSelectField(key, value, parent, fieldProperties)
+			createCheckboxInputField(key, value, parent, fieldProperties)
+		}
+	},
+	'allow-edit-team': {
+		'value': false,
+		'field-properties': {
+			'label-text': 'Allow Members to Edit Team?',
+			'validation': {
+				required: true
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createCheckboxInputField(key, value, parent, fieldProperties)
 		}
 	},
 	'personalised-skills': {
 		'value': '',
 		'field-properties': {
-			'label-text': 'team skills',
-			'help-text': 'create skills to add to tasks.',
+			'label-text': 'Additional Team Skill',
+			'help-text': 'Create Additional Skills for Your Team Members to Earn.',
 			'validation': {
 				required: true
 			}
@@ -88,7 +99,7 @@ const task = {
 	'name': {
 		'value': '',
 		'field-properties': {
-			'label-text': 'name',
+			'label-text': 'Name',
 			'validation': {
 				required: true,
 				min:3,
@@ -102,7 +113,7 @@ const task = {
 	'description': {
 		'value': '',
 		'field-properties': {
-			'label-text': 'description',
+			'label-text': 'Description',
 			'validation': {
 				required: true,
 				min:0,
@@ -116,7 +127,7 @@ const task = {
 	'urgency': {
 		'value': 1,
 		'field-properties': {
-			'label-text': 'urgency',
+			'label-text': 'Urgency',
 			'validation': {
 				required: true,
 				min:0,
@@ -130,7 +141,7 @@ const task = {
 	'importance': {
 		'value': 1,
 		'field-properties': {
-			'label-text': 'importance',
+			'label-text': 'Importance',
 			'validation': {
 				required: true,
 				min:0,
@@ -144,7 +155,7 @@ const task = {
 	'impact': {
 		'value': 1,
 		'field-properties': {
-			'label-text': 'impact',
+			'label-text': 'Impact',
 			'validation': {
 				required: true,
 				min:0,
@@ -159,7 +170,7 @@ const task = {
 		'value': 1,
 		'field-properties': {
 			'label-text': 'level requirements',
-			'help-text': 'Levels required to complete tasks, set to 0 to add experience rewards without requirement.',
+			'help-text': 'Levels Required to Complete Tasks, Set to 0 to Add Experience Rewards Without Requirement.',
 			'validation': {
 				required: true
 			}
@@ -205,13 +216,12 @@ function getExperienceTypes(){
 
 
 
-function createInputLabel(text,key, parent){
-
+function createInputLabel(text, key, parent){
 	if(text.length > 0){
 		let newLabelField = document.createElement("label");
 		newLabelField.setAttribute("for", key);
 		newLabelField.className = "form-label";
-		newLabelField.innerText = key;
+		newLabelField.innerText = text;
 		newLabelField.className = "form-row label";
 		parent.appendChild(newLabelField);
 	}
@@ -220,7 +230,7 @@ function createInputLabel(text,key, parent){
 
 function createSliderInput(key, value, parent, fieldConfig){
 	let labelText = getLabelText(key, fieldConfig);
-	createInputLabel(labelText,key, parent);
+	createInputLabel(labelText, key, parent);
 	let newSliderField = document.createElement("input");
 	newSliderField.name = key;
 	newSliderField.type = "range";
@@ -265,7 +275,7 @@ function getLabelText(key, fieldConfig){
 
 function createNumberInput(key, value, parent, fieldConfig){
 	let labelText = getLabelText(key, fieldConfig);
-	createInputLabel(labelText,key, parent);
+	createInputLabel(labelText, key, parent);
 	// create the field and propulate with any data from the object
 	let newNumberField = document.createElement("input");
 	newNumberField.name = key;
@@ -314,6 +324,30 @@ function createTextInputField(key, value, parent, fieldConfig){
 
 	return newTextField;
 }
+
+
+function createCheckboxInputField(key, value, parent, fieldConfig){
+	let labelText = getLabelText(key, fieldConfig);
+	createInputLabel(labelText,key, parent);
+
+	// create the field and propulate with any data from the object
+	let newTextField = document.createElement("input");
+	newTextField.name = key;
+	newTextField.type = "checkbox";
+	newTextField.checked = value;
+	newTextField.className = "form-row checkbox";
+
+	parent.appendChild(newTextField);
+
+
+	if(fieldConfig && fieldConfig["help-text"]){
+		createHelpTextRow(parent,fieldConfig["help-text"]);
+	}
+
+
+	return newTextField;
+}
+
 
 function createTextAreaField(key, value, parent, fieldConfig){
 	let labelText = getLabelText(key, fieldConfig);
@@ -785,7 +819,9 @@ class DocumentForm extends BasicForm{
 					 break;
 				 case "textarea":
 					 currentDocument[fieldName] =  fieldValue;
-
+					 break;
+				 case "checkbox":
+					 currentDocument[fieldName] =  currentFormRow.checked;
 					 break;
 				 case "select-one":
 					 currentDocument[fieldName] =  parseInt(fieldValue);

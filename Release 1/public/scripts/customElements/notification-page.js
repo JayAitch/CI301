@@ -29,7 +29,6 @@ class NotificationCard extends DocCard{
 	}
 
 	set isRead(val){
-		console.log(val);
 		if(val){
 			this.classList.add("read-notification")
 

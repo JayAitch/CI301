@@ -54,20 +54,20 @@ class TeamsList extends ActiveQueryListElement{
 
 	createCardDOMElement(docData){
 		let newTeamCard = document.createElement("team-card");
-		newTeamCard.canEdit = this.shouldShowEditButton(docData);
 		return newTeamCard;
 	}
 
 	shouldShowEditButton(docData){
-		let teamType = safeGetProperty(docData, "team-type");
+		let allowEditTeam = safeGetProperty(docData, "allow-edit-team");
+
 		let teamOwnerID = docData.owner;
 		let currentUserID = getUserId();
 		// is the team type verticle? is the current user not the owner of the team
-		if(teamType == 1 && teamOwnerID != currentUserID) {
+		if(allowEditTeam || teamOwnerID == currentUserID) {
 				// dont show edit button
-				return false;
+				return true;
 		}
-		return true
+		return false
 	}
 }
 

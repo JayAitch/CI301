@@ -113,7 +113,10 @@ function getCookie(cookieName){
 		let cookie = cookieArray[cookieIterator];
 		let cookieSearch = cookie.indexOf(name);
 		if(cookieSearch !== -1){
-			return cookie.substr(name.length +1, cookie.length);
+			let value = cookie.substr(name.length, cookie.length);
+			console.log(value);
+			value = value.replace("=", "");
+			return value;
 		}
 	}
 }
@@ -234,7 +237,7 @@ function LookupIconURI(skillType, notificationType){
 }
 
 
-function CompleteTask(taskDocument){
+function CompleteTask(taskDocument, notificationTarget){
 
 	let taskData =  taskDocument.data();
 	let taskRewards = taskData['experience-rewards']
@@ -258,7 +261,7 @@ function CompleteTask(taskDocument){
 					userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
 				}
 				else{
-					$(this).notify(`requires ${key} level ${requiredLevel}`);
+					$(notificationTarget).notify(`requires ${key} level ${requiredLevel}`);
 					//show something to the users!
 					return;
 				}
