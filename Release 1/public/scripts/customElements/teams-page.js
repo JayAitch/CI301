@@ -59,7 +59,7 @@ class TeamsList extends ActiveQueryListElement{
 	}
 
 	shouldShowEditButton(docData){
-		let teamType = docData["team-type"];
+		let teamType = safeGetProperty(docData, "team-type");
 		let teamOwnerID = docData.owner;
 		let currentUserID = getUserId();
 		// is the team type verticle? is the current user not the owner of the team

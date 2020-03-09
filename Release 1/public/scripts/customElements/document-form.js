@@ -475,7 +475,7 @@ function createMapInputField(mapkey, values, parent, fieldConfig){
 		newSelectValueMap.setAttribute('select-lookup', mapkey);
 		newSelectValueMap.setAttribute('selected-value', type);
 		newSelectValueMap.setAttribute('value', amount);
-		newSelectValueMap.className = "form-row select-map-wrapper";
+		newSelectValueMap.className = "select-map-wrapper";
 		fieldMapWrapper.appendChild(newSelectValueMap);
 	}
 
@@ -495,6 +495,8 @@ function createMapInputField(mapkey, values, parent, fieldConfig){
 		runTimeSelectMap.setAttribute('selected-value', "Strength");
 		runTimeSelectMap.setAttribute('value', "0");
 		fieldMapWrapper.appendChild(runTimeSelectMap);
+		parent.scrollTop = parent.scrollHeight; // UX improvement from survey
+
 	});
 
 	return fieldMapWrapper;
@@ -514,11 +516,10 @@ function createStringCollectionField(skey, values, parent, fieldConfig){
 
 	for(let value in values){
 		let newSelectValueMap = document.createElement("string-collection");
-
 		let amount = value
 		newSelectValueMap.setAttribute('key', skey);
 		newSelectValueMap.setAttribute('value', amount);
-		newSelectValueMap.className = "form-row select-map-wrapper";
+		newSelectValueMap.className = "select-map-wrapper";
 		fieldMapWrapper.appendChild(newSelectValueMap);
 	}
 
@@ -531,12 +532,14 @@ function createStringCollectionField(skey, values, parent, fieldConfig){
 	parent.appendChild(fieldMapWrapper);
 
 	addRowButton.addEventListener("click", () => {
+		// prevent the form from submitting
 		event.preventDefault();
 		let runTimeSelectMap = document.createElement("string-collection");
 		runTimeSelectMap.setAttribute('key', skey);
 		runTimeSelectMap.setAttribute('value', "");
-		runTimeSelectMap.className = "form-row select-map-wrapper";
+		runTimeSelectMap.className = "select-map-wrapper";
 		fieldMapWrapper.appendChild(runTimeSelectMap);
+		parent.scrollTop = parent.scrollHeight;
 	});
 
 	return fieldMapWrapper;
@@ -1132,9 +1135,8 @@ class StringCollectionField extends HTMLElement{
 		let newTextField = createTextInputField(key, value, newMapFields);
 		newMapFields.appendChild(newTextField);
 		newMapFields.appendChild(removeRowBtn);
+		newTextField.minLength = 2; // prevent this being empty
 		this.appendChild(newMapFields);
-
-
 
 
 		removeRowBtn.addEventListener('click', () =>{
