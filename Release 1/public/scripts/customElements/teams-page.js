@@ -5,7 +5,7 @@
 class TeamsPage extends HTMLElement{
   constructor() { 
     super();
-	this._showInviteCode = this._showInviteCode.bind(this);
+
 
   }
   
@@ -16,19 +16,9 @@ class TeamsPage extends HTMLElement{
   	this.appendChild(content);
 
 	this.newTeamBtn = document.getElementById("new-team-btn").addEventListener("click", this._onNewTeamBtnClick);
-
-	//  this should probably move from here
-	this.inviteCodeBtn = document.getElementById("invite-code-btn").addEventListener("click", this._showInviteCode);
-
-	this.QRcode = document.getElementById("qr-code");
-	let QRCodeData = {"text": getUserId()};
-	new QRCode(this.QRcode, QRCodeData);
   }
 
-  _showInviteCode(){
-	  let isHidden = this.QRcode.hidden
-	  this.QRcode.hidden = !isHidden
-  }
+
 
   // promote this to a seperate elemnt
   _onNewTeamBtnClick(){
@@ -80,6 +70,8 @@ class TeamCard extends EditableDocCard{
 		this._showInviteForm = this._showInviteForm.bind(this);
 	}
 
+
+
 	connectedCallback() {
 
 		const template = document.getElementById('team-card-template');
@@ -91,8 +83,7 @@ class TeamCard extends EditableDocCard{
 		this.headerEle = this.querySelector(".name");
 
 		this.querySelector(".team-view-button").addEventListener("click", this._viewTeam);
-		this.querySelector(".team-invite-button").addEventListener("click", this._showInviteForm);
-		this.showHideEditButton();
+		this.toggleEditButton();
 	}
 
 
@@ -106,6 +97,11 @@ class TeamCard extends EditableDocCard{
 		this.teamName = val;
 	}
 
+	set document(val){
+		super.document = val;
+		this.toggleInviteButton()
+	}
+
 	createEditButton(){
 		let editButton = document.createElement("edit-button");
 		editButton.documentLocation = this.documentLocation;
@@ -113,6 +109,38 @@ class TeamCard extends EditableDocCard{
 		this.controlGroup.insertBefore(editButton, this.controlGroup.firstChild);
 		return editButton;
 	}
+
+	toggleInviteButton(){
+		let inviteBtn = this.inviteBtn;
+		let docData = this.doc.data();
+		let showInvite = safeGetProperty(docData,'allow-others-invite');
+		let teamOwner = safeGetProperty(docData,'owner');
+		if(showInvite || teamOwner === getUserId()){
+			if(inviteBtn){
+
+			}
+			else{
+				this.inviteBtn = this.createInviteButton();
+			}
+		}
+		else{
+			if(inviteBtn){
+				inviteBtn.parentNode.removeChild(inviteBtn)
+			}
+			else{
+			}
+		}
+	}
+
+	createInviteButton(){
+		let inviteBtn = document.createElement("a");
+		inviteBtn.classList = "ui-btn control";
+		inviteBtn.innerText = "invite"
+		inviteBtn.addEventListener("click", this._showInviteForm);
+		this.controlGroup.insertBefore(inviteBtn, this.controlGroup.firstChild);
+		return inviteBtn;
+	}
+
 
 	_viewTeam(){
 		setCurrentViewedTeam(this.documentLocation);

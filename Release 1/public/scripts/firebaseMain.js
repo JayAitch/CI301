@@ -15,13 +15,13 @@ let taskPage;
 
 document.addEventListener("DOMContentLoaded", event =>{
 
-	if(!isCookieAccepted()) document.body.appendChild(document.createElement("cookie-policy"));
 
 	const app = firebase.initializeApp(firebaseConfig);
 ;
 	firebase.auth().onAuthStateChanged(function(user) {
 		if (user) {
-			console.log(isCookieAccepted());
+			if(!isCookieAccepted()) document.body.appendChild(document.createElement("cookie-policy"));
+
 			document.getElementById("notification-wrapper").appendChild(document.createElement("notification-page"));
 			document.getElementById("account-wrapper").appendChild(document.createElement("user-page"));
 			document.getElementById("team-wrapper").appendChild(document.createElement("team-page"));

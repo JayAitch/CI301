@@ -60,7 +60,7 @@ class TaskCard extends EditableDocCard{
         this.rewardsTileList = this.querySelector(".rewards-tile-list");
 
         this.querySelector(".complete-task-button").addEventListener("click", this._completeBtnClicked);
-        this.showHideEditButton();
+        this.toggleEditButton();
     }
 
 
@@ -92,7 +92,7 @@ class TaskCard extends EditableDocCard{
 
     set deadline(val){
         let htmlSafeDate = convertToHTMLDate(val.toDate());
-        this.deadlineDateDiv.textContent = htmlSafeDate;
+        this.deadlineDateDiv.textContent = "due: " + htmlSafeDate;
         this.setAttribute("deadline", htmlSafeDate);
     }
 
@@ -145,11 +145,11 @@ class TasksPage extends HTMLElement{
     toggleAddBtn(){
         let canAddTask = safeGetProperty(currentlyViewTeamData, "allow-add-task");
         let teamOwner = safeGetProperty(currentlyViewTeamData, "owner");
+        console.log(teamOwner);
         if(canAddTask || teamOwner === getUserId()){
             if(!this.addBtn){
                 this.showAddButton();
             }
-
         }
         else{
             this.removeAddButton();
@@ -163,13 +163,13 @@ class TasksPage extends HTMLElement{
         addBtn.textContent = "add task"
         addBtn.classList = "ui-btn";
         this.insertBefore(addBtn, this.taskListElem)
-        console.log(this)
         this.addBtn = addBtn;
     }
 
     removeAddButton(){
         if(this.addBtn){
-            this.parent.removeChild(this.addBtn);
+            this.removeChild(this.addBtn);
+            this.addBtn = null;
         }
     }
 
@@ -178,7 +178,6 @@ class TasksPage extends HTMLElement{
         let promise = teamDocRef.get().then(doc => {
             currentlyViewTeamData = doc.data();
             this.name = safeGetProperty(currentlyViewTeamData, "name");
-
         });
         return promise;
     }

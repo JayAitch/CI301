@@ -76,6 +76,18 @@ const team = {
 			createCheckboxInputField(key, value, parent, fieldProperties)
 		}
 	},
+	'allow-others-invite': {
+		'value': false,
+		'field-properties': {
+			'label-text': 'Allow Members to Invite?',
+			'validation': {
+				required: true
+			}
+		},
+		'construction': function (key, value, parent, fieldProperties) {
+			createCheckboxInputField(key, value, parent, fieldProperties)
+		}
+	},
 	'personalised-skills': {
 		'value': '',
 		'field-properties': {
@@ -169,8 +181,8 @@ const task = {
 	'requirements': {
 		'value': 1,
 		'field-properties': {
-			'label-text': 'level requirements',
-			'help-text': 'Levels Required to Complete Tasks, Set to 0 to Add Experience Rewards Without Requirement.',
+			'label-text': 'Level Requirements',
+			'help-text': 'Levels Required to Complete Task, Set to 0 to Add Experience Rewards Without Requirement.',
 			'validation': {
 				required: true
 			}
@@ -182,7 +194,7 @@ const task = {
 	'deadline': {
 		'value': new Date(),
 		'field-properties': {
-			'label-text': 'deadline',
+			'label-text': 'Deadline',
 			'validation': {
 				required: true
 			}
@@ -208,7 +220,7 @@ function getExperienceTypes(){
 
 	// add any personalised skills defined on the team data this task is for
 	let personalExperienceTypes = currentlyViewTeamData["personalised-skills"];
-	for(experienceType in personalExperienceTypes){
+	for(let experienceType in personalExperienceTypes){
 		experienceTypes[experienceType] = experienceType;
 	}
 	return experienceTypes;
@@ -464,7 +476,7 @@ function createSelectField(key, value, parent, fieldConfig){
 		selectOptionsJson = selectLookup[key];
 	}
 
-
+	console.log(selectOptionsJson);
 	// make an option field for each
 	for(let option in selectOptionsJson){
 		isSelected = false;

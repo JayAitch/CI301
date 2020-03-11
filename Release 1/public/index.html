@@ -54,7 +54,7 @@
   <div id="notification-area" style="width:100%;height:80px;"><div style="width:33%;" id="team-notification-area"></div><div id="tasks-notification-area" style="width:33%;"></div><div id="user-notification-area" style="width:33%;"></div><div id="notification-notification-area" style="width:33%;"></div></div>
 	<div data-role="page" id="teams-page" class="page" data-theme="a">
 		<div data-role="header">
-			<h1>Teams</h1>
+			<h1>Workaholic</h1>
 			<div data-role="navbar">
 				<ul>
                     <li><a href="#teams-page" class="ui-btn-active">teams</a></li>
@@ -73,7 +73,7 @@
 	<div data-role="page" id="tasks-page" class="page" data-theme="a">
 	
 		<div data-role="header">
-			<h1>Tasks</h1>
+			<h1>Workaholic</h1>
 			<div data-role="navbar">
 				<ul>
                     <li><a href="#teams-page" >teams</a></li>
@@ -93,7 +93,7 @@
 	</div>
 	<div data-role="page" id="user-page" class="page" data-theme="a">
 		<div data-role="header">
-			<h1>Account</h1>
+			<h1>Workaholic</h1>
 			<div data-role="navbar">
 				<ul>
                     <li><a href="#teams-page" >teams</a></li>
@@ -111,13 +111,13 @@
 	</div>
 	<div data-role="page" id="notifications-page" class="page" data-theme="a">
 		<div data-role="header">
-			<h1>Account</h1>
+			<h1>Workaholic</h1>
 			<div data-role="navbar">
 				<ul>
                     <li><a href="#teams-page" >teams</a></li>
                     <li><a href="#tasks-page">tasks</a></li>
                     <li><a href="#user-page" >user</a></li>
-                    <li><a class="notification-btn" href="#notifications-page" class="ui-btn-active">notifications</a></li>
+                    <li><a class="notification-btn ui-btn-active" href="#notifications-page">notifications</a></li>
 				</ul>
 			</div>			
 		</div>
@@ -172,7 +172,6 @@
 			</div>
 			<div class="control-group">
 				<a class="team-view-button control ui-btn" href="#">view</a>
-				<a class="team-invite-button control ui-btn" href="#">invite</a>
 			</div>
 		</div>
 	</template>
@@ -181,12 +180,9 @@
 	  <h2 class="name-header">
 		  Teams
 	  </h2>
-	  <div class="control-group">
-		  <a id="invite-code-btn" class="ui-btn" href="#">invite code</a>
+
 		  <a id="new-team-btn" class="ui-btn" href="#">new team</a>
-		  <!--move qr code out of here when creating the show hide top level modls-->
-		  <div hidden id="qr-code"></div>
-	  </div>
+		  <!--move this to user page-->
 	  <team-list></team-list>
   </template>
 
@@ -381,9 +377,11 @@
 
 
 
-      #qr-code img {
+      .qr-code img {
           padding:30px;
-          margin:auto
+          margin:auto;
+		  background-color:rgba(244,244,244,0.5);
+		  border-radius: 5px;
       }
 
 

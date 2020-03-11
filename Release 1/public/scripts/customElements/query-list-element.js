@@ -48,11 +48,11 @@ class EditableDocCard extends DocCard{
 			this.showEdit = val;
 			this.setAttribute("is-editable", val);
 		}
-		this.showHideEditButton();
+		this.toggleEditButton();
 	}
 
 
-	showHideEditButton(){
+	toggleEditButton(){
 		let editBtn = this.editBtn;
 		if(this.showEdit){
 			if(editBtn){

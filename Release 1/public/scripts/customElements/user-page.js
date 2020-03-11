@@ -8,7 +8,7 @@ class UserPage extends HTMLElement{
     super();
 
     this.experienceBars = {};
-
+      this._showInviteCode = this._showInviteCode.bind(this);
   }
   
   connectedCallback() {
@@ -18,6 +18,14 @@ class UserPage extends HTMLElement{
 		// this document will be used to populate the users account page
 		const workaholicCurrentUser = getUserId();
 		this.userAccount = firebase.firestore().collection('accounts').doc(workaholicCurrentUser);
+        this.innerHTML = 	`<a class="invite-code-btn ui-btn" href="#">user code<div hidden class="qr-code"></div></a>`
+
+
+         this.inviteCodeBtn = this.querySelector(".invite-code-btn").addEventListener("click", this._showInviteCode);
+
+        this.QRcode = this.querySelector(".qr-code");
+        let QRCodeData = {"text": getUserId()};
+        new QRCode(this.QRcode, workaholicCurrentUser);
 
 		// use arrow function to preserve the value of this
 		this.userAccount.get().then(doc => {
@@ -42,38 +50,17 @@ class UserPage extends HTMLElement{
 
                 let user = doc.data();
 
-                let skillLevels =  user["skill-levels"];
-                for(let skillType in skillLevels){
+                let skillLevels = user["skill-levels"];
 
-                    let skillXP = skillLevels[skillType];
-                    let experienceBar  = this.experienceBars[skillType];
-                    let skillLevel = experiencePointsAsLevel(skillXP);
+                 this.updateExperienceBars(skillLevels)
 
-                    if(!experienceBar){
-                        experienceBar = document.createElement("experience-bar");
-
-                        if(!this.isLoading){
-                            createFanFareNotification(`your ${skillType} leveled up to ${skillLevel}`);
-                        }
-
-                        this.experienceBars[skillType] = experienceBar;
-                    }
-
-                    experienceBar.skillType = skillType
-                    experienceBar.currentExperience = skillXP;
-                    this.appendChild(experienceBar);
-
-                }
-
-                
             })
 
-            // we want to do this with JQM loading trigger to so a loading thing
+            this.updateExperienceBars(doc.data()["skill-levels"]);
 
-            setTimeout(function () {
-                this.isLoading = false;
-            },100)
-
+        }).then(()=>
+        {
+            this.isLoading = false;
 
         }).catch(function(error) {
             console.log("Error getting document:", error);
@@ -82,8 +69,36 @@ class UserPage extends HTMLElement{
 	}
 
 
+	updateExperienceBars(skillLevels){
+        for(let skillType in skillLevels){
+
+            let skillXP = skillLevels[skillType];
+            let experienceBar  = this.experienceBars[skillType];
+            let skillLevel = experiencePointsAsLevel(skillXP);
+
+            if(!experienceBar){
+                experienceBar = document.createElement("experience-bar");
+
+                if(!this.isLoading){
+                    createFanFareNotification(`your ${skillType} leveled up to ${skillLevel}`);
+                }
+
+                this.experienceBars[skillType] = experienceBar;
+            }
+
+            experienceBar.skillType = skillType
+            experienceBar.currentExperience = skillXP;
+            this.appendChild(experienceBar);
+        }
+    }
+
+
+    _showInviteCode(){
+        let isHidden = this.QRcode.hidden
+        this.QRcode.hidden = !isHidden
+    }
+
 	disconnectedCallback() {
-		console.log("userpage disconnected");
 	}
 
 }
