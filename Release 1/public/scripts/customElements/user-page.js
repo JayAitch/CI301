@@ -27,43 +27,31 @@ class UserPage extends HTMLElement{
         let QRCodeData = {"text": getUserId()};
         new QRCode(this.QRcode, workaholicCurrentUser);
 
+      this.userAccount.set({
+          "last-logged": new Date()
+      }, {merge: true});
+
 		// use arrow function to preserve the value of this
 		this.userAccount.get().then(doc => {
-		    // make sure we arnt going to blat the users experience values.
-            if (doc.exists) {
-                this.userAccount.set({
-                    "logged-on": true,
-                    "last-logged": new Date()
-                }, {merge: true});
-            } else {
-                this.userAccount.set({
-                    "logged-on": true,
-                    "last-logged": new Date(),
-                    "skill-levels": {}
-                }, {merge: true});
-            }
-
-
-
 
             this.userAccount.onSnapshot(doc => {
 
                 let user = doc.data();
 
-                let skillLevels = user["skill-levels"];
+                let skillLevels = safeGetProperty(user,["skill-levels"]);
 
                  this.updateExperienceBars(skillLevels)
 
             })
-
-            this.updateExperienceBars(doc.data()["skill-levels"]);
+            let skillLevels = safeGetProperty(doc.data(),["skill-levels"]);
+            this.updateExperienceBars(skillLevels);
 
         }).then(()=>
         {
             this.isLoading = false;
 
         }).catch(function(error) {
-            console.log("Error getting document:", error);
+
         });
 
 	}

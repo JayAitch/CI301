@@ -240,19 +240,21 @@ function LookupIconURI(skillType, notificationType){
 function CompleteTask(taskDocument, notificationTarget){
 
 	let taskData =  taskDocument.data();
-	let taskRewards = taskData['experience-rewards']
+	let taskRewards = safeGetProperty(taskData, 'experience-rewards');
 
 	let userAccountRef = getCurrentUserDocRef();
+
 	userAccountRef.get().then((doc) => {
 
 			let userAccountData = doc.data();
 
 			// this will error for new users
-			let userAccountSkillLevels = userAccountData['skill-levels']
+			let userAccountSkillLevels = userAccountData['skill-levels'] || {};
 
 			for (let key in taskRewards) {
 
-				let userLevel = experiencePointsAsLevel(userAccountSkillLevels[key]);
+				let accountExperience = userAccountSkillLevels[key] || 0
+				let userLevel = experiencePointsAsLevel(accountExperience);
 				let requiredLevel = taskData["requirements"][key]
 
 				if(!requiredLevel || requiredLevel <= userLevel){
@@ -261,6 +263,7 @@ function CompleteTask(taskDocument, notificationTarget){
 					userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
 				}
 				else{
+					console.log(notificationTarget);
 					$(notificationTarget).notify(`requires ${key} level ${requiredLevel}`);
 					//show something to the users!
 					return;
@@ -286,10 +289,16 @@ function CompleteTask(taskDocument, notificationTarget){
 				for(var membersPos = 0;members.length > membersPos; membersPos++){
 					let memberRef = members[membersPos];
 					console.log(memberRef);
+
+					let rewardText = "";
+					for(let skillName in taskRewards){
+						rewardText +=  taskRewards[skillName] + " points in " + skillName + " ";
+					}
+
 					let newNotificationDocument = {
 						"for": memberRef,
 						"is-read": false,
-						"message": `the task ${taskData.name} has been completed by a team member!`
+						"message": `The task ${taskData.name} has been completed by a team member earning them ${rewardText}!`
 					}
 					notificationsCollectionRef.add(newNotificationDocument);
 				}

@@ -81,6 +81,7 @@ class TeamCard extends EditableDocCard{
 
 		this.controlGroup = this.querySelector(".control-group");
 		this.headerEle = this.querySelector(".name");
+		this.descriptionEle = this.querySelector(".description");
 
 		this.querySelector(".team-view-button").addEventListener("click", this._viewTeam);
 		this.toggleEditButton();
@@ -89,12 +90,19 @@ class TeamCard extends EditableDocCard{
 
 	displayDocumentValues(docData) {
 		this.name = safeGetProperty(docData, "name");
+		this.description = safeGetProperty(docData, "description");
 	}
 
 	set name(val){
 		this.headerEle.textContent = val;
 		this.setAttribute("name", val);
 		this.teamName = val;
+	}
+
+	set description(val){
+		this.descriptionEle.textContent = val;
+		this.setAttribute("description", val);
+		this.teamDescription = val;
 	}
 
 	set document(val){

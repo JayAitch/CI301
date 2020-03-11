@@ -168,7 +168,9 @@
 		<div class="card-wrapper">
 			<div class="name-header">
 				<h3 class="name"></h3>
-
+				<div class="description-wrapper">
+					<p class="description"></p>
+				</div>
 			</div>
 			<div class="control-group">
 				<a class="team-view-button control ui-btn" href="#">view</a>
@@ -180,7 +182,9 @@
 	  <h2 class="name-header">
 		  Teams
 	  </h2>
-
+	  <div class="description-wrapper">
+		  <p class="description"></p>
+	  </div>
 		  <a id="new-team-btn" class="ui-btn" href="#">new team</a>
 		  <!--move this to user page-->
 	  <team-list></team-list>
@@ -395,11 +399,11 @@
 	  .control-group .control{
 		  margin:0 auto;
 		  padding: 10px;
-		  flex: max-content;
+		  flex: auto;
 		  flex-direction: row;
 	  }
 	  .control-group .edit-wrapper{
-		  flex: max-content;
+		  flex: auto;
 		  flex-direction: row;
 	  }
 
@@ -494,8 +498,8 @@
 
 	  .card-wrapper{
 		  background-color: rgba(211,211,211,.5);
-		  padding: 28px;
-		  margin: 28px 7px;
+		  padding: 22px;
+		  margin:  12px;
 	  }
 	  .card-wrapper h3{
 		  display: inline-block;
@@ -504,7 +508,7 @@
 		  width:100%;
 	  }
 	  .card-wrapper .description, .card-wrapper .skill-rewards, .card-wrapper .skill-requirements{
-		  margin-left:14px;
+		  margin:8px 14px 8px 14px;
 	  }
 	  .tile-group{
 		  border-radius: 8px;

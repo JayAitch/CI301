@@ -74,7 +74,7 @@ class TaskCard extends EditableDocCard{
 
     displayDocumentValues(docData) {
         this.name = safeGetProperty(docData,"name");
-        this.description = safeGetProperty(docData,"name");
+        this.description = safeGetProperty(docData,"description");
         this.deadline = safeGetProperty(docData,"deadline");
         this.rewards = safeGetProperty(docData,"experience-rewards");
         this.requirements = safeGetProperty(docData,"requirements");
@@ -219,14 +219,14 @@ class TasksList extends ChangeableActiveQueryList{
 
     // called from child element
     shouldShowEditButton(docData){
-        let allowAddTask = currentlyViewTeamData["allow-add-task"];
+        let canAddTask = safeGetProperty(currentlyViewTeamData, "allow-add-task");
         let taskOwnerID = docData.owner;
         let teamOwnerID = currentlyViewTeamData.owner;
         let currentUserID = getUserId();
 
         // always allow the team owner to edit tasks
         // allow the task owner to edit tasks if the permissions to add it are there
-        if(allowAddTask && taskOwnerID == currentUserID || teamOwnerID == currentUserID) {
+        if(canAddTask && taskOwnerID == currentUserID || teamOwnerID == currentUserID) {
 
             return true
         }
