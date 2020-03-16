@@ -1,12 +1,12 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyC1LiymKHpZp6HRYwu-AYj9jw072Oqp0AU",
-  authDomain: "testfire-60064.firebaseapp.com",
-  databaseURL: "https://testfire-60064.firebaseio.com",
-  projectId: "testfire-60064",
-  storageBucket: "testfire-60064.appspot.com",
-  messagingSenderId: "497572840612",
-  appId: "1:497572840612:web:311417ad0a342883b7d231",
-  measurementId: "G-D6D9ZR077L"
+	apiKey: "AIzaSyCtuyIS5y4sKLHw4eN_-AfLehR5fVCaI3g",
+	authDomain: "workaholic-web.firebaseapp.com",
+	databaseURL: "https://workaholic-web.firebaseio.com",
+	projectId: "workaholic-web",
+	storageBucket: "workaholic-web.appspot.com",
+	messagingSenderId: "143793583250",
+	appId: "1:143793583250:web:f33108a9515c7801d1624b",
+	measurementId: "G-5B33DRWX4V"
 };
 
 let currentViewedTeams;
@@ -104,21 +104,24 @@ function isCookieAccepted(){
 
 
 function getCookie(cookieName){
-	// build name found in cookie string
-	let name = cookieName + "="
-	let cookies = decodeURIComponent(document.cookie);
-	let cookieArray = cookies.split(";")
 
-	for(let cookieIterator = 0; cookieIterator < cookieArray.length; cookieIterator++){
-		let cookie = cookieArray[cookieIterator];
-		let cookieSearch = cookie.indexOf(name);
-		if(cookieSearch !== -1){
-			let value = cookie.substr(name.length, cookie.length);
-			console.log(value);
-			value = value.replace("=", "");
-			return value;
+	if(cookieName.length > 0){
+		// build name found in cookie string
+		let name = cookieName + "="
+		let cookies = decodeURIComponent(document.cookie);
+		let cookieArray = cookies.split(";")
+
+		for(let cookieIterator = 0; cookieIterator < cookieArray.length; cookieIterator++){
+			let cookie = cookieArray[cookieIterator];
+			let cookieSearch = cookie.indexOf(name);
+			if(cookieSearch !== -1){
+				let value = cookie.substr(name.length, cookie.length);
+				value = value.replace("=", "");
+				return value;
+			}
 		}
 	}
+
 }
 
 

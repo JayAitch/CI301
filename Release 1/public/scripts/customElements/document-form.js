@@ -476,7 +476,6 @@ function createSelectField(key, value, parent, fieldConfig){
 		selectOptionsJson = selectLookup[key];
 	}
 
-	console.log(selectOptionsJson);
 	// make an option field for each
 	for(let option in selectOptionsJson){
 		isSelected = false;
@@ -602,8 +601,6 @@ function createStringCollectionField(skey, values, parent, fieldConfig){
 class BasicForm extends HTMLElement{
 	constructor() {
 		super();
-		this._submitHandler = this._submitHandler.bind(this);
-		this._cancelHandler = this._cancelHandler.bind(this);
 		this.currentDocument;
 	}
 
@@ -624,8 +621,8 @@ class BasicForm extends HTMLElement{
 		this.formElem = this.querySelector(".document-form");
 		this.formDataElem = this.querySelector(".form-data");
 		this.formHeader = this.querySelector(".form-header");
-		this.formElem.addEventListener("submit", this._submitHandler);
-		this.querySelector(".cancel-form").addEventListener("click", this._cancelHandler);
+		this.formElem.addEventListener("submit", this._submitHandler.bind(this));
+		this.querySelector(".cancel-form").addEventListener("click", this._cancelHandler.bind(this));
 	}
 
 	// the most basic form layout, the contents of form data will be populated when document targets are modified, this prevents the popup being re created and destroyed when its modified.
@@ -742,9 +739,10 @@ class InviteForm extends BasicForm {
 							<h3 class="form-header">Invite</h3>
 							<form class="document-form">
 								<fieldset class="form-data">
-								<img class="qr-scan-display" class="media" src="">
-									<label for="qr-input" class="form-row label"><img src="images/qrcodescan.png"/></label><input hidden id="qr-input" type="file" accept="image/*" capture="camera">
+	
+									<label for="qr-input" class="ui-btn qr-scan-btn form-row"><img  alt="launch qr photo or browse"src="images/qrcodescan.png"/></label><input hidden id="qr-input" type="file" accept="image/*" capture="camera">
 									<input name="qr-input" type="text" minlength="28" maxlength="28" class="invite-code-input form-row">
+									<img class="qr-scan-display" hidden="true" class="media" src="">
 								</fieldset>
 								<div class="form-controls-row">
 								<input type="submit"  class="invite-form" value="Invite">
@@ -988,7 +986,7 @@ class NewDocumentForm extends DocumentForm{
 	attributeChangedCallback(name, oldValue, newValue) {
 		let type = this.getAttribute("obj-type");
 		if(name === "obj-type"){
-			this.formHeader.innerHTML = "create new " + type;
+			this.formHeader.innerHTML = "Create new " + type;
 			//this.createNewForm(type);
 		} else {
 			this.collectionTarget = this.getAttribute('collection-target');
@@ -1071,11 +1069,13 @@ class ChangeDocumentForm extends DocumentForm{
 		let target = this.getAttribute("document-target");
 
 		if(name == "document-target" && oldValue != newValue) {
-			this.formHeader.innerHTML = "changing document";
+
 			this.documentReference = firebase.firestore().doc(target);
 			this.documentReference.get().then((doc) => {
 				if (doc.exists) {
-					this.createFormFromExisting(type, doc.data());
+					let docData = doc.data();
+					this.formHeader.textContent =  docData.name ;
+					this.createFormFromExisting(type, docData);
 				} else {
 				}
 

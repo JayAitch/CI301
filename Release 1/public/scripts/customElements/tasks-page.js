@@ -134,12 +134,12 @@ class TasksPage extends HTMLElement{
 
 
     set teamTarget(val){
-        this.setAttribute("collection-target", val);
-        this.teamLocation = val;
-        this.getTeamInformation().then( () =>{
-            this.taskListElem.collectionTarget = val;
-            this.toggleAddBtn();
-        });
+            this.setAttribute("collection-target", val);
+            this.teamLocation = val;
+            this.getTeamInformation().then( () =>{
+                this.taskListElem.collectionTarget = val;
+                this.toggleAddBtn();
+            });
     }
 
     toggleAddBtn(){

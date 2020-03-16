@@ -49,7 +49,8 @@
   </head>
   <body>
 
-
+<script>this.customElements||document.write('<script src="//unpkg.com/document-register-element"><\x2fscript>');</script>
+<script src="//unpkg.com/@ungap/custom-elements-builtin"></script>
 
   <div id="notification-area" style="width:100%;height:80px;"><div style="width:33%;" id="team-notification-area"></div><div id="tasks-notification-area" style="width:33%;"></div><div id="user-notification-area" style="width:33%;"></div><div id="notification-notification-area" style="width:33%;"></div></div>
 	<div data-role="page" id="teams-page" class="page" data-theme="a">
@@ -159,9 +160,9 @@
 
 
 	<!--modal div to create new documents with, modifying the obj-type attibute will trigger form regeneration-->
-	<document-form id="new-document-form"></document-form>
-	<change-document-form id="change-document-form"></change-document-form>
-	<invite-form id="invite-form"></invite-form>
+	<document-form id="new-document-form" class="ui-page-theme-a"></document-form>
+	<change-document-form id="change-document-form" class="ui-page-theme-a"></change-document-form>
+	<invite-form id="invite-form" class="ui-page-theme-a"></invite-form>
 
 
   	<template id="team-card-template">
@@ -251,7 +252,7 @@
 				<div class="scroll-container">
 
 
-				  <p>This is the Cookie Policy for Workaholic, accessible from https://testfire-60064.firebaseapp.com/</p>
+				  <p>This is the Cookie Policy for Workaholic, accessible from https://workaholic-web.firebaseapp.com/</p>
 
 				  <p><strong>What Are Cookies</strong></p>
 
@@ -299,7 +300,7 @@
 					  <li>Email: j.harrison14@uni.brighton.ac.uk</li>
 
 				  </ul>
-					<a href="#" class="ui-btn" id="cookie-policy-accept">Accept Cookies</a>
+					<a href="#" class=".ui-page-theme-a .ui-btn" id="cookie-policy-accept">Accept Cookies</a>
 			</div>
 
 		  	</div>
@@ -364,6 +365,7 @@
           flex-basis: auto;
 		  overflow:scroll;
           padding: 2%;
+		  height:100%;
       }
 
       .form-controls-row{
@@ -571,6 +573,14 @@
 		  height:100%;
 	  }
 
-
+	  .form-row.invite-code-input{
+		  display:block;
+		  margin: 8px auto;
+	  }
+	  .form-row.qr-scan-btn{
+		  display:block;
+		  margin: auto;
+		  margin-top:20vh;
+	  }
   </style>
 </html>

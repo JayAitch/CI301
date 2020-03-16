@@ -15,7 +15,9 @@ class TeamsPage extends HTMLElement{
   	let content = document.importNode(template.content, true);
   	this.appendChild(content);
 
-	this.newTeamBtn = document.getElementById("new-team-btn").addEventListener("click", this._onNewTeamBtnClick);
+	let newTeamBtn = document.getElementById("new-team-btn")
+	  newTeamBtn.addEventListener("click", this._onNewTeamBtnClick);
+	  console.log(newTeamBtn);
   }
 
 
@@ -82,7 +84,6 @@ class TeamCard extends EditableDocCard{
 		this.controlGroup = this.querySelector(".control-group");
 		this.headerEle = this.querySelector(".name");
 		this.descriptionEle = this.querySelector(".description");
-
 		this.querySelector(".team-view-button").addEventListener("click", this._viewTeam);
 		this.toggleEditButton();
 	}
