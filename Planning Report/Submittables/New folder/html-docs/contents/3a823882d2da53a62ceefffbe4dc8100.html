@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>UserPage</title>
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic|Source+Code+Pro:300,400,700' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="../assets/css/bootstrap.css">
+<link rel="stylesheet" href="../assets/css/jquery.bonsai.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/icon-font/icons.css">
+<script type="text/javascript" src="../assets/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="../assets/js/bootstrap.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.bonsai.js"></script>
+
+  </head>
+  <body>
+    <div>
+
+      <!-- Name Title -->
+
+      <h1>UserPage</h1>
+
+      <!-- Type and Stereotype -->
+
+      <section style="margin-top: .5em;">
+        <span class="alert alert-info">
+          <span class="node-icon staruml-icon icon-UMLClass"></span>
+          UMLClass
+        </span>
+        
+      </section>
+
+      <!-- Path -->
+
+      <section style="margin-top: 10px">
+        
+        
+        
+          
+          <span class="label label-info"><a href='cf9c8b720f3815adeccaf3ef6e48c6c4.html'><span class='node-icon staruml-icon icon-Project'></span>Workaholic</a></span>
+        
+          <span>::</span>
+          <span class="label label-info"><a href='8898647524f1f24affdb657c577335e0.html'><span class='node-icon staruml-icon icon-UMLModel'></span>User Page</a></span>
+        
+          <span>::</span>
+          <span class="label label-info"><a href='3a823882d2da53a62ceefffbe4dc8100.html'><span class='node-icon staruml-icon icon-UMLClass'></span>UserPage</a></span>
+        
+      </section>
+
+      <!-- Diagram -->
+
+      
+
+      <!-- Description -->
+
+      
+      <section>
+        <h3>Description</h3>
+        <div>
+          
+            <span class="label label-info">none</span>
+          
+        </div>
+      </section>
+      
+
+      <!-- Specification -->
+
+      
+
+      <!-- Directed Relationship -->
+
+      
+
+      <!-- Undirected Relationship -->
+
+      
+
+      <!-- Classifier -->
+
+      
+        
+        
+<section class="element-list">
+    <h3>Generalized Elements</h3>
+    <ul class="nav nav-list">
+        
+        <li><a href='6d961743dc5ff567586b50bbc1a4a10f.html'><span class='node-icon staruml-icon icon-UMLClass'></span>HTMLElement</a></li>
+        
+    </ul>
+</section>
+
+
+
+        
+        
+
+
+        
+        
+
+
+        
+        
+
+
+        
+        
+
+      
+
+      <!-- Interface -->
+
+      
+
+      <!-- Component -->
+
+      
+
+      <!-- Node -->
+
+      
+
+      <!-- Actor -->
+
+      
+
+      <!-- Use Case -->
+
+      
+
+      <!-- Template Parameters -->
+
+      
+
+      <!-- Literals -->
+
+      
+
+      <!-- Attributes -->
+
+      
+      <section>
+        <h3>Attributes</h3>
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Visibility</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="4e78ce79df90e2bc38d5501ae358a470.html">experienceBars</a></td>
+            <td>map{string, ExperienceBar}</td>
+            <td><p>Map of element to skill type. Collection o elements displaying experience values.</p></td>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="70fbc84c4aba67c37783560fb545cf66.html">isLoading</a></td>
+            <td>boolean</td>
+            <td><p>Has this element finished its initial query. Prevents new skills from triggering fanfare when adding them from the initial query.</p></td>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="f4dcb06e8bed9ddd8b5f1562e3d23b17.html">qrCodeWrapper</a></td>
+            <td><span class='label label-info'>none</span></td>
+            <td><p>wrapper containing the QR code and the text displaying the user code.</p></td>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="3470e694ecd414d567915a3ff1c70aea.html">userAccount</a></td>
+            <td>documentReference</td>
+            <td><p>Document reference of the user that is queried.</p></td>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="bc95681f2eda306e155697e98c1680f9.html">snapshotListener</a></td>
+            <td>snapshotListener</td>
+            <td><p>Listener responding to changes to the user document.</p></td>
+          </tr>
+          
+        </table>
+      </section>
+      
+
+      <!-- Operations -->
+
+      
+      <section>
+        <h3>Operations</h3>
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Visibility</th>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="5c425794b82731d47ff649c982b93563.html">connectionCallback()</a></td>
+            <td><p>Build HTML, select elements and append listeners.</p></td>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="2d75c1cf2de422058c582fe91fd01a48.html">setUserLogin()</a></td>
+            <td><p>Set the last logged in time on a user document. Will create a new user if there currently isnt one for the person logged in.</p></td>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="b56a38e7718866794c3a4c9f8c27b9f0.html">createQRCode()</a></td>
+            <td><p>Utilise qrcodejs to build  a QR code to display on the interface.</p></td>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="004ae5297d4bb2b4532115e6be295944.html">updateExperienceBars(skillLevels)</a></td>
+            <td><p>update experience bars with new values. Create new bars for new skills earned.</p></td>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="b63904c6ecf4917dbf32c631ae288446.html">_ToggleInviteCode()</a></td>
+            <td><p>display/hide the users invite code.</p></td>
+          </tr>
+          
+          <tr>
+            <td>public</td>
+            <td><a href="5ba99ad2b3065fdaeca638c56fa91f2e.html">disconnectedCallback()</a></td>
+            <td><p>remove any listeners still on the object</p></td>
+          </tr>
+          
+        </table>
+      </section>
+      
+
+      <!-- Receptions -->
+
+      
+
+      <!-- Extension Points -->
+
+      
+
+      <!-- Parameters -->
+
+      
+
+      <!-- Diagrams -->
+
+      
+      
+
+      <!-- Behavior -->
+
+      
+
+      <!-- Action -->
+
+      
+
+      <!-- Interaction -->
+
+      
+
+      <!-- CombinedFragment -->
+
+      
+
+      <!-- Activity -->
+
+      
+
+      <!-- State Machine -->
+
+      
+
+      <!-- State Machine -->
+
+      
+
+      <!-- State -->
+
+      
+
+      <!-- Vertex -->
+
+      
+
+      <!-- Transition -->
+
+      
+
+      <!-- Data Model (ERD) -->
+
+      
+
+      <!-- Columns (ERD) -->
+
+      
+
+      <!-- Related Entities (ERD) -->
+
+      
+
+      <!-- Data Flows (DFD) -->
+
+      
+
+      <!-- Flows (Flowchart) -->
+
+      
+
+      <!-- Properties -->
+
+      <section>
+        <h3>Properties</h3>
+        
+        <table class="table table-striped table-bordered">
+    <tr>
+        <th width="50%">Name</th>
+        <th width="50%">Value</th>
+    </tr>
+    
+    
+    
+    
+    
+    
+    
+    <tr>
+        <td>name</td>
+        <td>UserPage</td>
+    </tr>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <tr>
+        <td>stereotype</td>
+        <td><span class='label label-info'>null</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    <tr>
+        <td>visibility</td>
+        <td>public</td>
+    </tr>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <tr>
+        <td>isAbstract</td>
+        <td><span class='label label-info'>false</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    <tr>
+        <td>isFinalSpecialization</td>
+        <td><span class='label label-info'>false</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    <tr>
+        <td>isLeaf</td>
+        <td><span class='label label-info'>false</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    <tr>
+        <td>isActive</td>
+        <td><span class='label label-info'>false</span></td>
+    </tr>
+    
+    
+    
+</table>                
+
+      </section>
+
+      <!-- Tags -->
+
+      
+
+      <!-- Constraints, Dependencies, Dependants -->
+
+      
+        
+        
+
+
+        
+        
+
+
+        
+        
+
+      
+
+      <!-- Relationships -->
+
+      
+      
+<section class="element-list">
+    <h3>Relationships</h3>
+    <ul class="nav nav-list">
+        
+        <li><a href='16bbb1e078726a872f783a4bc7167bc4.html'><span class='node-icon staruml-icon icon-UMLAssociation'></span>(UserPage—ExperienceBar)</a></li>
+        
+        <li><a href='470465c5919e8ce4935cf1c5c32b933f.html'><span class='node-icon staruml-icon icon-UMLGeneralization'></span>(UserPage→HTMLElement)</a></li>
+        
+    </ul>
+</section>
+
+
+
+      <!-- Owned Elements -->
+
+      
+      
+<section class="element-list">
+    <h3>Owned Elements</h3>
+    <ul class="nav nav-list">
+        
+        <li><a href='16bbb1e078726a872f783a4bc7167bc4.html'><span class='node-icon staruml-icon icon-UMLAssociation'></span>(UserPage—ExperienceBar)</a></li>
+        
+        <li><a href='470465c5919e8ce4935cf1c5c32b933f.html'><span class='node-icon staruml-icon icon-UMLGeneralization'></span>(UserPage→HTMLElement)</a></li>
+        
+    </ul>
+</section>
+
+
+
+    </div>
+  </body>
+</html>

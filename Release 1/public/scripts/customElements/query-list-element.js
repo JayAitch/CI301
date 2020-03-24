@@ -33,11 +33,11 @@ class EditableDocCard extends DocCard{
 		super();
 	}
 	connectedCallback(){
-		this.innerHTML= "empty";
 	}
 
 	set document(val){
 		super.document = val;
+		// make sure the function is referenced
 		if(this.parentElement && this.parentElement.shouldShowEditButton){
 			this.canEdit = this.parentElement.shouldShowEditButton(this.doc.data());
 		}
@@ -45,7 +45,7 @@ class EditableDocCard extends DocCard{
 
 	set canEdit(val){
 		if(val === true || val === false){
-			this.showEdit = val;
+			this.shouldShowEdit = val;
 			this.setAttribute("is-editable", val);
 		}
 		this.toggleEditButton();
@@ -54,7 +54,7 @@ class EditableDocCard extends DocCard{
 
 	toggleEditButton(){
 		let editBtn = this.editBtn;
-		if(this.showEdit){
+		if(this.shouldShowEdit){
 			if(editBtn){
 
 			}
@@ -114,21 +114,21 @@ class StaticQueryListElement extends HTMLElement {
 	// create a new card from the doc passed in and add to the card array
 	createNewCard(doc){
 
-		//let docData = doc.data();
-
-		// allow implementations to define their on creation logic
+		// allow implementations to define their card creation logic
 		let newCard = this.createCardDOMElement(docData);
 
 		// generate the document reference to store in the dom attribute
 		let queryString = this.collectionRef + doc.id;
+
+		// assign property that is reflected
 		newCard.documentLocation = queryString;
+
+		// assing document to let the card dispplay data.
 		newCard.document = doc;
-		// just add this to our parent anyway
+
+		// add to DOM and update array
 		this.appendChild(newCard);
-	//	this.setAttributesFromDoc(newCard, docData);
-
 		this.cardElemsArray.add(newCard);
-
 	}
 
 
@@ -187,7 +187,6 @@ class ActiveQueryListElement extends StaticQueryListElement{
 		let docData = doc.data();
 		let changeIndex = change.newIndex;
 
-
 		// allow implementations to define their on creation logic
 		let newCard = this.createCardDOMElement(docData);
 
@@ -201,11 +200,10 @@ class ActiveQueryListElement extends StaticQueryListElement{
 		newCard.document = doc;
 		// splice into the array to maintain postional accuracy
 		this.cardElemsArray.splice(changeIndex, 0, newCard);
-		//return newCard;
 	}
 
 	applyChangesToCard(change){
-		let docIndex = change.newIndex
+		let docIndex = change.newIndex;
 		let doc = change.doc;
 
 		// find the notification card from the query index
@@ -213,7 +211,6 @@ class ActiveQueryListElement extends StaticQueryListElement{
 
 		// update the data to display
 		docCard.document = doc;
-
 	}
 
 	removeCard(change){
@@ -243,7 +240,7 @@ class ActiveQueryListElement extends StaticQueryListElement{
 				}
 			});
 		});
-  }
+  	}
 
 }
 
@@ -257,7 +254,7 @@ class ChangeableActiveQueryList extends ActiveQueryListElement{
 	}
 
 	set collectionTarget(val){
-		this.setAttribute('collection-target', val)
+		this.setAttribute('collection-target', val);
 		this.targetCollection = val;
 		this.removeAllCards();
 		if(this.snapshotListener) this.removeListeners();

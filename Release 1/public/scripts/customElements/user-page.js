@@ -8,41 +8,48 @@ class UserPage extends HTMLElement{
     super();
 
     this.experienceBars = {};
-      this._showInviteCode = this._showInviteCode.bind(this);
+    this._toggleInviteCode = this._toggleInviteCode.bind(this);
   }
   
   connectedCallback() {
 
-	    this.isLoading = true;
-		// we want the currently logged in users reference in our accounts collection
-		// this document will be used to populate the users account page
-		const workaholicCurrentUser = getUserId();
-		this.userAccount = firebase.firestore().collection('accounts').doc(workaholicCurrentUser);
-        this.innerHTML = 	`<a class="invite-code-btn ui-btn" href="#">user code<div hidden class="qr-code"></div></a>`
+	  this.isLoading = true;
+	  // we want the currently logged in users reference in our accounts collection
+	  // this document will be used to populate the users account page
+	  const workaholicCurrentUser = getUserId();
 
 
-         this.inviteCodeBtn = this.querySelector(".invite-code-btn").addEventListener("click", this._showInviteCode);
+      const template = document.getElementById('user-page-template');
+      let content = document.importNode(template.content, true);
+      this.appendChild(content);
 
-        this.QRcode = this.querySelector(".qr-code");
-        let QRCodeData = {"text": getUserId()};
-        new QRCode(this.QRcode, workaholicCurrentUser);
+      let qrCodeText = this.querySelector(".code-text");
+      let inviteCodeBtn = this.querySelector(".invite-code-btn");
+      this.qrCodeWrapper = this.querySelector(".qr-wrapper");
 
-      this.userAccount.set({
-          "last-logged": new Date()
-      }, {merge: true});
+      inviteCodeBtn.addEventListener("click", this._toggleInviteCode);
+      qrCodeText.textContent = workaholicCurrentUser;
 
-		// use arrow function to preserve the value of this
-		this.userAccount.get().then(doc => {
 
-            this.userAccount.onSnapshot(doc => {
+      this.userAccount = firebase.firestore().collection('accounts').doc(workaholicCurrentUser);
+      this.createQRCode();
+      this.setUserLogin();
+      this.setupSnapshot();
+
+	}
+
+    setupSnapshot(){
+        // use arrow function to preserve the value of this
+        this.userAccount.get().then(doc => {
+
+            this.snapshotListener = this.userAccount.onSnapshot(doc => {
 
                 let user = doc.data();
 
                 let skillLevels = safeGetProperty(user,["skill-levels"]);
+                this.updateExperienceBars(skillLevels)
 
-                 this.updateExperienceBars(skillLevels)
-
-            })
+            });
             let skillLevels = safeGetProperty(doc.data(),["skill-levels"]);
             this.updateExperienceBars(skillLevels);
 
@@ -53,9 +60,19 @@ class UserPage extends HTMLElement{
         }).catch(function(error) {
 
         });
+    }
 
-	}
-
+	setUserLogin(){
+        this.userAccount.set({
+            "last-logged": new Date()
+        }, {merge: true});
+    }
+    createQRCode(){
+        let currentUser = getUserId();
+        let QRcode = this.querySelector(".qr-code");
+        let QRCodeData = {"text": currentUser};
+        new QRCode(QRcode, currentUser);
+    }
 
 	updateExperienceBars(skillLevels){
         for(let skillType in skillLevels){
@@ -68,25 +85,26 @@ class UserPage extends HTMLElement{
                 experienceBar = document.createElement("experience-bar");
 
                 if(!this.isLoading){
-                    createFanFareNotification(`your ${skillType} leveled up to ${skillLevel}`);
+                    experienceBar.triggerFanFare();
                 }
 
                 this.experienceBars[skillType] = experienceBar;
             }
 
-            experienceBar.skillType = skillType
+            experienceBar.skillType = skillType;
             experienceBar.currentExperience = skillXP;
             this.appendChild(experienceBar);
         }
     }
 
 
-    _showInviteCode(){
-        let isHidden = this.QRcode.hidden
-        this.QRcode.hidden = !isHidden
+    _toggleInviteCode(){
+        let isHidden = this.qrCodeWrapper.hidden;
+        this.qrCodeWrapper.hidden = !isHidden;
     }
 
 	disconnectedCallback() {
+        this.snapshotListener();
 	}
 
 }
@@ -110,17 +128,21 @@ class ExperienceBar extends HTMLElement {
 			</style>
             
 			<div class="skill-card">
-			    <div class="bar-title"><img class="skill-icon" alt="${skillType}"src="${skillTypeIconURI}"><span class="skill-level"></span></div>
-			    
-			    <div class="bar-wrapper"><div class="progress"></div></div>
+			    <div class="bar-title">
+			        <img class="skill-icon" alt="${skillType}"src="${skillTypeIconURI}">
+			        <span class="skill-level"></span>
+			    </div>
+			    <div class="bar-wrapper">
+			        <div class="progress"></div>
+			    </div>
 			</div>
 		`;
 
 		this.progressBar = this.querySelector(".progress");
-        this.skillLevel =  this.querySelector(".skill-level");
+        this.skillLevelText =  this.querySelector(".skill-level");
 
-        this.setTitleText(this.experience);
-        this.setBarWidth(this.experience);
+        this.setTitleText();
+        this.setBarWidth();
 	}
 
 
@@ -144,21 +166,23 @@ class ExperienceBar extends HTMLElement {
         let skillType = this.getAttribute("skill-type")
 	    if(newExperience >= nextLevelXp){
 	        let newLevel = experiencePointsAsLevel(newExperience);
-            this.triggerFanFare(newLevel, skillType);
+            this.triggerFanFare();
             this.setTitleText(newExperience);
         }
     }
 
-    triggerFanFare(level, skillType){
-	    let fanFareText = `your ${skillType} leveled up to ${level}`
+    triggerFanFare(){
+        let level = experiencePointsAsLevel(this.experience);
+	    let fanFareText = `your ${this.experienceType} leveled up to ${level}`;
         createFanFareNotification(fanFareText);
     }
 
-	setBarWidth(value){
-        let level = experiencePointsAsLevel(value);
+	setBarWidth(){
+	    let experience = this.experience;
+        let level = experiencePointsAsLevel(experience);
         let currentLevelXp = levelAsExperiencePoints(level);
         let nextLevelXp = levelAsExperiencePoints(level + 1);
-        let pointsIntoLevel = value - currentLevelXp;
+        let pointsIntoLevel = experience - currentLevelXp;
         let pointsInLevel = nextLevelXp - currentLevelXp;
 
         let percentComplete = pointsIntoLevel / pointsInLevel
@@ -167,9 +191,10 @@ class ExperienceBar extends HTMLElement {
         this.progressBar.setAttribute("style", "width: " + percentComplete + "%;");
     }
 
-    setTitleText(experience){
+    setTitleText(){
+        let experience = this.experience;
 	    let level = experiencePointsAsLevel(experience);
-	    this.skillLevel.innerHTML = ` ${level}`
+	    this.skillLevelText.innerHTML = ` ${level}`
     }
 }
 

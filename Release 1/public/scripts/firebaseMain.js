@@ -239,6 +239,21 @@ function LookupIconURI(skillType, notificationType){
 	return URI;
 }
 
+function AcceptInvite(teamLocation, notificationLocation){
+	firebase.firestore().doc(teamLocation).set({
+		"members": firebase.firestore.FieldValue.arrayUnion(getUserId())
+	}, { merge: true })
+		.then(()=>{
+			MarkNotificationAsRead(notificationLocation);
+	});
+}
+
+function MarkNotificationAsRead(notificationLocation){
+	let notification = firebase.firestore().doc(notificationLocation);
+	notification.set({
+		"is-read": true,
+	}, { merge: true });
+}
 
 function CompleteTask(taskDocument, notificationTarget){
 

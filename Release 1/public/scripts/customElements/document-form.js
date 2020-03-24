@@ -206,7 +206,7 @@ const task = {
 }
 
 
-// collection to location the base object types
+// collection to locate the base object types
 const newObjectLookup = {"team":team, "task":task}
 
 // all lookups to link data options with field name
@@ -270,8 +270,6 @@ function createSliderInput(key, value, parent, fieldConfig){
 
 	parent.appendChild(newSliderField);
 	parent.appendChild(newSliderValueDisplay);
-
-
 
 	return newSliderField
 }
@@ -601,7 +599,6 @@ function createStringCollectionField(skey, values, parent, fieldConfig){
 class BasicForm extends HTMLElement{
 	constructor() {
 		super();
-		this.currentDocument;
 	}
 
 	// create any elements required by the form
@@ -612,11 +609,10 @@ class BasicForm extends HTMLElement{
 
 	// create template from extended classes and assign dom elements that will be modified by attribute changes
 	initBaseForm(){
-		const formTemplate = this.getFormTemplateHTML();
 		// modal so dont show to begin with
 		this.hidden = true;
 		// dont do it like this maybe? potential dom lag
-		this.innerHTML = formTemplate;
+		this.appendChild(this.getFormTemplateContent());
 		// find the UL containing the nofications
 		this.formElem = this.querySelector(".document-form");
 		this.formDataElem = this.querySelector(".form-data");
@@ -626,21 +622,11 @@ class BasicForm extends HTMLElement{
 	}
 
 	// the most basic form layout, the contents of form data will be populated when document targets are modified, this prevents the popup being re created and destroyed when its modified.
-	getFormTemplateHTML(){
-		return `				
-				<div class="fullscreen-popup">
-					<div class="modal">
-						<div class="content">
-							<h3 class="form-header">Unamed</h3>
-							<form class="document-form"><fieldset class="form-data"></fieldset>
-							<div class="form-controls-row">							
-								<input type="submit" value="OK">
-								<input type="button" class="cancel-form" value="Cancel"></form>
-							</div>
-						</div>
-					</div>
-				</div>
-											`;
+	getFormTemplateContent(){
+
+		const template = document.getElementById('modal-document-form');
+		let content = document.importNode(template.content, true);
+		return content;
 	}
 
 
@@ -648,19 +634,14 @@ class BasicForm extends HTMLElement{
 	// document validations should be performed on a per type basis
 	_submitHandler(ev){
 		ev.preventDefault();
-		if(this.isValid()){
-			this.submitForm();
-		}
-
+		this.submitForm();
 	}
+
 	// not overriden
 	_cancelHandler(){
 		this.closeForm();
 	}
 
-	// virtual method for overriding to check clientside whether the data is valid
-	// could also contain any base validations common to all objects
-	isValid(){ return true };
 
 	// to be overriden does form submit action will be different for creating/modifying documents
 	submitForm(){
@@ -732,25 +713,10 @@ class InviteForm extends BasicForm {
 
 	// own version of template html
 	// this form will no change based on the document type so it can be static html
-	getFormTemplateHTML(){
-		return `<div class="fullscreen-popup">
-					<div class="modal">
-						<div class="content">
-							<h3 class="form-header">Invite</h3>
-							<form class="document-form">
-								<fieldset class="form-data">
-	
-									<label for="qr-input" class="ui-btn qr-scan-btn form-row"><img  alt="launch qr photo or browse"src="images/qrcodescan.png"/></label><input hidden id="qr-input" type="file" accept="image/*" capture="camera">
-									<input name="qr-input" type="text" minlength="28" maxlength="28" class="invite-code-input form-row">
-									<img class="qr-scan-display" hidden="true" class="media" src="">
-								</fieldset>
-								<div class="form-controls-row">
-								<input type="submit"  class="invite-form" value="Invite">
-								<input type="button" class="cancel-form" value="Close"></form>
-								</div>
-						</div>
-					</div>
-				</div>`;
+	getFormTemplateContent(){
+		const template = document.getElementById('modal-invite-form');
+		let content = document.importNode(template.content, true);
+		return content;
 	}
 
 
@@ -812,7 +778,6 @@ class DocumentForm extends BasicForm{
   // we submit that object to firebase
   populateDocumentFromForm(){
 
-	// let formChildren = this.formDataElem.elements;
 	  let formChildren = this.formDataElem.children;
 	 let formChildrenCount = formChildren.length;
 	 let currentDocument = {};
@@ -837,7 +802,7 @@ class DocumentForm extends BasicForm{
 					 currentDocument[fieldName] =  parseInt(fieldValue);
 					 break;
 				 case "select-multiple":
-					 //this.currentDocument[fieldName] =  parseInt(fieldValue);
+
 					 let formatedSelection = this.mapDataFromMultiSelect(currentFormRow);
 					 currentDocument[fieldName] = formatedSelection;
 					 break;
@@ -851,7 +816,7 @@ class DocumentForm extends BasicForm{
 					 currentDocument[fieldName] = this.mapDataFromValueSelectMap(currentFormRow);
 					 break;
 				 case "string-collection":
-					 currentDocument[fieldName] = this.buildStringCollectionmap(currentFormRow);
+					 currentDocument[fieldName] = this.buildStringCollectionMap(currentFormRow);
 					 break;
 				 default:
 			 }
@@ -869,7 +834,7 @@ class DocumentForm extends BasicForm{
 	  this.currentDocument = currentDocument;
   }
 
-  buildStringCollectionmap(formRow){
+  buildStringCollectionMap(formRow){
 	  let dataMap = formRow.childNodes;
 	  let jsonMapping = {};
 
@@ -1014,9 +979,6 @@ class NewDocumentForm extends DocumentForm{
 		this.closeForm();
 	}
 
-	isValid() {
-		return super.isValid();
-	}
 	
 	// create team on server, use the current users as the owner and add this to the collection under the user
 	createNewTeam(){
@@ -1083,18 +1045,15 @@ class ChangeDocumentForm extends DocumentForm{
 		}
 	}
 
-	isValid() {
-		return super.isValid();
-	}
 
 	submitForm(){
 		this.populateDocumentFromForm();
 		let change = this.documentReference.update (
 			this.currentDocument
 		);
-
 		this.closeForm();
 	}
+
 	createFormFromExisting(type, document){
 		this.clearFormDataFields();
 		this.documentType = type;
@@ -1144,9 +1103,6 @@ class SelectAndValueField extends HTMLElement{
 		newMapFields.appendChild(removeRequiremntBtn);
 		this.appendChild(newMapFields);
 
-
-
-
 		removeRequiremntBtn.addEventListener('click', () =>{
 			this.parentElement.removeChild(this);
 		})
@@ -1180,24 +1136,33 @@ class StringCollectionField extends HTMLElement{
 
 		let newMapFields = document.createElement("div");
 
-		let newTextField = createTextInputField(key, value, newMapFields);
-		newMapFields.appendChild(newTextField);
+		this.newTextField = createTextInputField(key, value, newMapFields);
+
+		newMapFields.appendChild(this.newTextField);
 		newMapFields.appendChild(removeRowBtn);
-		newTextField.minLength = 2; // prevent this being empty
+
+		this.newTextField.minLength = 2; // prevent this being empty
 		this.appendChild(newMapFields);
 
 
 		removeRowBtn.addEventListener('click', () =>{
-			this.parentElement.removeChild(this);
+			this.removeRow();
 		})
 
 
-		newTextField.addEventListener('change', () =>{
-			let newSelectedValue = newTextField.value;
-			this.setAttribute('value', newSelectedValue)
+		this.newTextField.addEventListener('change', () =>{
+			let newSelectedValue = this.newTextField.value;
+			this.value = newSelectedValue
 		})
 	}
 
+	set value(val){
+		this.setAttribute('value', val);
+	}
+
+	removeRow(){
+		this.parentElement.removeChild(this);
+	}
 }
 
 

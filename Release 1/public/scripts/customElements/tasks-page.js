@@ -6,14 +6,14 @@ let currentlyViewTeamData;
 
 
 // tile to display experience rewards to the user
-class ExperienceRewardTile extends HTMLElement{
+class SkillTile extends HTMLElement{
     constructor() {
         super();
     }
 
     connectedCallback() {
 
-        let skillType = this.getAttribute("skill-type");
+        let skillType = this.skillType;
         let iconURI = LookupIconURI(skillType);
         const rewardTileTemplate = `<div class="reward-tile"><img alt="${skillType}" class="skill-icon" src="${iconURI}"><div class="amount"></div></div>`;
 
@@ -22,15 +22,19 @@ class ExperienceRewardTile extends HTMLElement{
         this.amountElem = this.querySelector(".amount");
     }
 
-    static get observedAttributes() {
-        return ['amount']; // status and experience
+    set amount(val){
+        this.skillAmount = val;
+        this.setAttribute("amount", val);
+        this.amountElem.innerHTML = val;
     }
-    attributeChangedCallback(name, oldValue, newValue) {
-        if(name === 'amount'){
-            this.amountElem.innerHTML = newValue;
-        }
+
+    set skill(val){
+        this.skillType = val;
+        this.setAttribute("skill-type", val);
 
     }
+
+
 
 }
 
@@ -51,11 +55,11 @@ class TaskCard extends EditableDocCard{
         let content = document.importNode(template.content, true);
         this.appendChild(content);
 
+        // query select elements into member variables
         this.controlGroup = this.querySelector(".control-group");
         this.nameEle = this.querySelector(".name");
         this.descrEle = this.querySelector(".description");
         this.deadlineDateDiv = this.querySelector(".deadline-date-display");
-
         this.requirementsTileList = this.querySelector(".requirements-tile-list");
         this.rewardsTileList = this.querySelector(".rewards-tile-list");
 
@@ -134,18 +138,17 @@ class TasksPage extends HTMLElement{
 
 
     set teamTarget(val){
-            this.setAttribute("collection-target", val);
-            this.teamLocation = val;
-            this.getTeamInformation().then( () =>{
-                this.taskListElem.collectionTarget = val;
-                this.toggleAddBtn();
-            });
+        this.setAttribute("collection-target", val);
+        this.teamLocation = val;
+        this.getTeamInformation().then( () =>{
+            this.taskListElem.collectionTarget = val;
+            this.toggleAddBtn();
+        });
     }
 
     toggleAddBtn(){
         let canAddTask = safeGetProperty(currentlyViewTeamData, "allow-add-task");
         let teamOwner = safeGetProperty(currentlyViewTeamData, "owner");
-        console.log(teamOwner);
         if(canAddTask || teamOwner === getUserId()){
             if(!this.addBtn){
                 this.showAddButton();
@@ -208,6 +211,7 @@ class TasksList extends ChangeableActiveQueryList{
     getQueryReference(){
         let targetDocument = this.targetCollection;
         this.collectionRef =  targetDocument + "/tasks/";
+
         // find all tasks underneith refering to the current team
         return firebase.firestore().collection(this.collectionRef).where("status", "==", taskStatus.Active);
     }
@@ -220,8 +224,8 @@ class TasksList extends ChangeableActiveQueryList{
     // called from child element
     shouldShowEditButton(docData){
         let canAddTask = safeGetProperty(currentlyViewTeamData, "allow-add-task");
-        let taskOwnerID = docData.owner;
-        let teamOwnerID = currentlyViewTeamData.owner;
+        let teamOwnerID = safeGetProperty(currentlyViewTeamData, "owner");
+        let taskOwnerID = safeGetProperty(docData, "owner");
         let currentUserID = getUserId();
 
         // always allow the team owner to edit tasks
@@ -236,7 +240,7 @@ class TasksList extends ChangeableActiveQueryList{
 }
 
 
-class SkillCardList extends HTMLElement{
+class SkillTileList extends HTMLElement{
     constructor() {
         super();
     }
@@ -246,6 +250,7 @@ class SkillCardList extends HTMLElement{
         this.innerHTML = `<div class="tile-list-title">${listTitle}</div><div class="tile-list"></div>`;
         this.tileListParent = this.querySelector(".tile-list")
     }
+
 
     set skillCardData(val){
         this.cardData = val;
@@ -283,17 +288,16 @@ class SkillCardList extends HTMLElement{
     createTile(type, amount){
 
         let newTile = document.createElement("reward-tile");
-        newTile.setAttribute("skill-type", type);
+        newTile.skill = type;
         this.tileListParent.appendChild(newTile);
-        newTile.setAttribute("amount", amount);
-
+        newTile.amount = amount;
     }
 }
 
 
 
-window.customElements.define('skill-card-list', SkillCardList);
-window.customElements.define('reward-tile', ExperienceRewardTile);
+window.customElements.define('skill-card-list', SkillTileList);
+window.customElements.define('reward-tile', SkillTile);
 window.customElements.define('tasks-page', TasksPage);
 window.customElements.define('tasks-list', TasksList);
 window.customElements.define('task-card', TaskCard);

@@ -42,11 +42,7 @@ class NotificationCard extends DocCard{
 	}
 
 	markAsRead(){
-		const docLocation = this.documentLocation;
-		let notification = firebase.firestore().doc(docLocation);
-		notification.set({
-				"is-read": true,
-		}, { merge: true });
+		MarkNotificationAsRead(this.documentLocation);
 	}
 }
 
@@ -87,18 +83,11 @@ class InviteNotificationCard extends NotificationCard{
 	// the user has accepeted the invite so lets add the team to their collection
 	_clickAccept(ev){
 		// get the document location from the dom object
-		let teamDocLocation = this.teamDocLocation;
-		let addToPendingInvites = firebase.firestore().doc(teamDocLocation).set({
-			"members": firebase.firestore.FieldValue.arrayUnion(getUserId())
-		}, { merge: true })
-			.then(()=>{
-				this.markAsRead();
-			});
+		AcceptInvite(this.teamDocLocation, this.documentLocation);
 	}
 	
 	// delete the notification???
 	_clickDecline(ev){
-
 		this.markAsRead();
 	}
 }

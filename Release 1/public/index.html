@@ -47,12 +47,8 @@
 
 
   </head>
-  <body>
 
-<script>this.customElements||document.write('<script src="//unpkg.com/document-register-element"><\x2fscript>');</script>
-<script src="//unpkg.com/@ungap/custom-elements-builtin"></script>
 
-  <div id="notification-area" style="width:100%;height:80px;"><div style="width:33%;" id="team-notification-area"></div><div id="tasks-notification-area" style="width:33%;"></div><div id="user-notification-area" style="width:33%;"></div><div id="notification-notification-area" style="width:33%;"></div></div>
 	<div data-role="page" id="teams-page" class="page" data-theme="a">
 		<div data-role="header">
 			<h1>Workaholic</h1>
@@ -240,8 +236,6 @@
 	  </div>
   </template>
 
-  <template id="skill-tile-list-template">
-  </template>
 
 
   <template id="cookie-policy-template">
@@ -309,6 +303,53 @@
 
   </template>
 
+	  <template id="modal-invite-form">
+
+		  <div class="fullscreen-popup">
+			  <div class="modal">
+				  <div class="content">
+					  <h3 class="form-header">Invite</h3>
+					  <form class="document-form">
+						  <fieldset class="form-data">
+
+							  <label for="qr-input" class="ui-btn qr-scan-btn form-row"><img  alt="launch qr photo or browse"src="images/qrcodescan.png"/></label><input hidden id="qr-input" type="file" accept="image/*" capture="camera">
+							  <input name="qr-input" type="text" minlength="28" maxlength="28" class="invite-code-input form-row">
+							  <img class="qr-scan-display" hidden="true" class="media" src="">
+						  </fieldset>
+						  <div class="form-controls-row">
+							  <input type="submit"  class="invite-form" value="Invite">
+							  <input type="button" class="cancel-form" value="Close"></form>
+				  </div>
+			  </div>
+		  </div>
+		  </div>
+	  </template>
+
+
+	  <template id="modal-document-form">
+
+		  <div class="fullscreen-popup">
+			  <div class="modal">
+				  <div class="content">
+					  <h3 class="form-header">Unamed</h3>
+					  <form class="document-form"><fieldset class="form-data"></fieldset>
+						  <div class="form-controls-row">
+							  <input type="submit" value="OK">
+							  <input type="button" class="cancel-form" value="Cancel"></form>
+				  </div>
+			  </div>
+		  </div>
+	  </template>
+
+	  <template id="user-page-template">
+		  <a class="invite-code-btn ui-btn" href="#">user code
+			  <div hidden class="qr-wrapper">
+				  <div class="qr-code">
+				  </div>
+				  <p class="code-text"></p>
+			  </div>
+		  </a>
+	  </template>
   </body>
   
   <style>

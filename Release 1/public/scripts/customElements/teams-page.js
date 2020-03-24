@@ -17,7 +17,6 @@ class TeamsPage extends HTMLElement{
 
 	let newTeamBtn = document.getElementById("new-team-btn")
 	  newTeamBtn.addEventListener("click", this._onNewTeamBtnClick);
-	  console.log(newTeamBtn);
   }
 
 
@@ -38,7 +37,6 @@ class TeamsList extends ActiveQueryListElement{
 		this.collectionRef = "teams/"
 	}
 	getQueryReference(){
-
 		// get all the teams the user is a member of
 		const queryRef = firebase.firestore().collection("teams").where('members', 'array-contains', getUserId());
 		return queryRef;
@@ -52,9 +50,10 @@ class TeamsList extends ActiveQueryListElement{
 	shouldShowEditButton(docData){
 		let allowEditTeam = safeGetProperty(docData, "allow-edit-team");
 
-		let teamOwnerID = docData.owner;
+		let teamOwnerID = safeGetProperty(docData, "owner");
 		let currentUserID = getUserId();
-		// is the team type verticle? is the current user not the owner of the team
+
+		// has team enabled team edit.
 		if(allowEditTeam || teamOwnerID == currentUserID) {
 				// dont show edit button
 				return true;
@@ -144,7 +143,7 @@ class TeamCard extends EditableDocCard{
 	createInviteButton(){
 		let inviteBtn = document.createElement("a");
 		inviteBtn.classList = "ui-btn control";
-		inviteBtn.innerText = "invite"
+		inviteBtn.innerText = "invite";
 		inviteBtn.addEventListener("click", this._showInviteForm);
 		this.controlGroup.insertBefore(inviteBtn, this.controlGroup.firstChild);
 		return inviteBtn;
