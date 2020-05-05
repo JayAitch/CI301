@@ -1,7 +1,4 @@
 
-
-// todo: base element that stores a document reference and has base control over dom updates
-
 class UserPage extends HTMLElement{
 
   constructor() {
@@ -39,7 +36,8 @@ class UserPage extends HTMLElement{
 	}
 
     setupSnapshot(){
-        // use arrow function to preserve the value of this
+      this.isLoading = true;
+      // use arrow function to preserve the value of thi
         this.userAccount.get().then(doc => {
 
             this.snapshotListener = this.userAccount.onSnapshot(doc => {
@@ -70,7 +68,6 @@ class UserPage extends HTMLElement{
     createQRCode(){
         let currentUser = getUserId();
         let QRcode = this.querySelector(".qr-code");
-        let QRCodeData = {"text": currentUser};
         new QRCode(QRcode, currentUser);
     }
 
@@ -79,10 +76,11 @@ class UserPage extends HTMLElement{
 
             let skillXP = skillLevels[skillType];
             let experienceBar  = this.experienceBars[skillType];
-            let skillLevel = experiencePointsAsLevel(skillXP);
+
 
             if(!experienceBar){
                 experienceBar = document.createElement("experience-bar");
+
 
                 if(!this.isLoading){
                     experienceBar.triggerFanFare();
@@ -143,6 +141,7 @@ class ExperienceBar extends HTMLElement {
 
         this.setTitleText();
         this.setBarWidth();
+        this.loaded = true;
 	}
 
 
@@ -150,7 +149,6 @@ class ExperienceBar extends HTMLElement {
         let oldExperience = this.experience;
 	    this.experience = val;
 	    this.setAttribute("current-experience", val);
-
         this.checkForLevelUp(oldExperience, this.experience);
     }
 
@@ -160,15 +158,17 @@ class ExperienceBar extends HTMLElement {
     }
 
     checkForLevelUp(oldExperience, newExperience){
+        if(this.loaded){
+            let oldLevel = experiencePointsAsLevel(oldExperience);
+            let newLevel = experiencePointsAsLevel(newExperience);
 
-        let level = experiencePointsAsLevel(oldExperience);
-        let nextLevelXp = levelAsExperiencePoints(level + 1);
-        let skillType = this.getAttribute("skill-type")
-	    if(newExperience >= nextLevelXp){
-	        let newLevel = experiencePointsAsLevel(newExperience);
-            this.triggerFanFare();
-            this.setTitleText(newExperience);
+            if(oldLevel != newLevel){
+
+                this.triggerFanFare();
+                this.setTitleText();
+            }
         }
+
     }
 
     triggerFanFare(){
@@ -194,7 +194,9 @@ class ExperienceBar extends HTMLElement {
     setTitleText(){
         let experience = this.experience;
 	    let level = experiencePointsAsLevel(experience);
-	    this.skillLevelText.innerHTML = ` ${level}`
+	    if(this.skillLevelText){
+            this.skillLevelText.innerHTML = ` ${level}`
+        }
     }
 }
 

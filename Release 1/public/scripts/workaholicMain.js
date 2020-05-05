@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", event =>{
 
 
 	const app = firebase.initializeApp(firebaseConfig);
-;
+
 	firebase.auth().onAuthStateChanged(function(user) {
 		if (user) {
 			if(!isCookieAccepted()) document.body.appendChild(document.createElement("cookie-policy"));
@@ -191,14 +191,12 @@ function createFanFareNotification(text){
 			"<div class='notification-title' data-notify-html='title'/>" +
 			"<div class='notification-body' data-notify-text='text'/>" +
 			"<div class='buttons'>" +
-
-
 			"</div>" +
 			"</div>"
 	});
 
 
-	$('#notification-area').notify({
+	$('.user-btn').notify({
 		title: 'Congratulations!',
 		text: text,
 		button: 'Ok',
@@ -221,19 +219,19 @@ function LookupIconURI(skillType, notificationType){
 	let URI = "";
 	switch(skillType) {
 		case "Strength":
-			URI = baseURI + "Icon.3_31.png"
+			URI = baseURI + "Icon.3_31.png";
 			break;
 		case "Agility":
-			URI = baseURI + "Icons8_87.png"
+			URI = baseURI + "Icons8_87.png";
 			break;
 		case "Intelligence":
-			URI = baseURI + "Icon.2_94.png"
+			URI = baseURI + "Icon.2_94.png";
 			break;
 		case "Endurance":
-			URI = baseURI + "Icon.1_09.png"
+			URI = baseURI + "Icon.1_09.png";
 			break;
 		default:
-			URI = baseURI + "Icon.2_92.png"
+			URI = baseURI + "Icon.2_92.png";
 	}
 
 	return URI;
@@ -281,7 +279,7 @@ function CompleteTask(taskDocument, notificationTarget){
 					userAccountSkillLevels[key] = rewardXPValue + currentXPValue;
 				}
 				else{
-					console.log(notificationTarget);
+
 					$(notificationTarget).notify(`requires ${key} level ${requiredLevel}`);
 					//show something to the users!
 					return;
@@ -290,13 +288,14 @@ function CompleteTask(taskDocument, notificationTarget){
 
 			taskDocument.ref.set({
 				"status": taskStatus.Complete,
+				"date-complete": getUserId(),
+				"finished-by": new Date()
 			}, {merge: true});
 
 
 			userAccountRef.set({
 				"skill-levels": userAccountSkillLevels,
 			}, {merge: true});
-//completed by
 
 			let teamDocumentRef =  firebase.firestore().doc(taskData.team);
 			teamDocumentRef.get().then((doc) => {
@@ -317,7 +316,7 @@ function CompleteTask(taskDocument, notificationTarget){
 						"for": memberRef,
 						"is-read": false,
 						"message": `The task ${taskData.name} has been completed by a team member earning them ${rewardText}!`
-					}
+					};
 					notificationsCollectionRef.add(newNotificationDocument);
 				}
 			});

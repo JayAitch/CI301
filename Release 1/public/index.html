@@ -6,7 +6,6 @@
     <title>workaholic</title>
 	<link defer rel="stylesheet" href="/scripts/libs/jquery/jquerymobile/css/themes/default/jquery.mobile-1.4.5.min.css">
 	<link defer rel="stylesheet" href="/themes/workaholic.min.css">
-	<script src="/scripts/libs/modernizr/modernizr-custom.js"></script>
 	<script src="/scripts/libs/jquery/jquerymobile/js/jquery.js"></script>
 	<script src="/scripts/libs/jquery/jquerymobile/js/jquery.mobile-1.4.5.min.js"></script>
     <!-- update the version number as needed -->
@@ -17,15 +16,7 @@
     <script defer src="/__/firebase/7.2.3/firebase-messaging.js"></script>
     <script defer src="/__/firebase/7.2.3/firebase-storage.js"></script>
 	  <script defer src="/__/firebase/7.2.3/firebase-firestore.js"></script>
-	<!--
-	<script defer src="/scripts/libs/jquery/jquery-3.4.1.min.js"></script>
-	-->	
-
-
-
-
 	  <script defer src="/scripts/libs/jquery/notify.min.js"></script>
-
 	<script defer src="/scripts/libs/qrcode.min.js"></script>
 
 
@@ -42,7 +33,7 @@
 	  <script defer src="/scripts/customElements/notification-page.js"></script>
 	<script defer src="/scripts/customElements/user-page.js"></script>
 	  <script defer src="/scripts/customElements/tasks-page.js"></script>
-    <script defer src="/scripts/firebaseMain.js"></script>
+    <script defer src="/scripts/workaholicMain.js"></script>
 
 
 
@@ -56,7 +47,7 @@
 				<ul>
                     <li><a href="#teams-page" class="ui-btn-active">teams</a></li>
                     <li><a href="#tasks-page">tasks</a></li>
-                    <li><a href="#user-page" >user</a></li>
+                    <li><a href="#user-page" class="user-btn">user</a></li>
                     <li><a class="notification-btn" href="#notifications-page">notifications</a></li>
 				</ul>
 			</div>		
@@ -75,7 +66,7 @@
 				<ul>
                     <li><a href="#teams-page" >teams</a></li>
                     <li><a href="#tasks-page" class="ui-btn-active">tasks</a></li>
-                    <li><a href="#user-page" >user</a></li>
+                    <li><a href="#user-page" class="user-btn">user</a></li>
                     <li><a class="notification-btn" href="#notifications-page">notifications</a></li>
 				</ul>
 			</div>		
@@ -95,7 +86,7 @@
 				<ul>
                     <li><a href="#teams-page" >teams</a></li>
                     <li><a href="#tasks-page">tasks</a></li>
-                    <li><a href="#user-page" class="ui-btn-active" >user</a></li>
+                    <li><a href="#user-page" class="ui-btn-active user-btn" >user</a></li>
                     <li><a class="notification-btn" href="#notifications-page">notifications</a></li>
 				</ul>
 			</div>			
@@ -113,7 +104,7 @@
 				<ul>
                     <li><a href="#teams-page" >teams</a></li>
                     <li><a href="#tasks-page">tasks</a></li>
-                    <li><a href="#user-page" >user</a></li>
+                    <li><a href="#user-page" class="user-btn">user</a></li>
                     <li><a class="notification-btn ui-btn-active" href="#notifications-page">notifications</a></li>
 				</ul>
 			</div>			
@@ -137,7 +128,7 @@
 				<ul>
 					<li><a href="#teams-page" >teams</a></li>
 					<li><a href="#tasks-page">tasks</a></li>
-					<li><a href="#user-page" >user</a></li>
+					<li><a href="#user-page" class="user-btn">user</a></li>
 					<li><a class="notification-btn" href="#notifications-page" class="ui-btn-active">notifications</a></li>
 				</ul>
 			</div>
